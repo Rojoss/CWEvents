@@ -11,7 +11,13 @@ public class Spleef extends BaseEvent {
 	}
 	
 	public void Open() {
+		super.Open();
 		cwe.getServer().broadcastMessage("Spleef Open");
+	}
+	
+	public void Close() {
+		cwe.getServer().broadcastMessage("Spleef Close");
+		super.Close();
 	}
 	
 	public void Start() {
@@ -24,8 +30,8 @@ public class Spleef extends BaseEvent {
 	}
 	
 	public void Stop() {
-		super.Stop();
 		cwe.getServer().broadcastMessage("Spleef Stop");
+		super.Stop();
 	}
 
 	public void onPlayerLeft(Player player) {

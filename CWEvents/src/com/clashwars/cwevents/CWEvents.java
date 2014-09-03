@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 
@@ -31,8 +32,20 @@ public class CWEvents {
 		this.cwe = cwe;
 	}
 
+	@SuppressWarnings("deprecation")
 	public void onDisable() {
+		for (String p : em.getPlayers()) {
+			if (getServer().getPlayer(p) != null) {
+				em.leaveEvent(getServer().getPlayer(p), true);
+			}
+		}
+		em.setStatus(EventStatus.CLOSED);
+		em.setArena(null);
+		em.setEvent(null);
+		em.updateEventItem();
+		
 		instance = null;
+		
 		log("Disabled.");
 	}
 
@@ -48,6 +61,12 @@ public class CWEvents {
 		}
 		
 		registerEvents();
+		
+		for (Player p : getServer().getOnlinePlayers()) {
+			em.resetPlayer(p);
+		}
+		em.updateEventItem();
+		
 		log("Successfully enabled.");
 	}
 	

@@ -1,0 +1,9 @@
+name: CWEvents
+main: com.clashwars.cwevents.bukkit.CWEventsPlugin
+version: '1.0'
+author: ClashWars
+description: ClashWars events plugin
+commands:
+  event:
+    description: Main event command
+    usage: /<command>

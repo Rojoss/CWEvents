@@ -61,12 +61,13 @@ public class EventManager {
 				return;
 			} else {
 				kick.sendMessage(Util.formatMsg("&cYou have been kicked out because someone with higher priority joined."));
-				leaveEvent(player);
+				leaveEvent(player, true);
 			}
 		}
 		
 		//Join
-		player.sendMessage(Util.formatMsg("&6You have joined &5" + event.getName() + "! &6Arena&8: &5" + arena));
+		player.sendMessage(Util.formatMsg("&3You have joined &9" + event.getName() + "! &3Arena&8: &9" + arena));
+		broadcast(Util.formatMsg("&9" + player.getDisplayName() + " &3joined the event. &8Players: &7" + (players.size() + 1)));
 		resetPlayer(player);
 		player.teleport(spawn);
 		players.add(player.getName());
@@ -75,12 +76,17 @@ public class EventManager {
 	}
 	
 	
-	public boolean leaveEvent(Player player) {
+	public boolean leaveEvent(Player player, boolean force) {
 		if (players.contains(player.getName())) {
 			event.getEventClass().onPlayerLeft(player);
 			resetPlayer(player);
 			player.teleport(player.getWorld().getSpawnLocation());
-			player.sendMessage(Util.formatMsg("&6You have left &5" + event.getName() + "! &6Arena&8: &5" + arena));
+			if (force) {
+				player.sendMessage(Util.formatMsg("&cYou have been removed from &4" + event.getName() + "! &cArena&8: &4" + arena));
+			} else {
+				player.sendMessage(Util.formatMsg("&3You have left &9" + event.getName() + "! &3Arena&8: &9" + arena));
+				broadcast(Util.formatMsg("&9" + player.getDisplayName() + " &3left the event."));
+			}
 			players.remove(player.getName());
 			updateEventItem();
 			return true;

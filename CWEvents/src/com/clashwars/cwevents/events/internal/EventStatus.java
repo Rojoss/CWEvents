@@ -3,8 +3,8 @@ package com.clashwars.cwevents.events.internal;
 public enum EventStatus {
 	NONE("&7Unknown"),
 	OPEN("&aOpen"),
-	STARTING("&eStarting"),
-	STARTED("&5Started"),
+	STARTING("&2Starting"),
+	STARTED("&2Started"),
 	STOPPED("&4Stopped"),
 	RESETTING("&cResetting"),
 	CLOSED("&cClosed");

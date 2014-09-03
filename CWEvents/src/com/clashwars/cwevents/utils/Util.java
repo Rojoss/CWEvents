@@ -16,7 +16,7 @@ public class Util {
 	
 	//Format a message
 	public static String formatMsg(String msg) {
-		return integrateColor("&8[&4CW Classes&8] &6" + msg);
+		return integrateColor("&8[&4CW Events&8] &6" + msg);
 	}
 	
 	

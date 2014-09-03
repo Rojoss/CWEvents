@@ -22,18 +22,18 @@ public class MainEvents implements Listener {
 	
 	@EventHandler
 	public void join(PlayerJoinEvent event) {
-		event.getPlayer().getInventory().setItem(8, cwe.GetEventItem());
 		cwe.getEM().resetPlayer(event.getPlayer());
+		event.getPlayer().getInventory().setItem(8, cwe.GetEventItem());
 	}
 	
 	@EventHandler
 	public void quit(PlayerQuitEvent event) {
-		cwe.getEM().leaveEvent(event.getPlayer());
+		cwe.getEM().leaveEvent(event.getPlayer(), true);
 	}
 	
 	@EventHandler
 	public void kick(PlayerKickEvent event) {
-		cwe.getEM().leaveEvent(event.getPlayer());
+		cwe.getEM().leaveEvent(event.getPlayer(), true);
 	}
 	
 	@EventHandler
@@ -63,7 +63,8 @@ public class MainEvents implements Listener {
 			return;
 		}
 		if (event.getItemDrop().getItemStack().getType() == Material.INK_SACK) {
-			event.setCancelled(true);
+			event.getItemDrop().remove();
+			event.getPlayer().getInventory().setItem(8, cwe.GetEventItem());
 		}
 	}
 }
