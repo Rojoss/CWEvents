@@ -198,4 +198,16 @@ public class EventManager {
 		}
 		return priority;
 	}
+	
+	public String getRegionName(EventType event, String arena, String type) {
+		return event.getPreifx() + "_" + arena + "_" + type;
+	}
+	
+	public String getRegionName(String arena, String type) {
+		return getRegionName(event, arena, type);
+	}
+	
+	public String getRegionName(String type) {
+		return getRegionName(event, arena, type);
+	}
 }

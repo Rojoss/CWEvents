@@ -1,5 +1,6 @@
 package com.clashwars.cwevents.events.internal;
 
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
@@ -11,10 +12,12 @@ public class BaseEvent implements Listener {
 
 	public CWEvents cwe;
 	public EventManager em;
+	public World world;
 	
 	public void Init(CWEvents cwe, EventManager em) {
 		this.cwe = cwe;
 		this.em = em;
+		this.world = cwe.getServer().getWorlds().get(0);
 	}
 	
 	public void Reset() {

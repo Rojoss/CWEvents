@@ -1,44 +1,130 @@
 package com.clashwars.cwevents.events;
 
+import java.util.Random;
+
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.BlockIterator;
 
 import com.clashwars.cwevents.events.internal.BaseEvent;
+import com.clashwars.cwevents.utils.Util;
+import com.clashwars.cwevents.utils.WGUtils;
+import com.sk89q.worldedit.blocks.BlockID;
+import com.sk89q.worldguard.protection.flags.DefaultFlag;
 
 public class Spleef extends BaseEvent {
 	
+	Random random = new Random();
+	
 	public void Reset() {
-		cwe.getServer().broadcastMessage("Spleef Reset");
+		WGUtils.regionFill(world, WGUtils.getRegion(world, em.getRegionName("floor")), BlockID.SNOW_BLOCK);
+		WGUtils.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "deny");
 	}
 	
 	public void Open() {
 		super.Open();
-		cwe.getServer().broadcastMessage("Spleef Open");
 	}
 	
 	public void Close() {
-		cwe.getServer().broadcastMessage("Spleef Close");
 		super.Close();
 	}
 	
 	public void Start() {
 		super.Start();
-		cwe.getServer().broadcastMessage("Spleef Start");
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void Begin() {
 		cwe.getServer().broadcastMessage("Spleef Begin");
+		for (String p : em.getPlayers()) {
+			cwe.getServer().getPlayer(p).getInventory().addItem(new ItemStack(Material.DIAMOND_SPADE, 1));
+		}
+		WGUtils.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "allow");
 	}
 	
 	public void Stop() {
-		cwe.getServer().broadcastMessage("Spleef Stop");
 		super.Stop();
+		WGUtils.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "deny");
 	}
 
 	public void onPlayerLeft(Player player) {
-		cwe.getServer().broadcastMessage("Spleef player left");
 	}
 
 	public void onPlayerJoin(Player player) {
-		cwe.getServer().broadcastMessage("Spleef player joined");
+	}
+	
+	
+	@EventHandler
+	public void blockBreak(BlockBreakEvent event) {
+		if (event.isCancelled()) {
+			return;
+		}
+		Block block = event.getBlock();
+		Player player = event.getPlayer();
+		if (block.getType() == Material.SNOW_BLOCK) {
+			//Make block falling.
+			player.getWorld().spawnFallingBlock(block.getLocation(), Material.SNOW_BLOCK, (byte) 0);
+			//Give snowball
+			float randomFloat = random.nextFloat();
+			if (randomFloat <= 0.05f) {
+				player.getInventory().addItem(new ItemStack(Material.SNOW_BALL, 1));
+			}
+		}
+	}
+	
+	@EventHandler
+	public void takeDamge(EntityDamageEvent event) {
+		if (event.isCancelled()) {
+			return;
+		}
+		if (!(event.getEntity() instanceof Player)) {
+			return;
+		}
+		Player player = (Player)event.getEntity();
+		if (event.getCause() == DamageCause.LAVA || (event.getCause() == DamageCause.FALL && event.getDamage() > 5)) {
+			em.broadcast(Util.formatMsg("&b&l" + player.getName() + " &3fell and is out!"));;
+			em.leaveEvent(player, true);
+		}
+	}
+	
+	@EventHandler
+	public void snowballLand(ProjectileHitEvent event) {
+		if (event.getEntity().getType() != EntityType.SNOWBALL) {
+			return;
+		}
+		Projectile proj = event.getEntity();
+		
+		BlockIterator bi = new BlockIterator(proj.getWorld(), proj.getLocation().toVector(), proj.getVelocity().normalize(), 0, 4);
+		Block hit = null;
+		while (bi.hasNext()) {
+			hit = bi.next();
+
+			if (hit.getType() == Material.SNOW_BLOCK) {
+				break;
+			}
+		}
+		breakBlock(hit, 1.0f);
+		breakBlock(hit.getRelative(BlockFace.NORTH), 0.4f);
+		breakBlock(hit.getRelative(BlockFace.EAST), 0.4f);
+		breakBlock(hit.getRelative(BlockFace.SOUTH), 0.4f);
+		breakBlock(hit.getRelative(BlockFace.WEST), 0.4f);
+	}
+	
+	private void breakBlock(Block block, float chance) {
+		float randomFloat = random.nextFloat();
+		if (randomFloat <= chance) {
+			block.setType(Material.AIR);
+			block.getWorld().spawnFallingBlock(block.getLocation(), Material.SNOW_BLOCK, (byte) 0);
+		}
 	}
 }

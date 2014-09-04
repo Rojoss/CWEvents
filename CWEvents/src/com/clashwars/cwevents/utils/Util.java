@@ -129,10 +129,4 @@ public class Util {
 		val = val /100;
 		return val;
 	}
-	
-//	public static boolean canPvP(Player player) {
-//		ApplicableRegionSet set = WGBukkit.getRegionManager(player.getWorld()).getApplicableRegions(player.getLocation());
-//		LocalPlayer localPlayer = WGBukkit.getPlugin().wrapPlayer(player);
-//		return set.allows(DefaultFlag.PVP, localPlayer);
-//    }
 }

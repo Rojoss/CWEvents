@@ -8,6 +8,6 @@
 			<attribute name="javadoc_location" value="http://jd.bukkit.org/apidocs/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/lib/worldguard.jar"/>
+	<classpathentry kind="lib" path="C:/lib/worldguard-5.9.1-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

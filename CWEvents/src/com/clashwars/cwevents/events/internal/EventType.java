@@ -9,19 +9,21 @@ import com.clashwars.cwevents.events.Spleef;
 import com.clashwars.cwevents.utils.Util;
 
 public enum EventType {
-	SPLEEF("Spleef", new Spleef()),
-	RACE("Race", new Race()),
-	KOH("KOH", new KOH());
+	SPLEEF("Spleef", "spl", new Spleef()),
+	RACE("Race", "rac", new Race()),
+	KOH("KOH", "koh", new KOH());
 	
 	//Vars
 	private static Map<String, EventType> types;
 	private String name;
 	private BaseEvent eventClass;
+	private String prefix;
 	
 	//Constructor
-	private EventType (String name, BaseEvent eventClass) {
+	private EventType (String name, String prefix, BaseEvent eventClass) {
 		this.name = name;
 		this.eventClass = eventClass;
+		this.prefix = prefix;
 	}
 	
 	//Get EventType by name
@@ -39,6 +41,11 @@ public enum EventType {
 	public String getName() {
         return name;
     }
+	
+	//Get prefix
+	public String getPreifx() {
+		return prefix;
+	}
 	
 	//Get class
 	public BaseEvent getEventClass() {
