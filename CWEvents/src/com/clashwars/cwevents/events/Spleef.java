@@ -6,17 +6,22 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BlockIterator;
 
 import com.clashwars.cwevents.events.internal.BaseEvent;
+import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.utils.Util;
 import com.clashwars.cwevents.utils.WGUtils;
 import com.sk89q.worldedit.blocks.BlockID;
@@ -64,16 +69,15 @@ public class Spleef extends BaseEvent {
 	}
 	
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void blockBreak(BlockBreakEvent event) {
-		if (event.isCancelled()) {
-			return;
-		}
 		Block block = event.getBlock();
 		Player player = event.getPlayer();
 		if (block.getType() == Material.SNOW_BLOCK) {
 			//Make block falling.
-			player.getWorld().spawnFallingBlock(block.getLocation(), Material.SNOW_BLOCK, (byte) 0);
+			event.setCancelled(true);
+			player.getWorld().spawnFallingBlock(block.getLocation(), Material.SNOW_BLOCK, (byte) 0).setDropItem(false);
+			block.setType(Material.AIR);
 			//Give snowball
 			float randomFloat = random.nextFloat();
 			if (randomFloat <= 0.05f) {
@@ -82,22 +86,46 @@ public class Spleef extends BaseEvent {
 		}
 	}
 	
-	@EventHandler
-	public void takeDamge(EntityDamageEvent event) {
-		if (event.isCancelled()) {
+	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
+	public void blockLand(EntityChangeBlockEvent event) {
+		if (!(event.getEntity() instanceof FallingBlock)) {
 			return;
 		}
+		if (event.getBlock().getType() != Material.AIR) {
+			return;
+		}
+		FallingBlock fallingBlock = (FallingBlock) event.getEntity();
+		if (fallingBlock.getMaterial() != Material.SNOW_BLOCK) {
+			return;
+		}
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				event.getBlock().setType(Material.AIR);
+			}
+		}.runTaskLater(cwe.getPlugin(), 1L);
+	}
+	
+	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+	public void takeDamge(EntityDamageEvent event) {
 		if (!(event.getEntity() instanceof Player)) {
 			return;
 		}
 		Player player = (Player)event.getEntity();
-		if (event.getCause() == DamageCause.LAVA || (event.getCause() == DamageCause.FALL && event.getDamage() > 5)) {
-			em.broadcast(Util.formatMsg("&b&l" + player.getName() + " &3fell and is out!"));;
-			em.leaveEvent(player, true);
+		if (!(em.getPlayers().contains(player))) {
+			return;
+		}
+		if (em.getStatus() == EventStatus.STARTED) {
+			if (event.getCause() == DamageCause.LAVA || (event.getCause() == DamageCause.FALL && event.getDamage() >= 4)) {
+				em.broadcast(Util.formatMsg("&b&l" + player.getName() + " &3fell and is out!"));;
+				em.leaveEvent(player, true);
+			}
+		} else {
+			player.teleport(em.getSpawn());
 		}
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void snowballLand(ProjectileHitEvent event) {
 		if (event.getEntity().getType() != EntityType.SNOWBALL) {
 			return;
@@ -108,7 +136,6 @@ public class Spleef extends BaseEvent {
 		Block hit = null;
 		while (bi.hasNext()) {
 			hit = bi.next();
-
 			if (hit.getType() == Material.SNOW_BLOCK) {
 				break;
 			}
@@ -121,10 +148,12 @@ public class Spleef extends BaseEvent {
 	}
 	
 	private void breakBlock(Block block, float chance) {
-		float randomFloat = random.nextFloat();
-		if (randomFloat <= chance) {
-			block.setType(Material.AIR);
-			block.getWorld().spawnFallingBlock(block.getLocation(), Material.SNOW_BLOCK, (byte) 0);
+		if (block.getType() == Material.SNOW_BLOCK) {
+			float randomFloat = random.nextFloat();
+			if (randomFloat <= chance) {
+				block.getWorld().spawnFallingBlock(block.getLocation(), Material.SNOW_BLOCK, (byte) 0);
+				block.setType(Material.AIR);
+			}
 		}
 	}
 }

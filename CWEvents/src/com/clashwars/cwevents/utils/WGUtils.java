@@ -52,9 +52,9 @@ public class WGUtils {
 	}
 	
 	public static boolean regionFill(World world, ProtectedRegion region, int blockID) {
-		LocalWorld localWorld = null;
+		LocalWorld localWorld = BukkitUtil.getLocalWorld(world);
 		//Polygonal2DRegion polyRegion = new Polygonal2DRegion(localWorld, region.getPoints(), region.getMinimumPoint().getBlockY(), region.getMaximumPoint().getBlockY());
-		CuboidRegion cuboidRegion = new CuboidRegion(localWorld, region.getMinimumPoint(), region.getMaximumPoint());
+		CuboidRegion cuboidRegion = new CuboidRegion(localWorld, region.getMinimumPoint(), region.getMaximumPoint().toBlockPoint());
 		
 		EditSession editSession = WorldEdit.getInstance().getEditSessionFactory().getEditSession(localWorld, -1);
 		try {
