@@ -14,13 +14,15 @@ public class BombRunnable extends BukkitRunnable {
 	private Bomberman bom;
 	private Player player;
 	private Location loc;
+	private long fuseTime;
 	private long ticks;
 	
-	public BombRunnable(Bomberman bom, Player player, Location loc, long ticks) {
+	public BombRunnable(Bomberman bom, Player player, Location loc, long fuseTime) {
 		this.bom = bom;
 		this.player = player;
 		this.loc = loc;
-		this.ticks = ticks;
+		this.fuseTime = fuseTime;
+		ticks = fuseTime;
 	}
 	
 	
@@ -29,7 +31,7 @@ public class BombRunnable extends BukkitRunnable {
 		int increaseTicks = 2;
 		float pitch = 2.0f;
 		int particles = 20;
-		for (int i = 1; i < 100; i += increaseTicks) {
+		for (int i = 1; i < fuseTime; i += increaseTicks) {
 			if (ticks == i) {
 				loc.getWorld().playSound(loc, Sound.CLICK, 0.5f, pitch);
 				ParticleEffect.SMOKE.display(loc, 0.5f, 0.5f, 0.5f, 0.001f, particles);
@@ -41,6 +43,7 @@ public class BombRunnable extends BukkitRunnable {
 		
 		if (ticks <= 0) {
 			bom.bombExplode(player, loc);
+			this.cancel();
 		}
 		ticks--;
 	}

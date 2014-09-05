@@ -27,17 +27,17 @@ public class StartGameRunnable extends BukkitRunnable {
 		}
 		
 		if (seconds <= 0) {
-			if (cwe.getEM().getPlayers().size() < 2) {
-				cwe.getEM().broadcast(Util.formatMsg("&6Not enough players to start the game..."));
-				cwe.getEM().getEvent().getEventClass().Open();
-				cwe.getEM().setStatus(EventStatus.OPEN);
-				cwe.getEM().updateEventItem();
-			} else {
+			//if (cwe.getEM().getPlayers().size() < 2) {
+//				cwe.getEM().broadcast(Util.formatMsg("&6Not enough players to start the game..."));
+//				cwe.getEM().getEvent().getEventClass().Open();
+//				cwe.getEM().setStatus(EventStatus.OPEN);
+//				cwe.getEM().updateEventItem();
+			//} else {
 				cwe.getEM().getEvent().getEventClass().Begin();
 				cwe.getEM().setStatus(EventStatus.STARTED);
 				cwe.getEM().updateEventItem();
 				cwe.getEM().broadcast(Util.formatMsg("&6The game has started!"));
-			}
+			//}
 			this.cancel();
 		}
 		seconds--;

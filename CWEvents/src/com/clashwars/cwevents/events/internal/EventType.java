@@ -3,6 +3,7 @@ package com.clashwars.cwevents.events.internal;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.clashwars.cwevents.events.Bomberman;
 import com.clashwars.cwevents.events.KOH;
 import com.clashwars.cwevents.events.Race;
 import com.clashwars.cwevents.events.Spleef;
@@ -11,8 +12,8 @@ import com.clashwars.cwevents.utils.Util;
 public enum EventType {
 	SPLEEF("Spleef", "spl", new Spleef()),
 	RACE("Race", "rac", new Race()),
-	BOMBERMAN("Bomberman", "bom", new KOH()),
-	KOH("KOH", "koh", new KOH());
+	KOH("KOH", "koh", new KOH()),
+	BOMBERMAN("Bomberman", "bom", new Bomberman());
 	
 	//Vars
 	private static Map<String, EventType> types;

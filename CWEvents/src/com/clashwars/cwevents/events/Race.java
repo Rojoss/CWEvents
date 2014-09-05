@@ -19,15 +19,16 @@ import com.sk89q.worldguard.protection.flags.DefaultFlag;
 public class Race extends BaseEvent {
 	
 	public void Reset() {
+		super.Reset();
 		WGUtils.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
 	}
 	
 	public void Open() {
-		
+		super.Open();
 	}
 	
 	public void Start() {
-		
+		super.Start();
 	}
 	
 	public void Begin() {
@@ -35,6 +36,7 @@ public class Race extends BaseEvent {
 	}
 	
 	public void Stop() {
+		super.Stop();
 		WGUtils.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
 	}
 
