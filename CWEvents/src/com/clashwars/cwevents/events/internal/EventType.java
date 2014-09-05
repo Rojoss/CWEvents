@@ -11,6 +11,7 @@ import com.clashwars.cwevents.utils.Util;
 public enum EventType {
 	SPLEEF("Spleef", "spl", new Spleef()),
 	RACE("Race", "rac", new Race()),
+	BOMBERMAN("Bomberman", "bom", new KOH()),
 	KOH("KOH", "koh", new KOH());
 	
 	//Vars

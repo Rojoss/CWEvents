@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 
 public class Util {
 	
@@ -128,5 +129,15 @@ public class Util {
 		val = Math.round(val);
 		val = val /100;
 		return val;
+	}
+	
+	//Get a random Color
+	public static Color getRandomColor() {
+		Random rand = new Random();
+		int r = rand.nextInt(255);
+		int g = rand.nextInt(255);
+		int b = rand.nextInt(255);
+
+		return Color.fromRGB(r, g, b);
 	}
 }

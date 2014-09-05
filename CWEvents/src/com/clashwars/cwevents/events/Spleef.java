@@ -22,6 +22,7 @@ import org.bukkit.util.BlockIterator;
 
 import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
+import com.clashwars.cwevents.events.internal.EventType;
 import com.clashwars.cwevents.utils.Util;
 import com.clashwars.cwevents.utils.WGUtils;
 import com.sk89q.worldedit.blocks.BlockID;
@@ -71,6 +72,9 @@ public class Spleef extends BaseEvent {
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void blockBreak(BlockBreakEvent event) {
+		if (em.getEvent() != EventType.SPLEEF) {
+			return;
+		}
 		Block block = event.getBlock();
 		Player player = event.getPlayer();
 		if (block.getType() == Material.SNOW_BLOCK) {
@@ -88,6 +92,9 @@ public class Spleef extends BaseEvent {
 	
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
 	public void blockLand(EntityChangeBlockEvent event) {
+		if (em.getEvent() != EventType.SPLEEF) {
+			return;
+		}
 		if (!(event.getEntity() instanceof FallingBlock)) {
 			return;
 		}
@@ -108,6 +115,9 @@ public class Spleef extends BaseEvent {
 	
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
 	public void takeDamge(EntityDamageEvent event) {
+		if (em.getEvent() != EventType.SPLEEF) {
+			return;
+		}
 		if (!(event.getEntity() instanceof Player)) {
 			return;
 		}
@@ -127,6 +137,9 @@ public class Spleef extends BaseEvent {
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void snowballLand(ProjectileHitEvent event) {
+		if (em.getEvent() != EventType.SPLEEF) {
+			return;
+		}
 		if (event.getEntity().getType() != EntityType.SNOWBALL) {
 			return;
 		}
