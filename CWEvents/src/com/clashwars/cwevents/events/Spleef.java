@@ -29,6 +29,10 @@ import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 
 public class Spleef extends BaseEvent {
+
+	public Spleef() {
+		regionsNeeded.add("floor");
+	}
 	
 	Random random = new Random();
 	

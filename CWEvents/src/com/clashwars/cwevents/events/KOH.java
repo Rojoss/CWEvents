@@ -16,6 +16,12 @@ import com.sk89q.worldguard.protection.flags.DefaultFlag;
 
 public class KOH extends BaseEvent {
 	
+	public KOH() {
+		regionsNeeded.add("lobby");
+		regionsNeeded.add("arena");
+	}
+	
+	
 	public void Reset() {
 		super.Reset();
 		WGUtils.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");

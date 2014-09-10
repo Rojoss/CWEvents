@@ -1,5 +1,8 @@
 package com.clashwars.cwevents.events.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -14,10 +17,17 @@ public class BaseEvent implements Listener {
 	public EventManager em;
 	public World world;
 	
+	public List<String> regionsNeeded = new ArrayList<String>();
+	public List<String> locationsNeeded = new ArrayList<String>();
+	
 	public void Init(CWEvents cwe, EventManager em) {
 		this.cwe = cwe;
 		this.em = em;
 		this.world = cwe.getServer().getWorlds().get(0);
+	}
+	
+	public void Setup() {
+		
 	}
 	
 	public void Reset() {

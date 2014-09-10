@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -13,14 +14,18 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.clashwars.cwevents.events.extra.BombermanData;
 import com.clashwars.cwevents.events.internal.BaseEvent;
+import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
 import com.clashwars.cwevents.runnables.BombRunnable;
 import com.clashwars.cwevents.utils.ItemUtils;
@@ -43,8 +48,14 @@ public class Bomberman extends BaseEvent {
 	private ItemStack bombItem;
 	
 	public Bomberman() {
+		for (int i = 1; i <= 12; i++) {
+			locationsNeeded.add("s" + i);
+		}
+		regionsNeeded.add("arena");
+		
 		bombItem = ItemUtils.getItem(Material.TNT, 1, (short)0, "&4&lBomb", new String[]
 				{"&7Place this on the ground to create an explosion.", "&7Bombs will will slowly regenerate based on ur stats."});
+		
 		powerups.put("life", ItemUtils.getItem(Material.GOLDEN_APPLE, 1, (short)1, "&6&lExtra Life", new String[] {"&7You get one extra life!"}));
 		powerups.put("bombUp", ItemUtils.getItem(Material.TNT, 1, (short)0, "&a&l+1 Bomb", new String[] {"&7You get one extra bomb!"}));
 		powerups.put("bombDown", ItemUtils.getItem(Material.SULPHUR, 1, (short)0, "&c&l-1 Bomb", new String[] {"&7You lose one bomb!"}));
@@ -60,24 +71,28 @@ public class Bomberman extends BaseEvent {
 	public void Reset() {
 		super.Reset();
 		WGUtils.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
+		//TODO: Reset floor
 	}
 	
 	public void Open() {
 		super.Open();
+		//Limit slots to 12 because no more locations.
+		if (em.getSlots() > 12 || em.getSlots() < 1) {
+			em.setSlots(12);
+		}
 	}
 	
 	public void Start() {
 		super.Start();
-		int playerID = 0;
+		int playerID = 1;
 		for (String p : em.getPlayers()) {
-			//Give each player a unique ID.
+			//Give each player a unique ID and tp them.
 			if (!bombData.containsKey(p)) {
 				bombData.put(p, new BombermanData(p));
 			}
 			bombData.get(p).setID(playerID);
 			
-			//TODO: Teleport players to different locations somehow.
-			//Player player = cwe.getServer().getPlayer(p);
+			cwe.tpLoc(Bukkit.getServer().getPlayer(p), em.getRegionName("s" + playerID));
 			playerID++;
 		}
 	}
@@ -144,6 +159,11 @@ public class Bomberman extends BaseEvent {
 							//Shield
 							ItemStack chest = otherPlayer.getInventory().getChestplate();
 							if (chest != null && chest.getType() == Material.IRON_CHESTPLATE) {
+								player.getInventory().setHelmet(new ItemStack(Material.AIR));
+								player.getInventory().setChestplate(new ItemStack(Material.AIR));
+								player.getInventory().setLeggings(new ItemStack(Material.AIR));
+								player.getInventory().setBoots(new ItemStack(Material.AIR));
+								player.sendMessage(Util.integrateColor("&4&lYour shield broke by a bomb!"));
 								continue;
 							}
 							
@@ -152,20 +172,20 @@ public class Bomberman extends BaseEvent {
 							
 							if (obd.getLives() <= 0) {
 								//No more lives remove player.
-								otherPlayer.sendMessage("&cYou have no more lives!");
+								otherPlayer.sendMessage(Util.formatMsg("&cYou have no more lives!"));
 								em.broadcast(Util.formatMsg("&b" + otherPlayer.getDisplayName() + " &3is out of the game!"));
 								em.leaveEvent(otherPlayer, true);
 							} else {
 								//More lives tell player and set player invis.
 								otherPlayer.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 60, 0), true);
 								if (obd.getLives() == 1) {
-									otherPlayer.sendMessage("&cThis is your last life!!! &4Be careful!");
+									otherPlayer.sendMessage(Util.formatMsg("&cThis is your last life!!! &4Be careful!"));
 								} else {
 									String hearts = "";
 									for (int i = 0; i < obd.getLives(); i++) {
 										hearts += "❤";
 									}
-									otherPlayer.sendMessage("&cYou have &4" + obd.getLives() + " &clives remaining. &8[&4" + hearts + "&8]");
+									otherPlayer.sendMessage(Util.formatMsg("&cYou have &4" + obd.getLives() + " &clives remaining. &8[&4" + hearts + "&8]"));
 								}
 							}
 						}
@@ -255,5 +275,111 @@ public class Bomberman extends BaseEvent {
 			return;
 		}
 		new BombRunnable(this, player, event.getBlock().getLocation().add(0.5f,0.5f,0.5f), bombData.get(player.getName()).getFuseTime()).runTaskTimer(cwe.getPlugin(), 0, 1);
+	}
+	
+	@EventHandler
+	public void blockBreak(BlockBreakEvent event) {
+		if (em.getEvent() != EventType.BOMBERMAN) {
+			return;
+		}
+		Player player = event.getPlayer();
+		if (!em.getPlayers().contains(player.getName())) {
+			return;
+		}
+		event.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void powerupPickup(PlayerPickupItemEvent event) {
+		ItemStack item = event.getItem().getItemStack();
+		if (item == null || item.getType() == Material.AIR) {
+			return;
+		}
+		if (em.getEvent() != EventType.BOMBERMAN) {
+			return;
+		}
+		if (em.getStatus() != EventStatus.STARTED) {
+			return;
+		}
+		Player player = event.getPlayer();
+		if (!em.getPlayers().contains(player.getName())) {
+			return;
+		}
+		BombermanData bd = bombData.get(player.getName());
+		ItemStack powerup = null;
+		for (String key : powerups.keySet()) {
+			powerup = powerups.get(key);
+			if (powerup.getType() == item.getType()) {
+				if (item.hasItemMeta() && item.getItemMeta().getDisplayName() != null && item.getItemMeta().getLore().size() > 0) {
+					player.sendMessage(Util.integrateColor("&6&lPowerup!!! &a&l" + powerup.getItemMeta().getDisplayName() + " &8- &7" + item.getItemMeta().getLore()));
+					switch (key) {
+						case "life":
+							bd.setLives(bd.getLives() + 1);
+							break;
+						case "bombUp":
+							bd.setBombs(bd.getBombs() + 1);
+							break;
+						case "bombDown":
+							if (bd.getBombs() > 1) {
+								bd.setBombs(bd.getBombs() - 1);
+							}
+							break;
+						case "speed":
+							if (bd.getSpeed() < 4) {
+								bd.setSpeed(bd.getSpeed() + 1);
+								player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, bd.getSpeed(), true), true);
+							}
+							break;
+						case "slow":
+							if (bd.getSpeed() > 0) {
+								bd.setSpeed(bd.getSpeed() - 1);
+							}
+							break;
+						case "powerUp":
+							if (bd.getExplosionSize() < 8) {
+								bd.setExplosionSize(bd.getExplosionSize() + 1);
+							}
+							break;
+						case "powerDown":
+							if (bd.getExplosionSize() > 1) {
+								bd.setExplosionSize(bd.getExplosionSize() - 1);
+							}
+							break;
+						case "pierce":
+							bd.setPierceBombs(bd.getPierceBombs() + 1);
+							break;
+						case "shield":
+							player.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET));
+							player.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE));
+							player.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS));
+							player.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS));
+							new BukkitRunnable() {
+								@Override
+								public void run() {
+									if (player.getInventory().getChestplate() != null && player.getInventory().getChestplate().getType() == Material.IRON_CHESTPLATE) {
+										player.getInventory().setHelmet(new ItemStack(Material.AIR));
+										player.getInventory().setChestplate(new ItemStack(Material.AIR));
+										player.getInventory().setLeggings(new ItemStack(Material.AIR));
+										player.getInventory().setBoots(new ItemStack(Material.AIR));
+										player.sendMessage(Util.integrateColor("&4&lYour shield broke because time ran out!"));
+									}
+								}
+							}.runTaskLater(cwe.getPlugin(), 200L);
+							break;
+						case "blind":
+							for (String p : em.getPlayers()) {
+								if (p == player.getName()) {
+									continue;
+								}
+								cwe.getServer().getPlayer(p).addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 0, true), true);
+							}
+							break;
+					}
+				}
+				powerup.setType(Material.AIR);
+				return;
+			}
+		}
+		event.setCancelled(true);
 	}
 }

@@ -1,7 +1,10 @@
 package com.clashwars.cwevents.commands;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -11,6 +14,7 @@ import com.clashwars.cwevents.CWEvents;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
 import com.clashwars.cwevents.utils.Util;
+import com.clashwars.cwevents.utils.WGUtils;
 
 public class Commands {
 	private CWEvents			cwe;
@@ -22,6 +26,102 @@ public class Commands {
 	
 	@SuppressWarnings("deprecation")
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		
+		//LOC COMMAND
+		if (label.equalsIgnoreCase("loc")) {
+			//Console check
+			if (!(sender instanceof Player)) {
+				sender.sendMessage(Util.formatMsg("&cThis is a player command only."));
+				return true;
+			}
+			Player player = (Player)sender;
+			
+			if (args.length > 0 ) {
+				//Permission check.
+				if (!player.isOp() && !player.hasPermission("cwevents.loc")) {
+					player.sendMessage(Util.formatMsg("&cInsuficient permissions."));
+					return true;
+				}
+				
+				//##########################################################################################################################
+				//#################################################### /loc set {name} #####################################################
+				//##########################################################################################################################
+				if (args[0].equalsIgnoreCase("set")) {
+					if (args.length < 2) {
+						player.sendMessage(Util.formatMsg("&cInvalid usage. &7/loc set {name}"));
+						return true;
+					}
+					if (args[1].length() < 2) {
+						player.sendMessage(Util.formatMsg("&cLocation name is too short."));
+						return true;
+					}
+					cwe.getLocConfig().setLocation(args[1], player.getLocation());
+					player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' set to your location!"));
+				}
+				
+				//##########################################################################################################################
+				//################################################### /loc remove {name} ###################################################
+				//##########################################################################################################################
+				if (args[0].equalsIgnoreCase("remove")) {
+					if (args.length < 2) {
+						player.sendMessage(Util.formatMsg("&cInvalid usage. &7/loc remove {name}"));
+						return true;
+					}
+					String name = cwe.getLocConfig().getName(args[1]);
+					if (name == "") {
+						player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' doesn't exist!"));
+						return true;
+					}
+					cwe.getLocConfig().removeLoction(name);
+					player.sendMessage(Util.formatMsg("&6Location &8'&5" + name + "&8' has been removed!"));
+				}
+				
+				
+				//##########################################################################################################################
+				//##################################################### /loc tp {name} #####################################################
+				//##########################################################################################################################
+				if (args[0].equalsIgnoreCase("tp")) {
+					if (args.length < 2) {
+						player.sendMessage(Util.formatMsg("&cInvalid usage. &7/loc tp {name}"));
+						return true;
+					}
+					String name = cwe.getLocConfig().getName(args[1]);
+					if (name == "") {
+						player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' doesn't exist!"));
+						return true;
+					}
+					player.teleport(cwe.getLocConfig().getLoc(name));
+					player.sendMessage(Util.formatMsg("&6Teleported to location &8'&5" + name + "&8'&6."));
+				}
+				
+				
+				//##########################################################################################################################
+				//####################################################### /loc list ########################################################
+				//##########################################################################################################################
+				if (args[0].equalsIgnoreCase("list")) {
+					String locs = "";
+					for (String name : cwe.getLocConfig().getLocations().keySet()) {
+						locs += name + "&8, &5";
+					}
+					player.sendMessage("&6&lLocations&8: &5" + locs);
+				}
+			}
+			
+			//##########################################################################################################################
+			//########################################################## /loc ##########################################################
+			//##########################################################################################################################
+			sender.sendMessage(Util.integrateColor("&8===== &4&lCommand Help &6/" + label + " &8====="));
+			sender.sendMessage(Util.integrateColor("&7Manage locations which can be used in certain events."));
+			sender.sendMessage(Util.integrateColor("&7Pretty much same as warps but more simple and easier to use in code."));
+			sender.sendMessage(Util.integrateColor("&6/loc set [name] &8- &5Set location or add location."));
+			sender.sendMessage(Util.integrateColor("&6/loc remove [name] &8- &5Remove location."));
+			sender.sendMessage(Util.integrateColor("&6/loc list &8- &5List all locations."));
+			return true;
+		}
+		
+		
+		
+		//EVENT COMMAND
 		if (label.equalsIgnoreCase("event")) {
 			if (!(sender instanceof Player)) {
 				sender.sendMessage(Util.formatMsg("&cThis is a player command only."));
@@ -124,7 +224,20 @@ public class Commands {
 					}
 					
 					String arena = args[2];
-					//TODO: Check if region exists.
+					for (String regionName : event.getEventClass().regionsNeeded) {
+						regionName = event.getPreifx() + "_" + arena + "_" + regionName;
+						if (WGUtils.getRegion(player.getWorld(), regionName) == null) {
+							sender.sendMessage("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + regionName + "&8'&7!");
+							return true;
+						}
+					}
+					for (String locName : event.getEventClass().locationsNeeded) {
+						locName = event.getPreifx() + "_" + arena + "_" + locName;
+						if (!cwe.getLocConfig().getLocations().containsKey(locName)) {
+							sender.sendMessage("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + locName + "&8'&7!");
+							return true;
+						}
+					}
 					
 					int slots = 0;
 					if (args.length >= 4) {
@@ -265,12 +378,31 @@ public class Commands {
 
 					cwe.getEM().setStatus(EventStatus.STOPPED);
 					activeEvent.getEventClass().Stop();
-					//TODO: send winner data to pvp server.
+					
+					//Send winner data to pvp server.
+					try {
+						ByteArrayOutputStream b = new ByteArrayOutputStream();
+						DataOutputStream out = new DataOutputStream(b);
+
+						out.writeUTF("queue");
+						out.writeUTF("pvp");
+						out.writeUTF(winner.toString());
+						out.writeUTF("cmd");
+						out.writeUTF("eventreward {PLAYER}");
+
+						Bukkit.getOnlinePlayers()[0].sendPluginMessage(cwe.getPlugin(), "CWBungee", b.toByteArray());
+					} catch (Throwable e) {
+						e.printStackTrace();
+					}
+					
 					cwe.getEM().updateEventItem();
 					return true;
 				}
 			}
 			
+			//##########################################################################################################################
+			//######################################################## /event ##########################################################
+			//##########################################################################################################################
 			sender.sendMessage(Util.integrateColor("&8======== &4&lEvent Information &8========"));
 			if (cwe.getEM().getEvent() == null || cwe.getEM().getArena() == null) {
 				sender.sendMessage(Util.integrateColor("&cThere is currently no event active."));

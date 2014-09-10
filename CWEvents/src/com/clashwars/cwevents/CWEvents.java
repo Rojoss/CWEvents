@@ -2,6 +2,7 @@ package com.clashwars.cwevents;
 
 import java.util.logging.Logger;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -13,6 +14,7 @@ import org.bukkit.plugin.PluginManager;
 import com.clashwars.cwevents.bukkit.CWEventsPlugin;
 import com.clashwars.cwevents.bukkit.events.MainEvents;
 import com.clashwars.cwevents.commands.Commands;
+import com.clashwars.cwevents.config.LocConfig;
 import com.clashwars.cwevents.events.internal.EventManager;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
@@ -22,7 +24,8 @@ public class CWEvents {
 	private CWEventsPlugin		cwe;
 	
 	private Commands			cmds;
-	private EventManager	em;
+	private EventManager		em;
+	private LocConfig			locCfg;
 
 	private final Logger		log	= Logger.getLogger("Minecraft");
 	public static CWEvents		instance;
@@ -32,7 +35,6 @@ public class CWEvents {
 		this.cwe = cwe;
 	}
 
-	@SuppressWarnings("deprecation")
 	public void onDisable() {
 		for (String p : em.getPlayers()) {
 			if (getServer().getPlayer(p) != null) {
@@ -49,8 +51,12 @@ public class CWEvents {
 		log("Disabled.");
 	}
 
+	@SuppressWarnings("deprecation")
 	public void onEnable() {
 		instance = this;
+		
+		locCfg = new LocConfig("locs.yml");
+		locCfg.load();
 		
 		cmds = new Commands(this);
 		
@@ -66,6 +72,7 @@ public class CWEvents {
 			em.resetPlayer(p);
 		}
 		em.updateEventItem();
+		
 		
 		log("Successfully enabled.");
 	}
@@ -100,6 +107,25 @@ public class CWEvents {
 	
 	public EventManager getEM() {
 		return em;
+	}
+	
+	public LocConfig getLocConfig() {
+		return locCfg;
+	}
+	
+	public void tpLoc(Player player, String name) {
+		String properName = locCfg.getName(name);
+		if (properName != "") {
+			player.teleport(locCfg.getLoc(properName));
+		}
+	}
+	
+	public Location getLoc(String name) {
+		String properName = locCfg.getName(name);
+		if (properName != "") {
+			return locCfg.getLoc(properName);
+		}
+		return null;
 	}
 	
 	public ItemStack GetEventItem() {
