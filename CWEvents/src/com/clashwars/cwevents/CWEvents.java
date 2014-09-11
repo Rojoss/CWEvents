@@ -10,9 +10,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.messaging.Messenger;
 
 import com.clashwars.cwevents.bukkit.CWEventsPlugin;
 import com.clashwars.cwevents.bukkit.events.MainEvents;
+import com.clashwars.cwevents.bukkit.events.PluginMessageEvents;
 import com.clashwars.cwevents.commands.Commands;
 import com.clashwars.cwevents.config.LocConfig;
 import com.clashwars.cwevents.events.internal.EventManager;
@@ -67,6 +69,7 @@ public class CWEvents {
 		}
 		
 		registerEvents();
+		registerChannels();
 		
 		for (Player p : getServer().getOnlinePlayers()) {
 			em.resetPlayer(p);
@@ -85,6 +88,13 @@ public class CWEvents {
 				pm.registerEvents(event.getEventClass(), getPlugin());
 			}
 		}
+	}
+	
+	private void registerChannels() {
+		Messenger msg = getPlugin().getServer().getMessenger();
+
+		msg.registerIncomingPluginChannel(getPlugin(), "CWBungee", new PluginMessageEvents(this));
+		msg.registerOutgoingPluginChannel(getPlugin(), "CWBungee");
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {

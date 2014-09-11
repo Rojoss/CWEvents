@@ -232,14 +232,14 @@ public class Commands {
 					for (String regionName : event.getEventClass().regionsNeeded) {
 						regionName = event.getPreifx() + "_" + arena + "_" + regionName;
 						if (WGUtils.getRegion(player.getWorld(), regionName) == null) {
-							sender.sendMessage("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + regionName + "&8'&7!");
+							sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + regionName + "&8'&7!"));
 							return true;
 						}
 					}
 					for (String locName : event.getEventClass().locationsNeeded) {
 						locName = event.getPreifx() + "_" + arena + "_" + locName;
 						if (!cwe.getLocConfig().getLocations().containsKey(locName)) {
-							sender.sendMessage("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + locName + "&8'&7!");
+							sender.sendMessage(Util.formatMsg("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + locName + "&8'&7!"));
 							return true;
 						}
 					}
