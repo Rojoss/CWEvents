@@ -32,13 +32,15 @@ public class PluginMessageEvents implements PluginMessageListener {
 				try {
 					String ch = in.readUTF();
 					if (ch.equalsIgnoreCase("eventdatarequest")) {
+						String sender = in.readUTF();
 						String server = in.readUTF();
 						try {
-							//  'eventdata' message format: server | event | arena | players | slots | status
+							//  'eventdata' message format: sender | server | event | arena | players | slots | status
 							ByteArrayOutputStream b = new ByteArrayOutputStream();
 							DataOutputStream out = new DataOutputStream(b);
 
 							out.writeUTF("eventdata");
+							out.writeUTF(sender);
 							out.writeUTF(server);
 							out.writeUTF(cwe.getEM().getEvent() == null ? "none" : cwe.getEM().getEvent().getName());
 							out.writeUTF(cwe.getEM().getArena() == null || cwe.getEM().getArena() == "" ? "none" : cwe.getEM().getArena());
