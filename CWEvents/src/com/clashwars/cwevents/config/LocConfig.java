@@ -9,7 +9,7 @@ import com.clashwars.cwevents.config.internal.EasyConfig;
 
 public class LocConfig extends EasyConfig {
 	
-	private HashMap<String, Location> locations = new HashMap<String, Location>();
+	public HashMap<String, Location> locations = new HashMap<String, Location>();
 	
 	public LocConfig(String fileName) {
 		this.setFile(fileName);

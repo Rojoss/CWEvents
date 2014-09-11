@@ -55,7 +55,7 @@ public class CWEvents {
 	public void onEnable() {
 		instance = this;
 		
-		locCfg = new LocConfig("locs.yml");
+		locCfg = new LocConfig("plugins/CWEvents/locs.yml");
 		locCfg.load();
 		
 		cmds = new Commands(this);
@@ -92,7 +92,7 @@ public class CWEvents {
 	}
 
 	public void log(Object msg) {
-		log.info("[CWClasses " + getPlugin().getDescription().getVersion() + "]: " + msg.toString());
+		log.info("[CWEvents " + getPlugin().getDescription().getVersion() + "]: " + msg.toString());
 	}
 	
 	

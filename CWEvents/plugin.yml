@@ -7,3 +7,6 @@ commands:
   event:
     description: Main event command
     usage: /<command>
+  loc:
+    description: Location management
+    usage: /<command>
