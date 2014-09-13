@@ -1,19 +1,28 @@
 package com.clashwars.cwevents.utils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import com.clashwars.cwevents.CWEvents;
+import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalWorld;
 import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.bukkit.BukkitUtil;
+import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.Polygonal2DRegion;
+import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.bukkit.WGBukkit;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
@@ -53,12 +62,17 @@ public class WGUtils {
 	
 	public static boolean regionFill(World world, ProtectedRegion region, int blockID) {
 		LocalWorld localWorld = BukkitUtil.getLocalWorld(world);
-		//Polygonal2DRegion polyRegion = new Polygonal2DRegion(localWorld, region.getPoints(), region.getMinimumPoint().getBlockY(), region.getMaximumPoint().getBlockY());
-		CuboidRegion cuboidRegion = new CuboidRegion(localWorld, region.getMinimumPoint(), region.getMaximumPoint().toBlockPoint());
-		
 		EditSession editSession = WorldEdit.getInstance().getEditSessionFactory().getEditSession(localWorld, -1);
+		
+		Region weRegion = null;
+		if (region.getTypeName().equalsIgnoreCase("cuboid")) {
+			weRegion = new CuboidRegion(localWorld, region.getMinimumPoint(), region.getMaximumPoint().toBlockPoint());
+		} else {
+			weRegion = new Polygonal2DRegion(localWorld, region.getPoints(), region.getMinimumPoint().getBlockY(), region.getMaximumPoint().getBlockY());
+		}
+		
 		try {
-			editSession.setBlocks(cuboidRegion, new BaseBlock(blockID));
+			editSession.setBlocks(weRegion, new BaseBlock(blockID));
 		} catch (MaxChangedBlocksException e) {
 			return false;
 		}
@@ -69,15 +83,36 @@ public class WGUtils {
 		LocalWorld localWorld = BukkitUtil.getLocalWorld(world);
 		Set<BaseBlock> fromBlocks = new HashSet<BaseBlock>();
 		fromBlocks.add(new BaseBlock(fromBlock));
-		//Polygonal2DRegion polyRegion = new Polygonal2DRegion(localWorld, region.getPoints(), region.getMinimumPoint().getBlockY(), region.getMaximumPoint().getBlockY());
-		CuboidRegion cuboidRegion = new CuboidRegion(localWorld, region.getMinimumPoint(), region.getMaximumPoint());
-		
 		EditSession editSession = WorldEdit.getInstance().getEditSessionFactory().getEditSession(localWorld, -1);
+		
+		Region weRegion = null;
+		if (region.getTypeName().equalsIgnoreCase("cuboid")) {
+			weRegion = new CuboidRegion(localWorld, region.getMinimumPoint(), region.getMaximumPoint());
+			
+		} else {
+			weRegion = new Polygonal2DRegion(localWorld, region.getPoints(), region.getMinimumPoint().getBlockY(), region.getMaximumPoint().getBlockY());
+			
+		}
+		
 		try {
-			editSession.replaceBlocks(cuboidRegion, fromBlocks, new BaseBlock(toBlock));
+			editSession.replaceBlocks(weRegion, fromBlocks, new BaseBlock(toBlock));
 		} catch (MaxChangedBlocksException e) {
 			return false;
 		}
 		return true;
+	}
+	
+	public static void pasteSchematic(World world, File file, Location location, boolean noAir, int rotation) throws MaxChangedBlocksException, DataException, IOException {
+		pasteSchematic(world, file, BukkitUtil.toVector(location), noAir, rotation);
+	}
+	
+	public static void pasteSchematic(World world, File file, Vector origin, boolean noAir, int rotation) throws DataException, IOException, MaxChangedBlocksException {
+		if (rotation  != 90 && rotation != 180 && rotation != 270 && rotation != 360 && rotation != 0) {
+			rotation = 0;
+		}
+		EditSession es = new EditSession(new BukkitWorld(world), 999999999);
+		CuboidClipboard cc = CuboidClipboard.loadSchematic(file);
+		cc.rotate2D(rotation);
+		cc.paste(es, origin, noAir);
 	}
 }

@@ -1,5 +1,7 @@
 package com.clashwars.cwevents.events;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +34,10 @@ import com.clashwars.cwevents.utils.ItemUtils;
 import com.clashwars.cwevents.utils.ParticleEffect;
 import com.clashwars.cwevents.utils.Util;
 import com.clashwars.cwevents.utils.WGUtils;
+import com.sk89q.worldedit.MaxChangedBlocksException;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.data.DataException;
+import com.sk89q.worldguard.bukkit.WGBukkit;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 
 public class Bomberman extends BaseEvent {
@@ -51,6 +57,7 @@ public class Bomberman extends BaseEvent {
 		for (int i = 1; i <= 12; i++) {
 			locationsNeeded.add("s" + i);
 		}
+		locationsNeeded.add("schem_arena");
 		regionsNeeded.add("arena");
 		
 		bombItem = ItemUtils.getItem(Material.TNT, 1, (short)0, "&4&lBomb", new String[]
@@ -71,7 +78,11 @@ public class Bomberman extends BaseEvent {
 	public void Reset() {
 		super.Reset();
 		WGUtils.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
-		//TODO: Reset floor
+		try {
+			WGUtils.pasteSchematic(world, new File(cwe.getEM().getRegionName("schem_arena") + ".schematic"), cwe.getLoc(cwe.getEM().getRegionName("schem_arena")), false, 0);
+		} catch (MaxChangedBlocksException | DataException | IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void Open() {
