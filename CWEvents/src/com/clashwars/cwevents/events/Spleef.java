@@ -84,7 +84,7 @@ public class Spleef extends BaseEvent {
 		if (block.getType() == Material.SNOW_BLOCK) {
 			//Make block falling.
 			event.setCancelled(true);
-			player.getWorld().spawnFallingBlock(block.getLocation(), Material.SNOW_BLOCK, (byte) 0).setDropItem(false);
+			player.getWorld().spawnFallingBlock(block.getLocation().add(0,-0.2,0), Material.SNOW_BLOCK, (byte) 0).setDropItem(false);
 			block.setType(Material.AIR);
 			//Give snowball
 			float randomFloat = random.nextFloat();
@@ -168,7 +168,7 @@ public class Spleef extends BaseEvent {
 		if (block.getType() == Material.SNOW_BLOCK) {
 			float randomFloat = random.nextFloat();
 			if (randomFloat <= chance) {
-				block.getWorld().spawnFallingBlock(block.getLocation(), Material.SNOW_BLOCK, (byte) 0);
+				block.getWorld().spawnFallingBlock(block.getLocation().add(0,-0.2,0), Material.SNOW_BLOCK, (byte) 0);
 				block.setType(Material.AIR);
 			}
 		}

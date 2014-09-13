@@ -56,7 +56,8 @@ public class Commands {
 						return true;
 					}
 					cwe.getLocConfig().setLocation(args[1], player.getLocation());
-					player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' set to your location!"));
+					player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' &6set to your location!"));
+					return true;
 				}
 				
 				//##########################################################################################################################
@@ -69,11 +70,12 @@ public class Commands {
 					}
 					String name = cwe.getLocConfig().getName(args[1]);
 					if (name == "") {
-						player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' doesn't exist!"));
+						player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' &6doesn't exist!"));
 						return true;
 					}
 					cwe.getLocConfig().removeLoction(name);
-					player.sendMessage(Util.formatMsg("&6Location &8'&5" + name + "&8' has been removed!"));
+					player.sendMessage(Util.formatMsg("&6Location &8'&5" + name + "&8' &6has been removed!"));
+					return true;
 				}
 				
 				
@@ -87,11 +89,12 @@ public class Commands {
 					}
 					String name = cwe.getLocConfig().getName(args[1]);
 					if (name == "") {
-						player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' doesn't exist!"));
+						player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' &6doesn't exist!"));
 						return true;
 					}
 					player.teleport(cwe.getLocConfig().getLoc(name));
 					player.sendMessage(Util.formatMsg("&6Teleported to location &8'&5" + name + "&8'&6."));
+					return true;
 				}
 				
 				
@@ -103,7 +106,8 @@ public class Commands {
 					for (String name : cwe.getLocConfig().getLocations().keySet()) {
 						locs += name + "&8, &5";
 					}
-					player.sendMessage("&6&lLocations&8: &5" + locs);
+					player.sendMessage(Util.integrateColor("&6&lLocations&8: &5" + locs));
+					return true;
 				}
 			}
 			
@@ -115,6 +119,7 @@ public class Commands {
 			sender.sendMessage(Util.integrateColor("&7Pretty much same as warps but more simple and easier to use in code."));
 			sender.sendMessage(Util.integrateColor("&6/loc set [name] &8- &5Set location or add location."));
 			sender.sendMessage(Util.integrateColor("&6/loc remove [name] &8- &5Remove location."));
+			sender.sendMessage(Util.integrateColor("&6/loc tp [name] &8- &5Teleport to location."));
 			sender.sendMessage(Util.integrateColor("&6/loc list &8- &5List all locations."));
 			return true;
 		}
@@ -227,14 +232,14 @@ public class Commands {
 					for (String regionName : event.getEventClass().regionsNeeded) {
 						regionName = event.getPreifx() + "_" + arena + "_" + regionName;
 						if (WGUtils.getRegion(player.getWorld(), regionName) == null) {
-							sender.sendMessage("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + regionName + "&8'&7!");
+							sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + regionName + "&8'&7!"));
 							return true;
 						}
 					}
 					for (String locName : event.getEventClass().locationsNeeded) {
 						locName = event.getPreifx() + "_" + arena + "_" + locName;
 						if (!cwe.getLocConfig().getLocations().containsKey(locName)) {
-							sender.sendMessage("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + locName + "&8'&7!");
+							sender.sendMessage(Util.formatMsg("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + locName + "&8'&7!"));
 							return true;
 						}
 					}

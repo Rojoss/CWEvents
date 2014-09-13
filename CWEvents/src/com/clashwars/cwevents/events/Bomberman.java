@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -52,6 +51,7 @@ public class Bomberman extends BaseEvent {
 	private HashMap<String, ItemStack> powerups = new HashMap<String, ItemStack>();
 	
 	private ItemStack bombItem;
+	private int bombsToRemove = 0;
 	
 	public Bomberman() {
 		for (int i = 1; i <= 12; i++) {
@@ -68,7 +68,7 @@ public class Bomberman extends BaseEvent {
 		powerups.put("bombDown", ItemUtils.getItem(Material.SULPHUR, 1, (short)0, "&c&l-1 Bomb", new String[] {"&7You lose one bomb!"}));
 		powerups.put("speed", ItemUtils.getItem(Material.GOLD_BOOTS, 1, (short)0, "&b&lSpeed", new String[] {"&7You get 1 extra speed."}));
 		powerups.put("slow", ItemUtils.getItem(Material.LEATHER_BOOTS, 1, (short)0, "&c&lSlow", new String[] {"&7You lose 1 extra speed."}));
-		powerups.put("powerupUp", ItemUtils.getItem(Material.BLAZE_POWDER, 1, (short)0, "&4&l+1 Power", new String[] {"&7Bombs will explode 1 block further."}));
+		powerups.put("powerUp", ItemUtils.getItem(Material.BLAZE_POWDER, 1, (short)0, "&4&l+1 Power", new String[] {"&7Bombs will explode 1 block further."}));
 		powerups.put("powerDown", ItemUtils.getItem(Material.QUARTZ, 1, (short)0, "&c&l-1 Power", new String[] {"&7Bombs will explode 1 block less."}));
 		powerups.put("pierce", ItemUtils.getItem(Material.ARROW, 1, (short)0, "&e&lPierce", new String[] {"&7Bombs will blow all blocks in range up."}));
 		powerups.put("shield", ItemUtils.getItem(Material.IRON_CHESTPLATE, 1, (short)0, "&5&lShield", new String[] {"&7Can't be killed by bombs for 8 seconds."}));
@@ -131,7 +131,12 @@ public class Bomberman extends BaseEvent {
 	}
 	
 	public void bombExplode(Player player, Location loc) {
-		player.getInventory().addItem(bombItem);
+		//Don't give bomb back if player picked up -1 bomb and had no bombs in inv.
+		if (bombsToRemove > 0) {
+			bombsToRemove--;
+		} else {
+			player.getInventory().addItem(bombItem);
+		}
 		BombermanData bd = bombData.get(player.getName());
 		BombermanData obd = null;
 		Block block = loc.getBlock();
@@ -139,8 +144,8 @@ public class Bomberman extends BaseEvent {
 		if (bd == null) {
 			return;
 		}
-		loc.getWorld().playSound(loc, Sound.EXPLODE, 0.6f, 1.5f);
-		ParticleEffect.HUGE_EXPLOSION.display(loc, 0.5f, 0.5f, 0.5f, 0.001f, 3);
+		loc.getWorld().playSound(loc, Sound.EXPLODE, 0.5f, 1.5f);
+		ParticleEffect.HUGE_EXPLOSION.display(loc, 0.5f, 0.5f, 0.5f, 0.001f, 1);
 		
 		Block b = block;
 		Player otherPlayer;
@@ -178,7 +183,7 @@ public class Bomberman extends BaseEvent {
 								continue;
 							}
 							
-							em.broadcast(Util.formatMsg("&4" + otherPlayer.getDisplayName() + " &cwas exploded by " + player.getDisplayName() + "'s bomb! &8[&4" + (obd.getLives() - 1) + "❤&8]"));
+							em.broadcast(Util.formatMsg("&4" + otherPlayer.getDisplayName() + " &cwas exploded by &4" + player.getName() + "&4's &cbomb! &8[&4" + (obd.getLives() - 1) + "❤&8]"));
 							obd.setLives(obd.getLives() - 1); 
 							
 							if (obd.getLives() <= 0) {
@@ -208,37 +213,32 @@ public class Bomberman extends BaseEvent {
 				//Check for a destroyable block.
 				if (destroyBlocks.contains(b.getType())) {
 					if (bd.getPierceBombs() > 0) {
-						if (brokeFirst) {
-							bd.setPierceBombs(bd.getPierceBombs() - 1);
-						} else {
-							brokeFirst = true;
-						}
 						explodeParticle(b.getLocation().add(0.5f,0.5f,0.5f), dir);
 						b.breakNaturally();
 						spawnPowerup(b.getLocation());
 						continue;
 					} else {
-						if (!brokeFirst) {
-							explodeParticle(b.getLocation().add(0.5f,0.5f,0.5f), dir);
-							b.breakNaturally();
-							spawnPowerup(b.getLocation());
-						}
+						explodeParticle(b.getLocation().add(0.5f,0.5f,0.5f), dir);
+						b.breakNaturally();
+						spawnPowerup(b.getLocation());
 						break;
 					}
 				}
-				
 				
 				//Hit a wall
 				break;
 			}
 		}
+		if (bd.getPierceBombs() > 0) {
+			bd.setPierceBombs(bd.getPierceBombs() - 1);
+		}
 	}
 	
 	private void spawnPowerup(Location location) {
-		if (random.nextFloat() <= 0.2f) {
-			Set<String> powerupKeys = powerups.keySet();
-			int id = Util.random(0, powerupKeys.size());
-			location.getWorld().dropItem(location.add(0.5f,0.5f,0.5f), powerups.get(powerupKeys.toArray()[id]));
+		if (random.nextFloat() <= 0.4f) {
+			Object[] powerupKeys = powerups.keySet().toArray();
+			int random = Util.random(0, powerupKeys.length - 1);
+			location.getWorld().dropItem(location.add(0.5f,0.5f,0.5f), powerups.get(powerupKeys[random]));
 			location.getWorld().playSound(location, Sound.ORB_PICKUP, 0.6f, 2.0f);
 			ParticleEffect.WITCH_MAGIC.display(location.add(0.5f,0.5f,0.5f), 0.25f, 1, 0.25f, 0.01f, 30);
 		}
@@ -329,21 +329,28 @@ public class Bomberman extends BaseEvent {
 							break;
 						case "bombUp":
 							bd.setBombs(bd.getBombs() + 1);
+							player.getInventory().addItem(bombItem);
 							break;
 						case "bombDown":
 							if (bd.getBombs() > 1) {
 								bd.setBombs(bd.getBombs() - 1);
+								bombsToRemove++;
 							}
 							break;
 						case "speed":
-							if (bd.getSpeed() < 4) {
+							if (bd.getSpeed() < 3) {
 								bd.setSpeed(bd.getSpeed() + 1);
-								player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, bd.getSpeed(), true), true);
+								player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, bd.getSpeed() - 1, true), true);
 							}
 							break;
 						case "slow":
 							if (bd.getSpeed() > 0) {
 								bd.setSpeed(bd.getSpeed() - 1);
+								if (bd.getSpeed() < 1) {
+									player.removePotionEffect(PotionEffectType.SPEED);
+								} else {
+									player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, bd.getSpeed() - 1, true), true);
+								}
 							}
 							break;
 						case "powerUp":
@@ -387,7 +394,8 @@ public class Bomberman extends BaseEvent {
 							break;
 					}
 				}
-				powerup.setType(Material.AIR);
+				event.getItem().remove();
+				event.setCancelled(true);
 				return;
 			}
 		}

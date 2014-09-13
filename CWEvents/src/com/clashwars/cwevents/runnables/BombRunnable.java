@@ -33,12 +33,12 @@ public class BombRunnable extends BukkitRunnable {
 		int particles = 20;
 		for (int i = 1; i < fuseTime; i += increaseTicks) {
 			if (ticks == i) {
-				loc.getWorld().playSound(loc, Sound.CLICK, 0.5f, pitch);
-				ParticleEffect.SMOKE.display(loc, 0.5f, 0.5f, 0.5f, 0.001f, particles);
+				loc.getWorld().playSound(loc, Sound.CLICK, 0.3f, pitch);
+				ParticleEffect.SMOKE.display(loc, 0.2f, 0.4f, 0.2f, 0.001f, particles);
 			}
 			particles--;
 			pitch -= 0.1f;
-			increaseTicks++;
+			increaseTicks += 4;
 		}
 		
 		if (ticks <= 0) {
