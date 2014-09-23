@@ -1,11 +1,11 @@
 package com.clashwars.cwevents.events;
 
+import com.clashwars.cwcore.dependencies.CWWorldGuard;
+import com.clashwars.cwcore.helpers.CWItem;
+import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
-import com.clashwars.cwevents.utils.ItemUtils;
-import com.clashwars.cwevents.utils.Util;
-import com.clashwars.cwevents.utils.WGUtils;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,7 +23,7 @@ public class Race extends BaseEvent {
 
     public void Reset() {
         super.Reset();
-        WGUtils.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
     }
 
     public void Open() {
@@ -35,12 +35,12 @@ public class Race extends BaseEvent {
     }
 
     public void Begin() {
-        WGUtils.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "allow");
+        CWWorldGuard.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "allow");
     }
 
     public void Stop() {
         super.Stop();
-        WGUtils.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
     }
 
     public void onPlayerLeft(Player player) {
@@ -48,14 +48,14 @@ public class Race extends BaseEvent {
     }
 
     public void onPlayerJoin(Player player) {
-        player.getInventory().addItem(ItemUtils.getItem(Material.LEASH, 1, (short) 0, "&6&lLasso", new String[]{"&7Use this on other players.", "&7It will pull them towards you!"}));
+        player.getInventory().addItem(new CWItem(Material.LEASH, 1, (short) 0, "&6&lLasso", new String[]{"&7Use this on other players.", "&7It will pull them towards you!"}));
         player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 8));
 
         //Random colored boots.
         ItemStack boots = new ItemStack(Material.LEATHER_BOOTS, 1);
         ItemMeta meta = boots.getItemMeta();
         LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
-        armorMeta.setColor(Util.getRandomColor());
+        armorMeta.setColor(CWUtil.getRandomColor());
         boots.setItemMeta(armorMeta);
         player.getInventory().setBoots(boots);
     }
@@ -69,7 +69,7 @@ public class Race extends BaseEvent {
             return;
         }
         if (em.getPlayers().contains(event.getPlayer().getName())) {
-            em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and has to start over again!"));
+            em.broadcast(CWUtil.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and has to start over again!"));
             event.getPlayer().teleport(em.getSpawn());
         }
     }

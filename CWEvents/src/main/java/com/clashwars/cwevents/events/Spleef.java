@@ -1,10 +1,10 @@
 package com.clashwars.cwevents.events;
 
+import com.clashwars.cwcore.dependencies.CWWorldGuard;
+import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
-import com.clashwars.cwevents.utils.Util;
-import com.clashwars.cwevents.utils.WGUtils;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import org.bukkit.Material;
@@ -36,8 +36,8 @@ public class Spleef extends BaseEvent {
     Random random = new Random();
 
     public void Reset() {
-        WGUtils.regionFill(world, WGUtils.getRegion(world, em.getRegionName("floor")), BlockID.SNOW_BLOCK);
-        WGUtils.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "deny");
+        CWWorldGuard.regionFill(world, CWWorldGuard.getRegion(world, em.getRegionName("floor")), BlockID.SNOW_BLOCK);
+        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "deny");
     }
 
     public void Open() {
@@ -58,12 +58,12 @@ public class Spleef extends BaseEvent {
         for (String p : em.getPlayers()) {
             cwe.getServer().getPlayer(p).getInventory().addItem(new ItemStack(Material.DIAMOND_SPADE, 1));
         }
-        WGUtils.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "allow");
+        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "allow");
     }
 
     public void Stop() {
         super.Stop();
-        WGUtils.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "deny");
     }
 
     public void onPlayerLeft(Player player) {
@@ -130,7 +130,7 @@ public class Spleef extends BaseEvent {
         }
         if (em.getStatus() == EventStatus.STARTED) {
             if (event.getCause() == DamageCause.LAVA || (event.getCause() == DamageCause.FALL && event.getDamage() >= 4)) {
-                em.broadcast(Util.formatMsg("&b&l" + player.getName() + " &3fell and is out!"));
+                em.broadcast(CWUtil.formatMsg("&b&l" + player.getName() + " &3fell and is out!"));
                 ;
                 em.leaveEvent(player, true);
             }

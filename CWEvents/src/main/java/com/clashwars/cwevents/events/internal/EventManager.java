@@ -1,7 +1,7 @@
 package com.clashwars.cwevents.events.internal;
 
+import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.CWEvents;
-import com.clashwars.cwevents.utils.Util;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -26,18 +26,18 @@ public class EventManager {
     public void joinEvent(Player player) {
         //Make sure the event is joinable.
         if (event == null || arena == null) {
-            player.sendMessage(Util.formatMsg("&cThere is no active event set."));
+            player.sendMessage(CWUtil.formatMsg("&cThere is no active event set."));
             return;
         }
         if (status != EventStatus.OPEN) {
-            player.sendMessage(Util.formatMsg("&cYou can't join right now. &4Status&8: &7" + status.getName()));
+            player.sendMessage(CWUtil.formatMsg("&cYou can't join right now. &4Status&8: &7" + status.getName()));
             return;
         }
 
         //Make sure player isn't already in the event.
         if (players.contains(player.getName())) {
-            player.sendMessage(Util.formatMsg("&cYou're already in the game."));
-            player.sendMessage(Util.formatMsg("&cYou can use &4/event spawn &cif you didn't get teleported."));
+            player.sendMessage(CWUtil.formatMsg("&cYou're already in the game."));
+            player.sendMessage(CWUtil.formatMsg("&cYou can use &4/event spawn &cif you didn't get teleported."));
             return;
         }
 
@@ -54,17 +54,17 @@ public class EventManager {
             }
             //Prevent join if full and no player can be kicked or else kick the found player.
             if (kick == null) {
-                player.sendMessage(Util.formatMsg("&6This event is full!"));
+                player.sendMessage(CWUtil.formatMsg("&6This event is full!"));
                 return;
             } else {
-                kick.sendMessage(Util.formatMsg("&cYou have been kicked out because someone with higher priority joined."));
+                kick.sendMessage(CWUtil.formatMsg("&cYou have been kicked out because someone with higher priority joined."));
                 leaveEvent(player, true);
             }
         }
 
         //Join
-        player.sendMessage(Util.formatMsg("&3You have joined &9" + event.getName() + "! &3Arena&8: &9" + arena));
-        broadcast(Util.formatMsg("&9" + player.getDisplayName() + " &3joined the event. &8Players: &7" + (players.size() + 1)));
+        player.sendMessage(CWUtil.formatMsg("&3You have joined &9" + event.getName() + "! &3Arena&8: &9" + arena));
+        broadcast(CWUtil.formatMsg("&9" + player.getDisplayName() + " &3joined the event. &8Players: &7" + (players.size() + 1)));
         resetPlayer(player);
         player.teleport(spawn);
         players.add(player.getName());
@@ -79,10 +79,10 @@ public class EventManager {
             resetPlayer(player);
             player.teleport(player.getWorld().getSpawnLocation());
             if (force) {
-                player.sendMessage(Util.formatMsg("&cYou have been removed from &4" + event.getName() + "! &cArena&8: &4" + arena));
+                player.sendMessage(CWUtil.formatMsg("&cYou have been removed from &4" + event.getName() + "! &cArena&8: &4" + arena));
             } else {
-                player.sendMessage(Util.formatMsg("&3You have left &9" + event.getName() + "! &3Arena&8: &9" + arena));
-                broadcast(Util.formatMsg("&9" + player.getDisplayName() + " &3left the event."));
+                player.sendMessage(CWUtil.formatMsg("&3You have left &9" + event.getName() + "! &3Arena&8: &9" + arena));
+                broadcast(CWUtil.formatMsg("&9" + player.getDisplayName() + " &3left the event."));
             }
             players.remove(player.getName());
             updateEventItem();

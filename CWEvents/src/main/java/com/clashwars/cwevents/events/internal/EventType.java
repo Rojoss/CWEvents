@@ -1,10 +1,10 @@
 package com.clashwars.cwevents.events.internal;
 
+import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.events.Bomberman;
 import com.clashwars.cwevents.events.KOH;
 import com.clashwars.cwevents.events.Race;
 import com.clashwars.cwevents.events.Spleef;
-import com.clashwars.cwevents.utils.Util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +35,7 @@ public enum EventType {
         }
         name = name.toLowerCase();
 
-        return types.get(Util.capitalize(name));
+        return types.get(CWUtil.capitalize(name));
     }
 
 

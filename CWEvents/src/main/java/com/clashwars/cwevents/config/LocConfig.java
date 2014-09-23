@@ -1,7 +1,7 @@
 package com.clashwars.cwevents.config;
 
+import com.clashwars.cwcore.config.internal.EasyConfig;
 import com.clashwars.cwevents.CWEvents;
-import com.clashwars.cwevents.config.internal.EasyConfig;
 import org.bukkit.Location;
 
 import java.util.HashMap;

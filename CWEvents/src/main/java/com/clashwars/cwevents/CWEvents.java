@@ -1,5 +1,7 @@
 package com.clashwars.cwevents;
 
+import com.clashwars.cwcore.CWCore;
+import com.clashwars.cwcore.helpers.CWItem;
 import com.clashwars.cwevents.commands.Commands;
 import com.clashwars.cwevents.config.LocConfig;
 import com.clashwars.cwevents.event.MainEvents;
@@ -7,13 +9,12 @@ import com.clashwars.cwevents.event.PluginMessageEvents;
 import com.clashwars.cwevents.events.internal.EventManager;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
-import com.clashwars.cwevents.utils.ItemUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
@@ -39,12 +40,18 @@ public class CWEvents extends JavaPlugin {
         em.setArena(null);
         em.setEvent(null);
         em.updateEventItem();
-
         log("Disabled.");
     }
 
     @SuppressWarnings("deprecation")
     public void onEnable() {
+        Plugin plugin = getServer().getPluginManager().getPlugin("CWCore");
+        if (plugin == null || !(plugin instanceof CWCore)) {
+            log("CWCore dependency couldn't be loaded!");
+            setEnabled(false);
+            return;
+        }
+
         instance = this;
 
         locCfg = new LocConfig("plugins/CWEvents/locs.yml");
@@ -123,16 +130,16 @@ public class CWEvents extends JavaPlugin {
         return null;
     }
 
-    public ItemStack GetEventItem() {
+    public CWItem GetEventItem() {
         if (em.getEvent() == null || em.getArena() == null) {
-            return ItemUtils.getItem(Material.INK_SACK, 1, (short) 1, "&4&lNo Event", new String[]{"&7There is currently no open event!"});
+            return new CWItem(Material.INK_SACK, 1, (short)1, "&4&lNo Event").addLore("&7There is currently no open event!");
         } else {
             if (em.getStatus() == EventStatus.OPEN) {
-                return ItemUtils.getItem(Material.INK_SACK, 1, (short) 10, "&6&lJoin &5&l" + em.getEvent().getName(), new String[]{
+                return new CWItem(Material.INK_SACK, 1, (short) 10, "&6&lJoin &5&l" + em.getEvent().getName(), new String[]{
                         "&7Use this item to join &8" + em.getEvent().getName() + "&7.", "&6&lEvent&8&l: &5" + em.getEvent().getName(),
                         "&6&lArena&8&l: &5" + em.getArena(), "&6&lPlayers&8&l: &a" + em.getPlayers().size() + "&7/&2" + em.getSlots()});
             } else {
-                return ItemUtils.getItem(Material.INK_SACK, 1, (short) 8, "&c&lNot Joinable", new String[]{
+                return new CWItem(Material.INK_SACK, 1, (short) 8, "&c&lNot Joinable", new String[]{
                         "&7The event is not joinable.", "&6&lEvent&8&l: &5" + em.getEvent().getName(), "&6&lArena&8&l: &5" + em.getArena(),
                         "&6&lStatus&8&l: &5" + em.getStatus().getName()});
             }

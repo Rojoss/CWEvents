@@ -1,10 +1,10 @@
 package com.clashwars.cwevents.events;
 
+import com.clashwars.cwcore.dependencies.CWWorldGuard;
+import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
-import com.clashwars.cwevents.utils.Util;
-import com.clashwars.cwevents.utils.WGUtils;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -23,9 +23,9 @@ public class KOH extends BaseEvent {
 
     public void Reset() {
         super.Reset();
-        WGUtils.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
-        WGUtils.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
-        WGUtils.setFlag(world, em.getRegionName("arena"), DefaultFlag.POTION_SPLASH, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.POTION_SPLASH, "deny");
     }
 
     public void Open() {
@@ -37,16 +37,16 @@ public class KOH extends BaseEvent {
     }
 
     public void Begin() {
-        WGUtils.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "allow");
-        WGUtils.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "allow");
-        WGUtils.setFlag(world, em.getRegionName("arena"), DefaultFlag.POTION_SPLASH, "allow");
+        CWWorldGuard.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "allow");
+        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "allow");
+        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.POTION_SPLASH, "allow");
     }
 
     public void Stop() {
         super.Stop();
-        WGUtils.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
-        WGUtils.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
-        WGUtils.setFlag(world, em.getRegionName("arena"), DefaultFlag.POTION_SPLASH, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.POTION_SPLASH, "deny");
     }
 
     public void onPlayerLeft(Player player) {
@@ -100,7 +100,7 @@ public class KOH extends BaseEvent {
             return;
         }
         if (em.getPlayers().contains(event.getPlayer().getName())) {
-            em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and is out of the game!"));
+            em.broadcast(CWUtil.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and is out of the game!"));
             em.resetPlayer(event.getPlayer());
         }
     }

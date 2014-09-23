@@ -1,14 +1,14 @@
 package com.clashwars.cwevents.events;
 
+import com.clashwars.cwcore.dependencies.CWWorldGuard;
+import com.clashwars.cwcore.helpers.CWItem;
+import com.clashwars.cwcore.packet.ParticleEffect;
+import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.events.extra.BombermanData;
 import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
 import com.clashwars.cwevents.runnables.BombRunnable;
-import com.clashwars.cwevents.utils.ItemUtils;
-import com.clashwars.cwevents.utils.ParticleEffect;
-import com.clashwars.cwevents.utils.Util;
-import com.clashwars.cwevents.utils.WGUtils;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
@@ -57,26 +57,26 @@ public class Bomberman extends BaseEvent {
         locationsNeeded.add("schem_arena");
         regionsNeeded.add("arena");
 
-        bombItem = ItemUtils.getItem(Material.TNT, 1, (short) 0, "&4&lBomb", new String[]
+        bombItem = new CWItem(Material.TNT, 1, (short) 0, "&4&lBomb", new String[]
                 {"&7Place this on the ground to create an explosion.", "&7Bombs will will slowly regenerate based on ur stats."});
 
-        powerups.put("life", ItemUtils.getItem(Material.GOLDEN_APPLE, 1, (short) 1, "&6&lExtra Life", new String[]{"&7You get one extra life!"}));
-        powerups.put("bombUp", ItemUtils.getItem(Material.TNT, 1, (short) 0, "&a&l+1 Bomb", new String[]{"&7You get one extra bomb!"}));
-        powerups.put("bombDown", ItemUtils.getItem(Material.SULPHUR, 1, (short) 0, "&c&l-1 Bomb", new String[]{"&7You lose one bomb!"}));
-        powerups.put("speed", ItemUtils.getItem(Material.GOLD_BOOTS, 1, (short) 0, "&b&lSpeed", new String[]{"&7You get 1 extra speed."}));
-        powerups.put("slow", ItemUtils.getItem(Material.LEATHER_BOOTS, 1, (short) 0, "&c&lSlow", new String[]{"&7You lose 1 extra speed."}));
-        powerups.put("powerUp", ItemUtils.getItem(Material.BLAZE_POWDER, 1, (short) 0, "&4&l+1 Power", new String[]{"&7Bombs will explode 1 block further."}));
-        powerups.put("powerDown", ItemUtils.getItem(Material.QUARTZ, 1, (short) 0, "&c&l-1 Power", new String[]{"&7Bombs will explode 1 block less."}));
-        powerups.put("pierce", ItemUtils.getItem(Material.ARROW, 1, (short) 0, "&e&lPierce", new String[]{"&7Bombs will blow all blocks in range up."}));
-        powerups.put("shield", ItemUtils.getItem(Material.IRON_CHESTPLATE, 1, (short) 0, "&5&lShield", new String[]{"&7Can't be killed by bombs for 8 seconds."}));
-        powerups.put("blind", ItemUtils.getItem(Material.COAL, 1, (short) 1, "&8&lBlind", new String[]{"&7All players will be blinded."}));
+        powerups.put("life", new CWItem(Material.GOLDEN_APPLE, 1, (short) 1, "&6&lExtra Life", new String[]{"&7You get one extra life!"}));
+        powerups.put("bombUp", new CWItem(Material.TNT, 1, (short) 0, "&a&l+1 Bomb", new String[]{"&7You get one extra bomb!"}));
+        powerups.put("bombDown", new CWItem(Material.SULPHUR, 1, (short) 0, "&c&l-1 Bomb", new String[]{"&7You lose one bomb!"}));
+        powerups.put("speed", new CWItem(Material.GOLD_BOOTS, 1, (short) 0, "&b&lSpeed", new String[]{"&7You get 1 extra speed."}));
+        powerups.put("slow", new CWItem(Material.LEATHER_BOOTS, 1, (short) 0, "&c&lSlow", new String[]{"&7You lose 1 extra speed."}));
+        powerups.put("powerUp", new CWItem(Material.BLAZE_POWDER, 1, (short) 0, "&4&l+1 Power", new String[]{"&7Bombs will explode 1 block further."}));
+        powerups.put("powerDown", new CWItem(Material.QUARTZ, 1, (short) 0, "&c&l-1 Power", new String[]{"&7Bombs will explode 1 block less."}));
+        powerups.put("pierce", new CWItem(Material.ARROW, 1, (short) 0, "&e&lPierce", new String[]{"&7Bombs will blow all blocks in range up."}));
+        powerups.put("shield", new CWItem(Material.IRON_CHESTPLATE, 1, (short) 0, "&5&lShield", new String[]{"&7Can't be killed by bombs for 8 seconds."}));
+        powerups.put("blind", new CWItem(Material.COAL, 1, (short) 1, "&8&lBlind", new String[]{"&7All players will be blinded."}));
     }
 
     public void Reset() {
         super.Reset();
-        WGUtils.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
         try {
-            WGUtils.pasteSchematic(world, new File(cwe.getEM().getRegionName("schem_arena") + ".schematic"), cwe.getLoc(cwe.getEM().getRegionName("schem_arena")), false, 0);
+            CWWorldGuard.pasteSchematic(world, new File(cwe.getEM().getRegionName("schem_arena") + ".schematic"), cwe.getLoc(cwe.getEM().getRegionName("schem_arena")), false, 0);
         } catch (MaxChangedBlocksException e) {
             e.printStackTrace();
         } catch (DataException e) {
@@ -110,7 +110,7 @@ public class Bomberman extends BaseEvent {
     }
 
     public void Begin() {
-        WGUtils.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "allow");
+        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "allow");
         for (String p : em.getPlayers()) {
             cwe.getServer().getPlayer(p).getInventory().addItem(bombItem);
         }
@@ -118,7 +118,7 @@ public class Bomberman extends BaseEvent {
 
     public void Stop() {
         super.Stop();
-        WGUtils.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
     }
 
     public void onPlayerLeft(Player player) {
@@ -180,29 +180,29 @@ public class Bomberman extends BaseEvent {
                                 player.getInventory().setChestplate(new ItemStack(Material.AIR));
                                 player.getInventory().setLeggings(new ItemStack(Material.AIR));
                                 player.getInventory().setBoots(new ItemStack(Material.AIR));
-                                player.sendMessage(Util.integrateColor("&4&lYour shield broke by a bomb!"));
+                                player.sendMessage(CWUtil.integrateColor("&4&lYour shield broke by a bomb!"));
                                 continue;
                             }
 
-                            em.broadcast(Util.formatMsg("&4" + otherPlayer.getDisplayName() + " &cwas exploded by &4" + player.getName() + "&4's &cbomb! &8[&4" + (obd.getLives() - 1) + "❤&8]"));
+                            em.broadcast(CWUtil.formatMsg("&4" + otherPlayer.getDisplayName() + " &cwas exploded by &4" + player.getName() + "&4's &cbomb! &8[&4" + (obd.getLives() - 1) + "❤&8]"));
                             obd.setLives(obd.getLives() - 1);
 
                             if (obd.getLives() <= 0) {
                                 //No more lives remove player.
-                                otherPlayer.sendMessage(Util.formatMsg("&cYou have no more lives!"));
-                                em.broadcast(Util.formatMsg("&b" + otherPlayer.getDisplayName() + " &3is out of the game!"));
+                                otherPlayer.sendMessage(CWUtil.formatMsg("&cYou have no more lives!"));
+                                em.broadcast(CWUtil.formatMsg("&b" + otherPlayer.getDisplayName() + " &3is out of the game!"));
                                 em.leaveEvent(otherPlayer, true);
                             } else {
                                 //More lives tell player and set player invis.
                                 otherPlayer.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 60, 0), true);
                                 if (obd.getLives() == 1) {
-                                    otherPlayer.sendMessage(Util.formatMsg("&cThis is your last life!!! &4Be careful!"));
+                                    otherPlayer.sendMessage(CWUtil.formatMsg("&cThis is your last life!!! &4Be careful!"));
                                 } else {
                                     String hearts = "";
                                     for (int i = 0; i < obd.getLives(); i++) {
                                         hearts += "❤";
                                     }
-                                    otherPlayer.sendMessage(Util.formatMsg("&cYou have &4" + obd.getLives() + " &clives remaining. &8[&4" + hearts + "&8]"));
+                                    otherPlayer.sendMessage(CWUtil.formatMsg("&cYou have &4" + obd.getLives() + " &clives remaining. &8[&4" + hearts + "&8]"));
                                 }
                             }
                         }
@@ -238,7 +238,7 @@ public class Bomberman extends BaseEvent {
     private void spawnPowerup(Location location) {
         if (random.nextFloat() <= 0.4f) {
             Object[] powerupKeys = powerups.keySet().toArray();
-            int random = Util.random(0, powerupKeys.length - 1);
+            int random = CWUtil.random(0, powerupKeys.length - 1);
             location.getWorld().dropItem(location.add(0.5f, 0.5f, 0.5f), powerups.get(powerupKeys[random]));
             location.getWorld().playSound(location, Sound.ORB_PICKUP, 0.6f, 2.0f);
             ParticleEffect.WITCH_MAGIC.display(location.add(0.5f, 0.5f, 0.5f), 0.25f, 1, 0.25f, 0.01f, 30);
@@ -282,7 +282,7 @@ public class Bomberman extends BaseEvent {
             return;
         }
         if (!floorBlocks.contains(event.getBlock().getRelative(BlockFace.DOWN).getType())) {
-            player.sendMessage(Util.formatMsg("&cBombs must be placed on the ground."));
+            player.sendMessage(CWUtil.formatMsg("&cBombs must be placed on the ground."));
             event.setCancelled(true);
             return;
         }
@@ -323,7 +323,7 @@ public class Bomberman extends BaseEvent {
             powerup = powerups.get(key);
             if (powerup.getType() == item.getType()) {
                 if (item.hasItemMeta() && item.getItemMeta().getDisplayName() != null && item.getItemMeta().getLore().size() > 0) {
-                    player.sendMessage(Util.integrateColor("&6&lPowerup!!! &a&l" + powerup.getItemMeta().getDisplayName() + " &8- &7" + item.getItemMeta().getLore()));
+                    player.sendMessage(CWUtil.integrateColor("&6&lPowerup!!! &a&l" + powerup.getItemMeta().getDisplayName() + " &8- &7" + item.getItemMeta().getLore()));
                     if (key.equals("life")) {
                         bd.setLives(bd.getLives() + 1);
 
@@ -379,7 +379,7 @@ public class Bomberman extends BaseEvent {
                                     player.getInventory().setChestplate(new ItemStack(Material.AIR));
                                     player.getInventory().setLeggings(new ItemStack(Material.AIR));
                                     player.getInventory().setBoots(new ItemStack(Material.AIR));
-                                    player.sendMessage(Util.integrateColor("&4&lYour shield broke because time ran out!"));
+                                    player.sendMessage(CWUtil.integrateColor("&4&lYour shield broke because time ran out!"));
                                 }
                             }
                         }.runTaskLater(cwe, 200L);

@@ -1,7 +1,7 @@
 package com.clashwars.cwevents.runnables;
 
+import com.clashwars.cwcore.packet.ParticleEffect;
 import com.clashwars.cwevents.events.Bomberman;
-import com.clashwars.cwevents.utils.ParticleEffect;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;

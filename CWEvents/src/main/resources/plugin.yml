@@ -2,6 +2,7 @@ main : com.clashwars.cwevents.CWEvents
 name: ${project.artifactId}
 version: ${project.version}
 description: ${project.description}
+depend: [CWCore]
 commands:
   event:
     description: Main event command
