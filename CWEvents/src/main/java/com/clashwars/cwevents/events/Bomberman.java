@@ -9,8 +9,6 @@ import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
 import com.clashwars.cwevents.runnables.BombRunnable;
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.data.DataException;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -77,11 +75,11 @@ public class Bomberman extends BaseEvent {
         CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
         try {
             CWWorldGuard.pasteSchematic(world, new File(cwe.getEM().getRegionName("schem_arena") + ".schematic"), cwe.getLoc(cwe.getEM().getRegionName("schem_arena")), false, 0);
-        } catch (MaxChangedBlocksException e) {
-            e.printStackTrace();
-        } catch (DataException e) {
-            e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (com.sk89q.worldedit.data.DataException e) {
+            e.printStackTrace();
+        } catch (com.sk89q.worldedit.MaxChangedBlocksException e) {
             e.printStackTrace();
         }
     }
