@@ -9,6 +9,8 @@ import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
 import com.clashwars.cwevents.runnables.BombRunnable;
+import com.sk89q.minecraft.util.commands.CommandException;
+import com.sk89q.worldedit.FilenameException;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -85,7 +87,19 @@ public class Bomberman extends BaseEvent {
             sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + name + "&8'&7!"));
             return false;
         }
-        //TODO: Check for schematic.
+        name = em.getRegionName(event, arena, "arena");
+        try {
+            if (!CWWorldGuard.doesSchematicExists(name)) {
+                sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or schematics not set properly. &7Missing schematic &8'&4" + name + "&8'&7!"));
+                return false;
+            }
+        } catch (CommandException e) {
+            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or schematics not set properly. &7Missing schematic &8'&4" + name + "&8'&7!"));
+            return false;
+        } catch (FilenameException e) {
+            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or schematics not set properly. &7Missing schematic &8'&4" + name + "&8'&7!"));
+            return false;
+        }
         return true;
     }
 
@@ -93,7 +107,7 @@ public class Bomberman extends BaseEvent {
         super.Reset();
         CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
         try {
-            CWWorldGuard.pasteSchematic(world, new File(cwe.getEM().getRegionName("schem_arena") + ".schematic"), cwe.getLoc(cwe.getEM().getRegionName("schem_arena")), false, 0);
+            CWWorldGuard.pasteSchematic(world, new File(cwe.getEM().getRegionName("arena") + ".schematic"), cwe.getLoc(cwe.getEM().getRegionName("schem_arena")), false, 0);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (com.sk89q.worldedit.data.DataException e) {
