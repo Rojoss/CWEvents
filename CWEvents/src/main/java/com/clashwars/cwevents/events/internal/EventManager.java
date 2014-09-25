@@ -3,6 +3,7 @@ package com.clashwars.cwevents.events.internal;
 import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.CWEvents;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 import java.util.HashSet;
@@ -181,6 +182,16 @@ public class EventManager {
                 p.sendMessage(msg);
             } else if (p.hasPermission("event.notifiy") || p.isOp()) {
                 p.sendMessage(msg);
+            }
+        }
+    }
+
+    public void playSound(Sound sound, float volume, float pitch) {
+        for (Player p : cwe.getServer().getOnlinePlayers()) {
+            if (players.contains(p.getName())) {
+                p.playSound(p.getLocation(), sound, volume, pitch);
+            } else if (p.hasPermission("event.notifiy") || p.isOp()) {
+                p.playSound(p.getLocation(), sound, volume, pitch);
             }
         }
     }

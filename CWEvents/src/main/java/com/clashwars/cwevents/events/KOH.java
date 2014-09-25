@@ -132,6 +132,9 @@ public class KOH extends BaseEvent {
         if (em.getStatus() != EventStatus.STARTED) {
             return;
         }
+        if (!em.getPlayers().contains(event.getPlayer().toString())) {
+            return;
+        }
         Player player = event.getPlayer();
         for (ProtectedRegion region : event.getRegions()) {
             if (region.getId().equalsIgnoreCase(em.getRegionName("hill"))) {
@@ -156,6 +159,9 @@ public class KOH extends BaseEvent {
             return;
         }
         if (em.getStatus() != EventStatus.STARTED) {
+            return;
+        }
+        if (!em.getPlayers().contains(event.getPlayer().toString())) {
             return;
         }
         Player player = event.getPlayer();
