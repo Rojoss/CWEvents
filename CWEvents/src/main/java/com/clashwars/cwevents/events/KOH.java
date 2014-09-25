@@ -11,6 +11,7 @@ import com.sk89q.worldguard.bukkit.event.RegionLeaveEvent;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -26,10 +27,26 @@ public class KOH extends BaseEvent {
     private KohRunnable kohRunnable;
 
     public KOH() {
-        regionsNeeded.add("lobby");
-        regionsNeeded.add("arena");
-        regionsNeeded.add("hill");
         kohRunnable = new KohRunnable(this);
+    }
+
+    public boolean checkSetup(EventType event, String arena, CommandSender sender) {
+        String name = em.getRegionName(event, arena, "lobby");
+        if (CWWorldGuard.getRegion(world, name) == null) {
+            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            return false;
+        }
+        name = em.getRegionName(event, arena, "arena");
+        if (CWWorldGuard.getRegion(world, name) == null) {
+            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            return false;
+        }
+        name = em.getRegionName(event, arena, "hill");
+        if (CWWorldGuard.getRegion(world, name) == null) {
+            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            return false;
+        }
+        return true;
     }
 
 

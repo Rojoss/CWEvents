@@ -10,6 +10,7 @@ import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
@@ -29,11 +30,16 @@ import java.util.Random;
 
 public class Spleef extends BaseEvent {
 
-    public Spleef() {
-        regionsNeeded.add("floor");
-    }
-
     Random random = new Random();
+
+    public boolean checkSetup(EventType event, String arena, CommandSender sender) {
+        String name = em.getRegionName(event, arena, "floor");
+        if (CWWorldGuard.getRegion(world, name) == null) {
+            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            return false;
+        }
+        return true;
+    }
 
     public void Reset() {
         CWWorldGuard.regionFill(world, CWWorldGuard.getRegion(world, em.getRegionName("floor")), BlockID.SNOW_BLOCK);

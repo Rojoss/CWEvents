@@ -16,6 +16,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -49,12 +50,6 @@ public class Bomberman extends BaseEvent {
     private int bombsToRemove = 0;
 
     public Bomberman() {
-        for (int i = 1; i <= 12; i++) {
-            locationsNeeded.add("s" + i);
-        }
-        locationsNeeded.add("schem_arena");
-        regionsNeeded.add("arena");
-
         bombItem = new CWItem(Material.TNT, 1, (short) 0, "&4&lBomb", new String[]
                 {"&7Place this on the ground to create an explosion.", "&7Bombs will will slowly regenerate based on ur stats."});
 
@@ -70,6 +65,28 @@ public class Bomberman extends BaseEvent {
         powerups.put("pierce", new CWItem(Material.ARROW, 1, (short) 0, "&e&lPierce", new String[]{"&7Bombs will blow all blocks in range up."}));
         powerups.put("shield", new CWItem(Material.IRON_CHESTPLATE, 1, (short) 0, "&5&lShield", new String[]{"&7Can't be killed by bombs for 8 seconds."}));
         powerups.put("blind", new CWItem(Material.COAL, 1, (short) 1, "&8&lBlind", new String[]{"&7All players will be blinded."}));
+    }
+
+    public boolean checkSetup(EventType event, String arena, CommandSender sender) {
+        String name = em.getRegionName(event, arena, "arena");
+        if (CWWorldGuard.getRegion(world, name) == null) {
+            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            return false;
+        }
+        for (int i = 1; i <= 12; i++) {
+            name = em.getRegionName(event, arena, "s" + i);
+            if (!cwe.getLocConfig().getLocations().containsKey(name)) {
+                sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + name + "&8'&7!"));
+                return false;
+            }
+        }
+        name = em.getRegionName(event, arena, "schem_arena");
+        if (!cwe.getLocConfig().getLocations().containsKey(name)) {
+            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + name + "&8'&7!"));
+            return false;
+        }
+        //TODO: Check for schematic.
+        return true;
     }
 
     public void Reset() {

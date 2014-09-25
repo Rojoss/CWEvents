@@ -13,6 +13,7 @@ import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -28,9 +29,21 @@ public class Race extends BaseEvent {
     CooldownManager cdm;
 
     public Race() {
-        regionsNeeded.add("lobby");
-        regionsNeeded.add("finish");
         cdm = CWCore.inst().getCDM();
+    }
+
+    public boolean checkSetup(EventType event, String arena, CommandSender sender) {
+        String name = em.getRegionName(event, arena, "finish");
+        if (CWWorldGuard.getRegion(world, name) == null) {
+            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            return false;
+        }
+        name = em.getRegionName(event, arena, "lobby");
+        if (CWWorldGuard.getRegion(world, name) == null) {
+            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            return false;
+        }
+        return true;
     }
 
     public void Reset() {

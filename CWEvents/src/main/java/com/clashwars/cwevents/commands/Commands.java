@@ -225,19 +225,8 @@ public class Commands {
                     }
 
                     String arena = args[2];
-                    for (String regionName : event.getEventClass().regionsNeeded) {
-                        regionName = event.getPreifx() + "_" + arena + "_" + regionName;
-                        if (CWWorldGuard.getRegion(player.getWorld(), regionName) == null) {
-                            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + regionName + "&8'&7!"));
-                            return true;
-                        }
-                    }
-                    for (String locName : event.getEventClass().locationsNeeded) {
-                        locName = event.getPreifx() + "_" + arena + "_" + locName;
-                        if (!cwe.getLocConfig().getLocations().containsKey(locName)) {
-                            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + locName + "&8'&7!"));
-                            return true;
-                        }
+                    if (!event.getEventClass().checkSetup(event, arena, sender)) {
+                        return true;
                     }
 
                     int slots = 0;

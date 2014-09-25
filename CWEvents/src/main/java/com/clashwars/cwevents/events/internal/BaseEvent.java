@@ -4,6 +4,7 @@ import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.CWEvents;
 import com.clashwars.cwevents.runnables.StartGameRunnable;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
@@ -15,9 +16,6 @@ public class BaseEvent implements Listener {
     public CWEvents cwe;
     public EventManager em;
     public World world;
-
-    public List<String> regionsNeeded = new ArrayList<String>();
-    public List<String> locationsNeeded = new ArrayList<String>();
 
     public void Init(CWEvents cwe, EventManager em) {
         this.cwe = cwe;
@@ -68,5 +66,10 @@ public class BaseEvent implements Listener {
 
     public void onPlayerJoin(Player player) {
         //Overridden
+    }
+
+    public boolean checkSetup(EventType event, String arena, CommandSender sender) {
+        //Overridden
+        return true;
     }
 }
