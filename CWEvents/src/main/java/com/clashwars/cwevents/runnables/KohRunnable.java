@@ -50,7 +50,7 @@ public class KohRunnable extends BukkitRunnable {
             return;
         }
 
-        if (seconds == 8 || seconds == 5 || seconds <= 3) {
+        if (seconds == 8 || seconds == 5 || seconds == 3 || seconds == 2 || seconds == 1) {
             koh.em.broadcast(CWUtil.formatMsg("&5" + capturer.getName() + " &6is the king of the hill in &a&l"+ seconds + "&7..."));
         }
         koh.em.playSound(Sound.NOTE_PLING, 0.5f, 1.8f);

@@ -84,6 +84,7 @@ public class Race extends BaseEvent {
         armorMeta.setColor(CWUtil.getRandomColor());
         boots.setItemMeta(armorMeta);
         player.getInventory().setBoots(boots);
+        player.updateInventory();
     }
 
     @EventHandler

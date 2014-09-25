@@ -12,7 +12,7 @@ import java.util.Map;
 public enum EventType {
     SPLEEF("Spleef", "spl", new Spleef()),
     RACE("Race", "rac", new Race()),
-    KOH("KOH", "koh", new KOH()),
+    KOH("Koh", "koh", new KOH()),
     BOMBERMAN("Bomberman", "bom", new Bomberman());
 
     //Vars
