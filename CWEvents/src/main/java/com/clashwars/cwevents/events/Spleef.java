@@ -1,7 +1,7 @@
 package com.clashwars.cwevents.events;
 
 import com.clashwars.cwcore.dependencies.CWWorldGuard;
-import com.clashwars.cwcore.utils.CWUtil;
+import com.clashwars.cwevents.Util;
 import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
@@ -35,7 +35,7 @@ public class Spleef extends BaseEvent {
     public boolean checkSetup(EventType event, String arena, CommandSender sender) {
         String name = em.getRegionName(event, arena, "floor");
         if (CWWorldGuard.getRegion(world, name) == null) {
-            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
             return false;
         }
         return true;
@@ -63,6 +63,7 @@ public class Spleef extends BaseEvent {
         cwe.getServer().broadcastMessage("Spleef Begin");
         for (String p : em.getPlayers()) {
             cwe.getServer().getPlayer(p).getInventory().addItem(new ItemStack(Material.DIAMOND_SPADE, 1));
+            cwe.getServer().getPlayer(p).updateInventory();
         }
         CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "allow");
     }
@@ -136,7 +137,7 @@ public class Spleef extends BaseEvent {
         }
         if (em.getStatus() == EventStatus.STARTED) {
             if (event.getCause() == DamageCause.LAVA || (event.getCause() == DamageCause.FALL && event.getDamage() >= 4)) {
-                em.broadcast(CWUtil.formatMsg("&b&l" + player.getName() + " &3fell and is out!"));
+                em.broadcast(Util.formatMsg("&b&l" + player.getName() + " &3fell and is out!"));
                 ;
                 em.leaveEvent(player, true);
             }

@@ -4,6 +4,7 @@ import com.clashwars.cwcore.dependencies.CWWorldGuard;
 import com.clashwars.cwcore.helpers.CWItem;
 import com.clashwars.cwcore.packet.ParticleEffect;
 import com.clashwars.cwcore.utils.CWUtil;
+import com.clashwars.cwevents.Util;
 import com.clashwars.cwevents.events.extra.BombermanData;
 import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
@@ -72,32 +73,32 @@ public class Bomberman extends BaseEvent {
     public boolean checkSetup(EventType event, String arena, CommandSender sender) {
         String name = em.getRegionName(event, arena, "arena");
         if (CWWorldGuard.getRegion(world, name) == null) {
-            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
             return false;
         }
         for (int i = 1; i <= 12; i++) {
             name = em.getRegionName(event, arena, "s" + i);
             if (!cwe.getLocConfig().getLocations().containsKey(name)) {
-                sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + name + "&8'&7!"));
+                sender.sendMessage(Util.formatMsg("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + name + "&8'&7!"));
                 return false;
             }
         }
         name = em.getRegionName(event, arena, "schem_arena");
         if (!cwe.getLocConfig().getLocations().containsKey(name)) {
-            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + name + "&8'&7!"));
+            sender.sendMessage(Util.formatMsg("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + name + "&8'&7!"));
             return false;
         }
         name = em.getRegionName(event, arena, "arena");
         try {
             if (!CWWorldGuard.doesSchematicExists(name)) {
-                sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or schematics not set properly. &7Missing schematic &8'&4" + name + "&8'&7!"));
+                sender.sendMessage(Util.formatMsg("&cInvalid arena name or schematics not set properly. &7Missing schematic &8'&4" + name + "&8'&7!"));
                 return false;
             }
         } catch (CommandException e) {
-            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or schematics not set properly. &7Missing schematic &8'&4" + name + "&8'&7!"));
+            sender.sendMessage(Util.formatMsg("&cInvalid arena name or schematics not set properly. &7Missing schematic &8'&4" + name + "&8'&7!"));
             return false;
         } catch (FilenameException e) {
-            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or schematics not set properly. &7Missing schematic &8'&4" + name + "&8'&7!"));
+            sender.sendMessage(Util.formatMsg("&cInvalid arena name or schematics not set properly. &7Missing schematic &8'&4" + name + "&8'&7!"));
             return false;
         }
         return true;
@@ -215,25 +216,25 @@ public class Bomberman extends BaseEvent {
                                 continue;
                             }
 
-                            em.broadcast(CWUtil.formatMsg("&4" + otherPlayer.getDisplayName() + " &cwas exploded by &4" + player.getName() + "&4's &cbomb! &8[&4" + (obd.getLives() - 1) + "❤&8]"));
+                            em.broadcast(Util.formatMsg("&4" + otherPlayer.getDisplayName() + " &cwas exploded by &4" + player.getName() + "&4's &cbomb! &8[&4" + (obd.getLives() - 1) + "❤&8]"));
                             obd.setLives(obd.getLives() - 1);
 
                             if (obd.getLives() <= 0) {
                                 //No more lives remove player.
-                                otherPlayer.sendMessage(CWUtil.formatMsg("&cYou have no more lives!"));
-                                em.broadcast(CWUtil.formatMsg("&b" + otherPlayer.getDisplayName() + " &3is out of the game!"));
+                                otherPlayer.sendMessage(Util.formatMsg("&cYou have no more lives!"));
+                                em.broadcast(Util.formatMsg("&b" + otherPlayer.getDisplayName() + " &3is out of the game!"));
                                 em.leaveEvent(otherPlayer, true);
                             } else {
                                 //More lives tell player and set player invis.
                                 otherPlayer.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 60, 0), true);
                                 if (obd.getLives() == 1) {
-                                    otherPlayer.sendMessage(CWUtil.formatMsg("&cThis is your last life!!! &4Be careful!"));
+                                    otherPlayer.sendMessage(Util.formatMsg("&cThis is your last life!!! &4Be careful!"));
                                 } else {
                                     String hearts = "";
                                     for (int i = 0; i < obd.getLives(); i++) {
                                         hearts += "❤";
                                     }
-                                    otherPlayer.sendMessage(CWUtil.formatMsg("&cYou have &4" + obd.getLives() + " &clives remaining. &8[&4" + hearts + "&8]"));
+                                    otherPlayer.sendMessage(Util.formatMsg("&cYou have &4" + obd.getLives() + " &clives remaining. &8[&4" + hearts + "&8]"));
                                 }
                             }
                         }
@@ -268,9 +269,8 @@ public class Bomberman extends BaseEvent {
 
     private void spawnPowerup(Location location) {
         if (random.nextFloat() <= 0.4f) {
-            Object[] powerupKeys = powerups.keySet().toArray();
-            int random = CWUtil.random(0, powerupKeys.length - 1);
-            location.getWorld().dropItem(location.add(0.5f, 0.5f, 0.5f), powerups.get(powerupKeys[random]));
+            String[] powerupKeys = powerups.keySet().toArray(new String[powerups.size()]);
+            location.getWorld().dropItem(location.add(0.5f, 0.5f, 0.5f), powerups.get(CWUtil.random(powerupKeys)));
             location.getWorld().playSound(location, Sound.ORB_PICKUP, 0.6f, 2.0f);
             ParticleEffect.WITCH_MAGIC.display(location.add(0.5f, 0.5f, 0.5f), 0.25f, 1, 0.25f, 0.01f, 30);
         }
@@ -313,7 +313,7 @@ public class Bomberman extends BaseEvent {
             return;
         }
         if (!floorBlocks.contains(event.getBlock().getRelative(BlockFace.DOWN).getType())) {
-            player.sendMessage(CWUtil.formatMsg("&cBombs must be placed on the ground."));
+            player.sendMessage(Util.formatMsg("&cBombs must be placed on the ground."));
             event.setCancelled(true);
             return;
         }

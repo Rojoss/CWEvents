@@ -132,7 +132,7 @@ public class CWEvents extends JavaPlugin {
 
     public CWItem GetEventItem() {
         if (em.getEvent() == null || em.getArena() == null) {
-            return new CWItem(Material.INK_SACK, 1, (short)1, "&4&lNo Event").addLore("&7There is currently no open event!");
+            return new CWItem(Material.INK_SACK, 1, (short) 1, "&4&lNo Event").addLore("&7There is currently no open event!");
         } else {
             if (em.getStatus() == EventStatus.OPEN) {
                 return new CWItem(Material.INK_SACK, 1, (short) 10, "&6&lJoin &5&l" + em.getEvent().getName(), new String[]{

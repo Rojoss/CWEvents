@@ -5,6 +5,7 @@ import com.clashwars.cwcore.CooldownManager;
 import com.clashwars.cwcore.dependencies.CWWorldGuard;
 import com.clashwars.cwcore.helpers.CWItem;
 import com.clashwars.cwcore.utils.CWUtil;
+import com.clashwars.cwevents.Util;
 import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
@@ -35,12 +36,12 @@ public class Race extends BaseEvent {
     public boolean checkSetup(EventType event, String arena, CommandSender sender) {
         String name = em.getRegionName(event, arena, "finish");
         if (CWWorldGuard.getRegion(world, name) == null) {
-            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
             return false;
         }
         name = em.getRegionName(event, arena, "lobby");
         if (CWWorldGuard.getRegion(world, name) == null) {
-            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
             return false;
         }
         return true;
@@ -103,16 +104,16 @@ public class Race extends BaseEvent {
             return;
         }
         if (cdm.getCooldown(player.getName() + "-lasso").onCooldown()) {
-            player.sendMessage(CWUtil.formatMsg("&cLasso is on cooldown."));
+            player.sendMessage(Util.formatMsg("&cLasso is on cooldown."));
             return;
         }
         cdm.createCooldown(player.getName() + "-lasso", 3000);
-        if (CWUtil.random(0,4) != 1) {
-            player.sendMessage(CWUtil.formatMsg("&cMiss!"));
+        if (CWUtil.random(0, 4) != 1) {
+            player.sendMessage(Util.formatMsg("&cMiss!"));
             player.playSound(player.getLocation(), Sound.ITEM_BREAK, 1.0f, 2.0f);
             return;
         }
-        Player target = (Player)event.getRightClicked();
+        Player target = (Player) event.getRightClicked();
         Vector dir = player.getLocation().getDirection();
         target.setVelocity(new Vector(dir.getX(), 0.3f, dir.getZ()));
         world.playSound(target.getLocation(), Sound.BAT_TAKEOFF, 1.0f, 1.8f);
@@ -131,7 +132,7 @@ public class Race extends BaseEvent {
             return;
         }
         if (em.getPlayers().contains(event.getPlayer().getName())) {
-            em.broadcast(CWUtil.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and has to start over again!"));
+            em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and has to start over again!"));
             event.getPlayer().teleport(em.getSpawn());
         }
     }
@@ -152,10 +153,10 @@ public class Race extends BaseEvent {
             if (region.getId().equalsIgnoreCase(em.getRegionName("finish"))) {
                 playersFinished++;
                 if (playersFinished == 1) {
-                    em.broadcast(CWUtil.formatMsg("&a&l" + player.getName() + " &6wins the race!"));
+                    em.broadcast(Util.formatMsg("&a&l" + player.getName() + " &6wins the race!"));
                     em.playSound(Sound.ORB_PICKUP, 0.8f, 0f);
                 } else {
-                    em.broadcast(CWUtil.formatMsg("&5" + player.getName() + " &6finished on place &5" + playersFinished + "&6."));
+                    em.broadcast(Util.formatMsg("&5" + player.getName() + " &6finished on place &5" + playersFinished + "&6."));
                     em.playSound(Sound.ORB_PICKUP, 0.4f, 2f);
                 }
                 return;

@@ -1,7 +1,7 @@
 package com.clashwars.cwevents.runnables;
 
-import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.CWEvents;
+import com.clashwars.cwevents.Util;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -20,9 +20,9 @@ public class StartGameRunnable extends BukkitRunnable {
     @Override
     public void run() {
         if (seconds == 1) {
-            cwe.getEM().broadcast(CWUtil.formatMsg("&6Starting in " + seconds + " second!"));
+            cwe.getEM().broadcast(Util.formatMsg("&6Starting in " + seconds + " second!"));
         } else if (seconds > 1) {
-            cwe.getEM().broadcast(CWUtil.formatMsg("&6Starting in " + seconds + " seconds!"));
+            cwe.getEM().broadcast(Util.formatMsg("&6Starting in " + seconds + " seconds!"));
         }
 
         if (seconds <= 0) {
@@ -35,7 +35,7 @@ public class StartGameRunnable extends BukkitRunnable {
             cwe.getEM().getEvent().getEventClass().Begin();
             cwe.getEM().setStatus(EventStatus.STARTED);
             cwe.getEM().updateEventItem();
-            cwe.getEM().broadcast(CWUtil.formatMsg("&6The game has started!"));
+            cwe.getEM().broadcast(Util.formatMsg("&6The game has started!"));
             //}
             this.cancel();
         }

@@ -2,9 +2,8 @@ package com.clashwars.cwevents.events;
 
 import com.clashwars.cwcore.dependencies.CWWorldGuard;
 import com.clashwars.cwcore.utils.CWUtil;
-import com.clashwars.cwevents.CWEvents;
+import com.clashwars.cwevents.Util;
 import com.clashwars.cwevents.events.internal.BaseEvent;
-import com.clashwars.cwevents.events.internal.EventManager;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
 import com.clashwars.cwevents.runnables.KohRunnable;
@@ -32,17 +31,17 @@ public class KOH extends BaseEvent {
     public boolean checkSetup(EventType event, String arena, CommandSender sender) {
         String name = em.getRegionName(event, arena, "lobby");
         if (CWWorldGuard.getRegion(world, name) == null) {
-            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
             return false;
         }
         name = em.getRegionName(event, arena, "arena");
         if (CWWorldGuard.getRegion(world, name) == null) {
-            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
             return false;
         }
         name = em.getRegionName(event, arena, "hill");
         if (CWWorldGuard.getRegion(world, name) == null) {
-            sender.sendMessage(CWUtil.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
+            sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
             return false;
         }
         return true;
@@ -127,7 +126,7 @@ public class KOH extends BaseEvent {
     }
 
     public void capture(Player capturer) {
-        em.broadcast(CWUtil.formatMsg("&a&l" + capturer.getName() + " &6&lis the king of the hill!"));
+        em.broadcast(Util.formatMsg("&a&l" + capturer.getName() + " &6&lis the king of the hill!"));
     }
 
     @EventHandler
@@ -139,13 +138,13 @@ public class KOH extends BaseEvent {
             return;
         }
         if (em.getPlayers().contains(event.getPlayer().getName())) {
-            em.broadcast(CWUtil.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and is out of the game!"));
+            em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and is out of the game!"));
             em.resetPlayer(event.getPlayer());
         }
     }
 
     @EventHandler
-     public void regionEnter(RegionEnterEvent event) {
+    public void regionEnter(RegionEnterEvent event) {
         if (em.getEvent() != EventType.KOH) {
             return;
         }

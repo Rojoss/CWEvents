@@ -2,7 +2,7 @@ package com.clashwars.cwevents.runnables;
 
 import com.clashwars.cwcore.dependencies.CWWorldGuard;
 import com.clashwars.cwcore.packet.ParticleEffect;
-import com.clashwars.cwcore.utils.CWUtil;
+import com.clashwars.cwevents.Util;
 import com.clashwars.cwevents.events.KOH;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
@@ -20,7 +20,6 @@ public class KohRunnable extends BukkitRunnable {
     private int seconds;
     private boolean running = false;
     private Location hillCenter;
-
 
 
     public KohRunnable(KOH koh) {
@@ -41,7 +40,7 @@ public class KohRunnable extends BukkitRunnable {
         this.capturer = capturer;
         running = true;
         seconds = CAPTURE_TIME;
-        koh.em.broadcast(CWUtil.formatMsg("&5" + capturer.getName() + " &6started to capture the hill!"));
+        koh.em.broadcast(Util.formatMsg("&5" + capturer.getName() + " &6started to capture the hill!"));
     }
 
     @Override
@@ -51,11 +50,11 @@ public class KohRunnable extends BukkitRunnable {
         }
 
         if (seconds == 8 || seconds == 5 || seconds == 3 || seconds == 2 || seconds == 1) {
-            koh.em.broadcast(CWUtil.formatMsg("&5" + capturer.getName() + " &6is the king of the hill in &a&l"+ seconds + "&7..."));
+            koh.em.broadcast(Util.formatMsg("&5" + capturer.getName() + " &6is the king of the hill in &a&l" + seconds + "&7..."));
         }
         koh.em.playSound(Sound.NOTE_PLING, 0.5f, 1.8f);
         ParticleEffect.FIREWORKS_SPARK.display(hillCenter, 2.0f, 2.0f, 2.0f, 0.1f, 50);
-        ParticleEffect.displayBlockCrack(hillCenter.add(0,1,0), 155, (byte)1, 1.0f, 1.0f, 1.0f, 50);
+        ParticleEffect.displayBlockCrack(hillCenter.add(0, 1, 0), 155, (byte) 1, 1.0f, 1.0f, 1.0f, 50);
 
         if (seconds <= 0) {
             koh.capture(capturer);

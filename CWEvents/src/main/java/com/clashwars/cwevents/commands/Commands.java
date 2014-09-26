@@ -1,8 +1,8 @@
 package com.clashwars.cwevents.commands;
 
-import com.clashwars.cwcore.dependencies.CWWorldGuard;
 import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.CWEvents;
+import com.clashwars.cwevents.Util;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
 import org.bukkit.Bukkit;
@@ -30,7 +30,7 @@ public class Commands {
         if (label.equalsIgnoreCase("loc")) {
             //Console check
             if (!(sender instanceof Player)) {
-                sender.sendMessage(CWUtil.formatMsg("&cThis is a player command only."));
+                sender.sendMessage(Util.formatMsg("&cThis is a player command only."));
                 return true;
             }
             Player player = (Player) sender;
@@ -38,7 +38,7 @@ public class Commands {
             if (args.length > 0) {
                 //Permission check.
                 if (!player.isOp() && !player.hasPermission("cwevents.loc")) {
-                    player.sendMessage(CWUtil.formatMsg("&cInsuficient permissions."));
+                    player.sendMessage(Util.formatMsg("&cInsuficient permissions."));
                     return true;
                 }
 
@@ -47,15 +47,15 @@ public class Commands {
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("set")) {
                     if (args.length < 2) {
-                        player.sendMessage(CWUtil.formatMsg("&cInvalid usage. &7/loc set {name}"));
+                        player.sendMessage(Util.formatMsg("&cInvalid usage. &7/loc set {name}"));
                         return true;
                     }
                     if (args[1].length() < 2) {
-                        player.sendMessage(CWUtil.formatMsg("&cLocation name is too short."));
+                        player.sendMessage(Util.formatMsg("&cLocation name is too short."));
                         return true;
                     }
                     cwe.getLocConfig().setLocation(args[1], player.getLocation());
-                    player.sendMessage(CWUtil.formatMsg("&6Location &8'&5" + args[1] + "&8' &6set to your location!"));
+                    player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' &6set to your location!"));
                     return true;
                 }
 
@@ -64,16 +64,16 @@ public class Commands {
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("remove")) {
                     if (args.length < 2) {
-                        player.sendMessage(CWUtil.formatMsg("&cInvalid usage. &7/loc remove {name}"));
+                        player.sendMessage(Util.formatMsg("&cInvalid usage. &7/loc remove {name}"));
                         return true;
                     }
                     String name = cwe.getLocConfig().getName(args[1]);
                     if (name == "") {
-                        player.sendMessage(CWUtil.formatMsg("&6Location &8'&5" + args[1] + "&8' &6doesn't exist!"));
+                        player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' &6doesn't exist!"));
                         return true;
                     }
                     cwe.getLocConfig().removeLoction(name);
-                    player.sendMessage(CWUtil.formatMsg("&6Location &8'&5" + name + "&8' &6has been removed!"));
+                    player.sendMessage(Util.formatMsg("&6Location &8'&5" + name + "&8' &6has been removed!"));
                     return true;
                 }
 
@@ -83,16 +83,16 @@ public class Commands {
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("tp")) {
                     if (args.length < 2) {
-                        player.sendMessage(CWUtil.formatMsg("&cInvalid usage. &7/loc tp {name}"));
+                        player.sendMessage(Util.formatMsg("&cInvalid usage. &7/loc tp {name}"));
                         return true;
                     }
                     String name = cwe.getLocConfig().getName(args[1]);
                     if (name == "") {
-                        player.sendMessage(CWUtil.formatMsg("&6Location &8'&5" + args[1] + "&8' &6doesn't exist!"));
+                        player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' &6doesn't exist!"));
                         return true;
                     }
                     player.teleport(cwe.getLocConfig().getLoc(name));
-                    player.sendMessage(CWUtil.formatMsg("&6Teleported to location &8'&5" + name + "&8'&6."));
+                    player.sendMessage(Util.formatMsg("&6Teleported to location &8'&5" + name + "&8'&6."));
                     return true;
                 }
 
@@ -127,7 +127,7 @@ public class Commands {
         //EVENT COMMAND
         if (label.equalsIgnoreCase("event")) {
             if (!(sender instanceof Player)) {
-                sender.sendMessage(CWUtil.formatMsg("&cThis is a player command only."));
+                sender.sendMessage(Util.formatMsg("&cThis is a player command only."));
                 return true;
             }
             Player player = (Player) sender;
@@ -169,7 +169,7 @@ public class Commands {
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("leave")) {
                     if (!cwe.getEM().leaveEvent(player, false)) {
-                        sender.sendMessage(CWUtil.formatMsg("&cYou are not playing a event."));
+                        sender.sendMessage(Util.formatMsg("&cYou are not playing a event."));
                     }
                     return true;
                 }
@@ -180,9 +180,9 @@ public class Commands {
                 if (args[0].equalsIgnoreCase("spawn")) {
                     if (cwe.getEM().getPlayers().contains(player.getName()) || player.isOp() || player.hasPermission("cwevents.cmd.admin")) {
                         player.teleport(cwe.getEM().getSpawn());
-                        sender.sendMessage(CWUtil.formatMsg("&6Teleported to &5" + cwe.getEM().getEvent().getName() + " &6arena &5" + cwe.getEM().getArena() + "&6."));
+                        sender.sendMessage(Util.formatMsg("&6Teleported to &5" + cwe.getEM().getEvent().getName() + " &6arena &5" + cwe.getEM().getArena() + "&6."));
                     } else {
-                        sender.sendMessage(CWUtil.formatMsg("&cYou're not playing an event."));
+                        sender.sendMessage(Util.formatMsg("&cYou're not playing an event."));
                     }
                     return true;
                 }
@@ -190,7 +190,7 @@ public class Commands {
 
                 //Admin commands...
                 if (!sender.hasPermission("cwevents.cmd.admin") && sender.isOp()) {
-                    sender.sendMessage(CWUtil.formatMsg("&cInsufficient permissions."));
+                    sender.sendMessage(Util.formatMsg("&cInsufficient permissions."));
                     return true;
                 }
 
@@ -199,8 +199,8 @@ public class Commands {
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("set")) {
                     if (cwe.getEM().getStatus() == EventStatus.OPEN || cwe.getEM().getStatus() == EventStatus.STARTED || cwe.getEM().getStatus() == EventStatus.STARTING) {
-                        sender.sendMessage(CWUtil.formatMsg("&cthe game is running or opened already!"));
-                        sender.sendMessage(CWUtil.formatMsg("&cUse &4/arena stop &cor &4/arena close &cbefore setting it again."));
+                        sender.sendMessage(Util.formatMsg("&cthe game is running or opened already!"));
+                        sender.sendMessage(Util.formatMsg("&cUse &4/arena stop &cor &4/arena close &cbefore setting it again."));
                         return true;
                     }
                     if (args.length > 1 && args[1].equalsIgnoreCase("none")) {
@@ -210,17 +210,17 @@ public class Commands {
                         cwe.getEM().setSlots(-1);
                         cwe.getEM().setSpawn(null);
                         cwe.getEM().updateEventItem();
-                        sender.sendMessage(CWUtil.formatMsg("&6Cached arena data has been cleared."));
+                        sender.sendMessage(Util.formatMsg("&6Cached arena data has been cleared."));
                         return true;
                     }
                     if (args.length < 3) {
-                        sender.sendMessage(CWUtil.formatMsg("&cInvalid usage. &7/event set {event|'none'} {arena} [slots]"));
+                        sender.sendMessage(Util.formatMsg("&cInvalid usage. &7/event set {event|'none'} {arena} [slots]"));
                         return true;
                     }
 
                     EventType event = EventType.fromString(args[1]);
                     if (event == null) {
-                        sender.sendMessage(CWUtil.formatMsg("&cInvalid event name."));
+                        sender.sendMessage(Util.formatMsg("&cInvalid event name."));
                         return true;
                     }
 
@@ -233,7 +233,7 @@ public class Commands {
                     if (args.length >= 4) {
                         slots = CWUtil.getInt(args[3]);
                         if (slots <= 1) {
-                            sender.sendMessage(CWUtil.formatMsg("&cInvalid slot amount. Must be number and at least 2."));
+                            sender.sendMessage(Util.formatMsg("&cInvalid slot amount. Must be number and at least 2."));
                             return true;
                         }
                     } else {
@@ -248,14 +248,14 @@ public class Commands {
 
                     cwe.getEM().updateEventItem();
 
-                    sender.sendMessage(CWUtil.formatMsg("&6Event set to&8: &5" + event.getName()));
-                    sender.sendMessage(CWUtil.formatMsg("&6Arena set to&8: &5" + arena));
+                    sender.sendMessage(Util.formatMsg("&6Event set to&8: &5" + event.getName()));
+                    sender.sendMessage(Util.formatMsg("&6Arena set to&8: &5" + arena));
                     if (slots > 0) {
-                        sender.sendMessage(CWUtil.formatMsg("&6Slots set to&8: &5" + event.getName()));
+                        sender.sendMessage(Util.formatMsg("&6Slots set to&8: &5" + event.getName()));
                     } else {
-                        sender.sendMessage(CWUtil.formatMsg("&7No slots are set. Infinite players can join."));
+                        sender.sendMessage(Util.formatMsg("&7No slots are set. Infinite players can join."));
                     }
-                    sender.sendMessage(CWUtil.formatMsg("&6Spawn set to&8: &aX&8:&7" + player.getLocation().getBlockX() + " &9Y&8:&7" + player.getLocation().getBlockY() + " &cZ&8:&7" + player.getLocation().getBlockZ()));
+                    sender.sendMessage(Util.formatMsg("&6Spawn set to&8: &aX&8:&7" + player.getLocation().getBlockX() + " &9Y&8:&7" + player.getLocation().getBlockY() + " &cZ&8:&7" + player.getLocation().getBlockZ()));
                     return true;
                 }
 
@@ -263,7 +263,7 @@ public class Commands {
                 EventType activeEvent = cwe.getEM().getEvent();
                 String activeArena = cwe.getEM().getArena();
                 if (activeEvent == null || activeArena == null) {
-                    sender.sendMessage(CWUtil.formatMsg("&cNo cached event/arena data found. &7Set it with &8/event set"));
+                    sender.sendMessage(Util.formatMsg("&cNo cached event/arena data found. &7Set it with &8/event set"));
                     return true;
                 }
 
@@ -272,7 +272,7 @@ public class Commands {
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("setspawn")) {
                     cwe.getEM().setSpawn(player.getLocation());
-                    sender.sendMessage(CWUtil.formatMsg("&6Spawn set to&8: &aX&8:&7" + player.getLocation().getBlockX() + " &9Y&8:&7" + player.getLocation().getBlockY() + " &cZ&8:&7" + player.getLocation().getBlockZ()));
+                    sender.sendMessage(Util.formatMsg("&6Spawn set to&8: &aX&8:&7" + player.getLocation().getBlockX() + " &9Y&8:&7" + player.getLocation().getBlockY() + " &cZ&8:&7" + player.getLocation().getBlockZ()));
                     return true;
                 }
 
@@ -281,14 +281,14 @@ public class Commands {
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("reset")) {
                     if (cwe.getEM().getStatus() == EventStatus.OPEN || cwe.getEM().getStatus() == EventStatus.STARTED || cwe.getEM().getStatus() == EventStatus.STARTING) {
-                        sender.sendMessage(CWUtil.formatMsg("&cthe game is running or opened!"));
-                        sender.sendMessage(CWUtil.formatMsg("&cUse &4/arena stop &cor &4/arena close &cbefore resetting."));
+                        sender.sendMessage(Util.formatMsg("&cthe game is running or opened!"));
+                        sender.sendMessage(Util.formatMsg("&cUse &4/arena stop &cor &4/arena close &cbefore resetting."));
                         return true;
                     }
                     cwe.getEM().setStatus(EventStatus.RESETTING);
                     cwe.getEM().updateEventItem();
                     activeEvent.getEventClass().Reset();
-                    sender.sendMessage(CWUtil.formatMsg("&6Reset &5" + activeEvent.getName() + " &6arena &5" + activeArena + "&6."));
+                    sender.sendMessage(Util.formatMsg("&6Reset &5" + activeEvent.getName() + " &6arena &5" + activeArena + "&6."));
                     return true;
                 }
 
@@ -297,13 +297,13 @@ public class Commands {
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("open")) {
                     if (cwe.getEM().getStatus() == EventStatus.OPEN || cwe.getEM().getStatus() == EventStatus.STARTED || cwe.getEM().getStatus() == EventStatus.STARTING) {
-                        sender.sendMessage(CWUtil.formatMsg("&cThe game is already running or opened."));
+                        sender.sendMessage(Util.formatMsg("&cThe game is already running or opened."));
                         return true;
                     }
                     activeEvent.getEventClass().Open();
                     cwe.getEM().setStatus(EventStatus.OPEN);
                     cwe.getEM().updateEventItem();
-                    sender.sendMessage(CWUtil.formatMsg("&6Opened &5" + activeEvent.getName() + " &6arena &5" + activeArena + "&6 for joining."));
+                    sender.sendMessage(Util.formatMsg("&6Opened &5" + activeEvent.getName() + " &6arena &5" + activeArena + "&6 for joining."));
                     return true;
                 }
 
@@ -312,18 +312,18 @@ public class Commands {
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("start")) {
                     if (cwe.getEM().getStatus() != EventStatus.OPEN) {
-                        sender.sendMessage(CWUtil.formatMsg("&cthe game hasn't been opened yet."));
+                        sender.sendMessage(Util.formatMsg("&cthe game hasn't been opened yet."));
                         return true;
                     }
                     if (cwe.getEM().getPlayers().size() < 2) {
-                        sender.sendMessage(CWUtil.formatMsg("&cThere need to be at least 2 players to start the game!"));
+                        sender.sendMessage(Util.formatMsg("&cThere need to be at least 2 players to start the game!"));
                         //TODO: Uncomment this for public version.
                         //return true;
                     }
                     activeEvent.getEventClass().Start();
                     cwe.getEM().setStatus(EventStatus.STARTING);
                     cwe.getEM().updateEventItem();
-                    sender.sendMessage(CWUtil.formatMsg("&6Started &5" + activeEvent.getName() + " &6arena &5" + activeArena + "&6."));
+                    sender.sendMessage(Util.formatMsg("&6Started &5" + activeEvent.getName() + " &6arena &5" + activeArena + "&6."));
                     return true;
                 }
 
@@ -332,13 +332,13 @@ public class Commands {
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("close")) {
                     if (cwe.getEM().getStatus() != EventStatus.OPEN) {
-                        sender.sendMessage(CWUtil.formatMsg("&cthe game hasn't been opened yet."));
+                        sender.sendMessage(Util.formatMsg("&cthe game hasn't been opened yet."));
                         return true;
                     }
                     activeEvent.getEventClass().Close();
                     cwe.getEM().setStatus(EventStatus.CLOSED);
                     cwe.getEM().updateEventItem();
-                    sender.sendMessage(CWUtil.formatMsg("&6Closed &5" + activeEvent.getName() + " &6arena &5" + activeArena + "&6."));
+                    sender.sendMessage(Util.formatMsg("&6Closed &5" + activeEvent.getName() + " &6arena &5" + activeArena + "&6."));
                     return true;
                 }
 
@@ -347,7 +347,7 @@ public class Commands {
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("stop")) {
                     if (cwe.getEM().getStatus() != EventStatus.STARTED) {
-                        sender.sendMessage(CWUtil.formatMsg("&cthe game hasn't been started yet."));
+                        sender.sendMessage(Util.formatMsg("&cthe game hasn't been started yet."));
                         return true;
                     }
                     UUID winner = null;
@@ -355,15 +355,15 @@ public class Commands {
                     if (args.length > 1) {
                         w = cwe.getServer().getOfflinePlayer(args[1]);
                         if (w == null) {
-                            sender.sendMessage(CWUtil.formatMsg("&cInvalid player specified."));
+                            sender.sendMessage(Util.formatMsg("&cInvalid player specified."));
                             return true;
                         }
                         winner = w.getUniqueId();
                     }
 
-                    sender.sendMessage(CWUtil.formatMsg("&6Stopped &5" + activeEvent.getName() + " &6arena &5" + activeArena + "&6."));
+                    sender.sendMessage(Util.formatMsg("&6Stopped &5" + activeEvent.getName() + " &6arena &5" + activeArena + "&6."));
                     if (winner != null) {
-                        sender.sendMessage(CWUtil.formatMsg("&6Winner set to &a&l" + w.getName() + " &7(&8" + winner.toString() + "&7)"));
+                        sender.sendMessage(Util.formatMsg("&6Winner set to &a&l" + w.getName() + " &7(&8" + winner.toString() + "&7)"));
                     }
 
                     cwe.getEM().setStatus(EventStatus.STOPPED);
