@@ -11,3 +11,7 @@ commands:
   loc:
     description: Location management
     usage: /<command>
+  leave:
+    description: Leave the events server.
+    usage: /<command>
+    aliases: [quit, pvp]

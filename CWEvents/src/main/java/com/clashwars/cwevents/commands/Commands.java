@@ -124,6 +124,17 @@ public class Commands {
         }
 
 
+        //LEAVE COMMAND
+        if (label.equalsIgnoreCase("pvp") || label.equalsIgnoreCase("leave") || label.equalsIgnoreCase("quit")) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(Util.formatMsg("&cThis is a player command only."));
+                return true;
+            }
+            cwe.joinPvP((Player)sender);
+            return true;
+        }
+
+
         //EVENT COMMAND
         if (label.equalsIgnoreCase("event") || label.equalsIgnoreCase("e") || label.equalsIgnoreCase("events")) {
             if (!(sender instanceof Player)) {
@@ -169,7 +180,8 @@ public class Commands {
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("leave")) {
                     if (!cwe.getEM().leaveEvent(player, false)) {
-                        sender.sendMessage(Util.formatMsg("&cYou are not playing a event."));
+                        //Not in a event so teleport player to pvp server.
+                        cwe.joinPvP((Player)sender);
                     }
                     return true;
                 }

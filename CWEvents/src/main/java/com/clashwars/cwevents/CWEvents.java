@@ -9,6 +9,7 @@ import com.clashwars.cwevents.event.PluginMessageEvents;
 import com.clashwars.cwevents.events.internal.EventManager;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -19,6 +20,8 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.Messenger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.util.logging.Logger;
 
 public class CWEvents extends JavaPlugin {
@@ -100,6 +103,24 @@ public class CWEvents extends JavaPlugin {
 
     public void log(Object msg) {
         log.info("[CWEvents " + getDescription().getVersion() + "]: " + msg.toString());
+    }
+
+    public void joinPvP(Player player) {
+        player.sendMessage(Util.formatMsg("&aTeleporting to the PvP server..."));
+        try {
+            ByteArrayOutputStream b = new ByteArrayOutputStream();
+            DataOutputStream out = new DataOutputStream(b);
+
+            out.writeUTF("tpserver");
+            out.writeUTF(player.getName());
+            out.writeUTF("pvp");
+
+            Bukkit.getOnlinePlayers()[0].sendPluginMessage(this, "CWBungee", b.toByteArray());
+            //TODO: Wait a little and if player is still on server give error msg.
+        } catch (Throwable e) {
+            player.sendMessage(Util.formatMsg("&cError connecting to pvp server."));
+            e.printStackTrace();
+        }
     }
 
 
