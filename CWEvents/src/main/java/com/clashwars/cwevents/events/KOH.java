@@ -17,6 +17,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -28,18 +29,11 @@ public class KOH extends BaseEvent {
     private List<String> capturingPlayers = new ArrayList<String>();
     private KohRunnable kohRunnable;
 
+    private List<String> allSpawns = new ArrayList<String>();
+    private List<String> spawns = new ArrayList<String>();
+
     public boolean checkSetup(EventType event, String arena, CommandSender sender) {
-        String name = em.getRegionName(event, arena, "lobby");
-        if (CWWorldGuard.getRegion(world, name) == null) {
-            sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
-            return false;
-        }
-        name = em.getRegionName(event, arena, "arena");
-        if (CWWorldGuard.getRegion(world, name) == null) {
-            sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
-            return false;
-        }
-        name = em.getRegionName(event, arena, "hill");
+        String name = em.getRegionName(event, arena, "hill");
         if (CWWorldGuard.getRegion(world, name) == null) {
             sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
             return false;
@@ -51,13 +45,19 @@ public class KOH extends BaseEvent {
     public void Reset() {
         super.Reset();
         kohRunnable = null;
-        CWWorldGuard.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
-        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
-        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.POTION_SPLASH, "deny");
+        CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.PVP, "deny");
+        CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.POTION_SPLASH, "deny");
     }
 
     public void Open() {
         super.Open();
+        allSpawns.clear();
+        for (String locName : cwe.getLocConfig().getLocations().keySet()) {
+            if (locName.toLowerCase().startsWith((em.getEvent().getPreifx() + "_" + em.getArena() + "_s").toLowerCase())) {
+                allSpawns.add(locName);
+            }
+        }
+        spawns = allSpawns;
     }
 
     public void Start() {
@@ -65,20 +65,25 @@ public class KOH extends BaseEvent {
     }
 
     public void Begin() {
-        CWWorldGuard.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "allow");
-        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "allow");
-        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.POTION_SPLASH, "allow");
+
 
         kohRunnable = new KohRunnable(this);
         kohRunnable.runTaskTimer(cwe, 20, 20);
+
+        Bukkit.getScheduler().scheduleSyncDelayedTask(cwe, new Runnable() {
+            public void run() {
+                em.broadcast(Util.formatMsg("&6You can now &4&lPvP&6!"));
+                CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.PVP, "allow");
+                CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.POTION_SPLASH, "allow");
+            }
+        }, 100L);
     }
 
     public void Stop() {
         super.Stop();
         kohRunnable.cancel();
-        CWWorldGuard.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
-        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
-        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.POTION_SPLASH, "deny");
+        CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.PVP, "deny");
+        CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.POTION_SPLASH, "deny");
     }
 
     public void onPlayerLeft(Player player) {
@@ -123,10 +128,33 @@ public class KOH extends BaseEvent {
         player.getInventory().addItem(new ItemStack(Material.POTION, 3, (short) 16396)); /* harming */
         player.getInventory().addItem(new ItemStack(Material.ARROW, 1));
         player.updateInventory();
+
+        if (allSpawns != null && !allSpawns.isEmpty() && spawns != null) {
+            if (spawns.size() <= 0) {
+                spawns = allSpawns;
+            }
+
+            player.teleport(cwe.getLoc(spawns.get(0)));
+            CWUtil.trimFirst(spawns);
+        }
     }
 
     public void capture(Player capturer) {
         em.broadcast(Util.formatMsg("&a&l" + capturer.getName() + " &6&lis the king of the hill!"));
+    }
+
+    @EventHandler
+    public void move(PlayerMoveEvent event) {
+        if (em.getEvent() != EventType.KOH) {
+            return;
+        }
+        if (em.getPlayers() == null || !em.getPlayers().contains(event.getPlayer().getName())) {
+            return;
+        }
+        if (em.getStatus() == EventStatus.STARTING || em.getStatus() == EventStatus.OPEN) {
+            event.setCancelled(true);
+            event.getPlayer().teleport(event.getFrom());
+        }
     }
 
     @EventHandler

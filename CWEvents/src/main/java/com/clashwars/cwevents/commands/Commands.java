@@ -125,7 +125,7 @@ public class Commands {
 
 
         //EVENT COMMAND
-        if (label.equalsIgnoreCase("event")) {
+        if (label.equalsIgnoreCase("event") || label.equalsIgnoreCase("e") || label.equalsIgnoreCase("events")) {
             if (!(sender instanceof Player)) {
                 sender.sendMessage(Util.formatMsg("&cThis is a player command only."));
                 return true;
@@ -178,9 +178,13 @@ public class Commands {
                 //##################################################### /event spawn #######################################################
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("spawn")) {
-                    if (cwe.getEM().getPlayers().contains(player.getName()) || player.isOp() || player.hasPermission("cwevents.cmd.admin")) {
-                        player.teleport(cwe.getEM().getSpawn());
-                        sender.sendMessage(Util.formatMsg("&6Teleported to &5" + cwe.getEM().getEvent().getName() + " &6arena &5" + cwe.getEM().getArena() + "&6."));
+                    if ((cwe.getEM().getPlayers() != null && cwe.getEM().getPlayers().contains(player.getName())) || player.isOp() || player.hasPermission("cwevents.cmd.admin")) {
+                        if (cwe.getEM().getSpawn() != null) {
+                            player.teleport(cwe.getEM().getSpawn());
+                            sender.sendMessage(Util.formatMsg("&6Teleported to &5" + cwe.getEM().getEvent().getName() + " &6arena &5" + cwe.getEM().getArena() + "&6."));
+                        } else {
+                            sender.sendMessage(Util.formatMsg("&cNo cached event/arena data found. &7Set it with &8/event set"));
+                        }
                     } else {
                         sender.sendMessage(Util.formatMsg("&cYou're not playing an event."));
                     }
@@ -189,7 +193,7 @@ public class Commands {
 
 
                 //Admin commands...
-                if (!sender.hasPermission("cwevents.cmd.admin") && sender.isOp()) {
+                if (!player.isOp() && !player.hasPermission("cwevents.cmd.admin")) {
                     sender.sendMessage(Util.formatMsg("&cInsufficient permissions."));
                     return true;
                 }
@@ -370,19 +374,21 @@ public class Commands {
                     activeEvent.getEventClass().Stop();
 
                     //Send winner data to pvp server.
-                    try {
-                        ByteArrayOutputStream b = new ByteArrayOutputStream();
-                        DataOutputStream out = new DataOutputStream(b);
+                    if (winner != null) {
+                        try {
+                            ByteArrayOutputStream b = new ByteArrayOutputStream();
+                            DataOutputStream out = new DataOutputStream(b);
 
-                        out.writeUTF("queue");
-                        out.writeUTF("pvp");
-                        out.writeUTF(winner.toString());
-                        out.writeUTF("cmd");
-                        out.writeUTF("eventreward {PLAYER}");
+                            out.writeUTF("queue");
+                            out.writeUTF("pvp");
+                            out.writeUTF(winner.toString());
+                            out.writeUTF("cmd");
+                            out.writeUTF("eventreward {PLAYER}");
 
-                        Bukkit.getOnlinePlayers()[0].sendPluginMessage(cwe, "CWBungee", b.toByteArray());
-                    } catch (Throwable e) {
-                        e.printStackTrace();
+                            Bukkit.getOnlinePlayers()[0].sendPluginMessage(cwe, "CWBungee", b.toByteArray());
+                        } catch (Throwable e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     cwe.getEM().updateEventItem();

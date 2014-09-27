@@ -60,7 +60,7 @@ public class Bomberman extends BaseEvent {
         powerups.put("bombUp", new CWItem(Material.TNT, 1, (short) 0, "&a&l+1 Bomb", new String[]{"&7You get one extra bomb!"}));
         powerups.put("bombDown", new CWItem(Material.SULPHUR, 1, (short) 0, "&c&l-1 Bomb", new String[]{"&7You lose one bomb!"}));
         powerups.put("fuseTimeDown", new CWItem(Material.REDSTONE_TORCH_ON, 1, (short) 0, "&a&l-1s FuseTime", new String[]{"&7Bombs will take 1 less second to explode."}));
-        powerups.put("fuseTimeUp", new CWItem(Material.REDSTONE_TORCH_OFF, 1, (short) 0, "&c&l+1s FuseTime", new String[]{"&7Bombs will take 1 more second to explode."}));
+        powerups.put("fuseTimeUp", new CWItem(Material.STRING, 1, (short) 0, "&c&l+1s FuseTime", new String[]{"&7Bombs will take 1 more second to explode."}));
         powerups.put("speed", new CWItem(Material.GOLD_BOOTS, 1, (short) 0, "&b&lSpeed", new String[]{"&7You get 1 extra speed."}));
         powerups.put("slow", new CWItem(Material.LEATHER_BOOTS, 1, (short) 0, "&c&lSlow", new String[]{"&7You lose 1 extra speed."}));
         powerups.put("powerUp", new CWItem(Material.BLAZE_POWDER, 1, (short) 0, "&4&l+1 Power", new String[]{"&7Bombs will explode 1 block further."}));
@@ -108,7 +108,16 @@ public class Bomberman extends BaseEvent {
         super.Reset();
         CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
         try {
-            CWWorldGuard.pasteSchematic(world, new File(cwe.getEM().getRegionName("arena") + ".schematic"), cwe.getLoc(cwe.getEM().getRegionName("schem_arena")), false, 0);
+            try {
+                File schemFile = CWWorldGuard.getSchematicFile(cwe.getEM().getRegionName("arena"));
+                if (schemFile != null) {
+                    CWWorldGuard.pasteSchematic(world, CWWorldGuard.getSchematicFile(cwe.getEM().getRegionName("arena")), cwe.getLoc(cwe.getEM().getRegionName("schem_arena")), false, 0);
+                }
+            } catch (FilenameException e) {
+                e.printStackTrace();
+            } catch (CommandException e) {
+                e.printStackTrace();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (com.sk89q.worldedit.data.DataException e) {

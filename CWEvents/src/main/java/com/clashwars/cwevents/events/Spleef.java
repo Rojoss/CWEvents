@@ -42,8 +42,8 @@ public class Spleef extends BaseEvent {
     }
 
     public void Reset() {
-        CWWorldGuard.regionFill(world, CWWorldGuard.getRegion(world, em.getRegionName("floor")), BlockID.SNOW_BLOCK);
-        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "deny");
+        CWWorldGuard.regionReplace(world, CWWorldGuard.getRegion(world, em.getRegionName("floor")), BlockID.AIR, BlockID.SNOW_BLOCK);
+        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BLOCK_BREAK, "deny");
     }
 
     public void Open() {
@@ -65,12 +65,12 @@ public class Spleef extends BaseEvent {
             cwe.getServer().getPlayer(p).getInventory().addItem(new ItemStack(Material.DIAMOND_SPADE, 1));
             cwe.getServer().getPlayer(p).updateInventory();
         }
-        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "allow");
+        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BLOCK_BREAK, "allow");
     }
 
     public void Stop() {
         super.Stop();
-        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BLOCK_BREAK, "deny");
     }
 
     public void onPlayerLeft(Player player) {
