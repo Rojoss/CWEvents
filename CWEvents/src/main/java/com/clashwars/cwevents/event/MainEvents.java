@@ -1,6 +1,8 @@
 package com.clashwars.cwevents.event;
 
 import com.clashwars.cwevents.CWEvents;
+import com.clashwars.cwevents.events.internal.EventStatus;
+import com.clashwars.cwevents.events.internal.EventType;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -60,6 +62,20 @@ public class MainEvents implements Listener {
         if (event.getItemDrop().getItemStack().getType() == Material.INK_SACK) {
             event.getItemDrop().remove();
             event.getPlayer().getInventory().setItem(8, cwe.GetEventItem());
+        }
+    }
+
+    @EventHandler
+    public void move(PlayerMoveEvent event) {
+        if (cwe.getEM().getEvent() != EventType.KOH && cwe.getEM().getEvent() != EventType.RACE) {
+            return;
+        }
+        if (cwe.getEM().getPlayers() == null || !cwe.getEM().getPlayers().contains(event.getPlayer().getName())) {
+            return;
+        }
+        if (cwe.getEM().getStatus() == EventStatus.STARTING || cwe.getEM().getStatus() == EventStatus.OPEN) {
+            event.setCancelled(true);
+            event.getPlayer().teleport(event.getFrom());
         }
     }
 }

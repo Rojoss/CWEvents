@@ -24,10 +24,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Race extends BaseEvent {
 
-    int playersFinished = 0;
-    CooldownManager cdm;
+    private List<String> finished = new ArrayList<String>();
+    private CooldownManager cdm;
 
     public Race() {
         cdm = CWCore.inst().getCDM();
@@ -39,17 +42,11 @@ public class Race extends BaseEvent {
             sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
             return false;
         }
-        name = em.getRegionName(event, arena, "lobby");
-        if (CWWorldGuard.getRegion(world, name) == null) {
-            sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
-            return false;
-        }
         return true;
     }
 
     public void Reset() {
         super.Reset();
-        CWWorldGuard.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
     }
 
     public void Open() {
@@ -61,13 +58,11 @@ public class Race extends BaseEvent {
     }
 
     public void Begin() {
-        CWWorldGuard.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "allow");
-        playersFinished = 0;
+        finished.clear();
     }
 
     public void Stop() {
         super.Stop();
-        CWWorldGuard.setFlag(world, em.getRegionName("lobby"), DefaultFlag.EXIT, "deny");
     }
 
     public void onPlayerLeft(Player player) {
@@ -145,18 +140,21 @@ public class Race extends BaseEvent {
         if (em.getStatus() != EventStatus.STARTED) {
             return;
         }
-        if (!em.getPlayers().contains(event.getPlayer().getName())) {
+        Player player = event.getPlayer();
+        if (!em.getPlayers().contains(player.getName())) {
             return;
         }
-        Player player = event.getPlayer();
+        if (finished.contains(player.getName())) {
+            return;
+        }
         for (ProtectedRegion region : event.getRegions()) {
             if (region.getId().equalsIgnoreCase(em.getRegionName("finish"))) {
-                playersFinished++;
-                if (playersFinished == 1) {
+                finished.add(player.getName());
+                if (finished.size() == 1) {
                     em.broadcast(Util.formatMsg("&a&l" + player.getName() + " &6wins the race!"));
                     em.playSound(Sound.ORB_PICKUP, 0.8f, 0f);
                 } else {
-                    em.broadcast(Util.formatMsg("&5" + player.getName() + " &6finished on place &5" + playersFinished + "&6."));
+                    em.broadcast(Util.formatMsg("&5" + player.getName() + " &6finished on place &5" + finished.size() + "&6."));
                     em.playSound(Sound.ORB_PICKUP, 0.4f, 2f);
                 }
                 return;

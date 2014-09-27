@@ -144,20 +144,6 @@ public class KOH extends BaseEvent {
     }
 
     @EventHandler
-    public void move(PlayerMoveEvent event) {
-        if (em.getEvent() != EventType.KOH) {
-            return;
-        }
-        if (em.getPlayers() == null || !em.getPlayers().contains(event.getPlayer().getName())) {
-            return;
-        }
-        if (em.getStatus() == EventStatus.STARTING || em.getStatus() == EventStatus.OPEN) {
-            event.setCancelled(true);
-            event.getPlayer().teleport(event.getFrom());
-        }
-    }
-
-    @EventHandler
     public void respawn(PlayerRespawnEvent event) {
         if (em.getEvent() != EventType.KOH) {
             return;
