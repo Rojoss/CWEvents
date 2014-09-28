@@ -8,6 +8,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class BaseEvent implements Listener {
 
     public CWEvents cwe;
@@ -30,13 +33,15 @@ public class BaseEvent implements Listener {
 
     public void Open() {
         cwe.getServer().broadcastMessage(Util.formatMsg("&a&l" + em.getEvent().getName() + " &2&lhas opened! &6Arena&8: &5" + em.getArena()));
+        //TODO: Broadcast to pvp server.
         cwe.getServer().broadcastMessage(Util.formatMsg("&4The game will start soon so join quickly!"));
     }
 
     @SuppressWarnings("deprecation")
     public void Close() {
         em.broadcast(Util.formatMsg("&cThe game has been closed before it was started!"));
-        for (String p : em.getPlayers()) {
+        Set<String> playerClone = new HashSet<String>(em.getPlayers());
+        for (String p : playerClone) {
             em.leaveEvent(cwe.getServer().getPlayer(p), true);
         }
     }
@@ -52,7 +57,8 @@ public class BaseEvent implements Listener {
     @SuppressWarnings("deprecation")
     public void Stop() {
         em.broadcast(Util.formatMsg("&cThe game has been stopped/ended!"));
-        for (String p : em.getPlayers()) {
+        Set<String> playerClone = new HashSet<String>(em.getPlayers());
+        for (String p : playerClone) {
             em.leaveEvent(cwe.getServer().getPlayer(p), true);
         }
     }

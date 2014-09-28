@@ -22,6 +22,8 @@ import org.bukkit.plugin.messaging.Messenger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class CWEvents extends JavaPlugin {
@@ -34,7 +36,8 @@ public class CWEvents extends JavaPlugin {
     private final Logger log = Logger.getLogger("Minecraft");
 
     public void onDisable() {
-        for (String p : em.getPlayers()) {
+        Set<String> playerClone = new HashSet<String>(em.getPlayers());
+        for (String p : playerClone) {
             if (getServer().getPlayer(p) != null) {
                 em.leaveEvent(getServer().getPlayer(p), true);
             }
@@ -73,6 +76,7 @@ public class CWEvents extends JavaPlugin {
 
         for (Player p : getServer().getOnlinePlayers()) {
             em.resetPlayer(p);
+            p.teleport(p.getWorld().getSpawnLocation());
         }
         em.updateEventItem();
 

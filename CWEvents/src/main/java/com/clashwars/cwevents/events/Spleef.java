@@ -43,10 +43,11 @@ public class Spleef extends BaseEvent {
 
     public void Reset() {
         CWWorldGuard.regionReplace(world, CWWorldGuard.getRegion(world, em.getRegionName("floor")), BlockID.AIR, BlockID.SNOW_BLOCK);
-        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BLOCK_BREAK, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "deny");
     }
 
     public void Open() {
+        Reset();
         super.Open();
     }
 
@@ -65,12 +66,12 @@ public class Spleef extends BaseEvent {
             cwe.getServer().getPlayer(p).getInventory().addItem(new ItemStack(Material.DIAMOND_SPADE, 1));
             cwe.getServer().getPlayer(p).updateInventory();
         }
-        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BLOCK_BREAK, "allow");
+        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "allow");
     }
 
     public void Stop() {
         super.Stop();
-        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BLOCK_BREAK, "deny");
+        CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "deny");
     }
 
     public void onPlayerLeft(Player player) {
@@ -85,18 +86,28 @@ public class Spleef extends BaseEvent {
         if (em.getEvent() != EventType.SPLEEF) {
             return;
         }
+        Player player = (Player) event.getPlayer();
+        if (!(em.getPlayers().contains(player.getName()))) {
+            return;
+        }
         Block block = event.getBlock();
-        Player player = event.getPlayer();
-        if (block.getType() == Material.SNOW_BLOCK) {
-            //Make block falling.
+        if (block.getType() != Material.SNOW_BLOCK) {
             event.setCancelled(true);
-            player.getWorld().spawnFallingBlock(block.getLocation().add(0, -0.2, 0), Material.SNOW_BLOCK, (byte) 0).setDropItem(false);
-            block.setType(Material.AIR);
-            //Give snowball
-            float randomFloat = random.nextFloat();
-            if (randomFloat <= 0.05f) {
-                player.getInventory().addItem(new ItemStack(Material.SNOW_BALL, 1));
-            }
+            return;
+        }
+        if (em.getStatus() != EventStatus.STARTED) {
+            player.sendMessage(Util.formatMsg("&cThe game hasn't started yet!"));
+            event.setCancelled(true);
+            return;
+        }
+        //Make block falling.
+        event.setCancelled(true);
+        player.getWorld().spawnFallingBlock(block.getLocation().add(0, -0.2, 0), Material.SNOW_BLOCK, (byte) 0).setDropItem(false);
+        block.setType(Material.AIR);
+        //Give snowball
+        float randomFloat = random.nextFloat();
+        if (randomFloat <= 0.05f) {
+            player.getInventory().addItem(new ItemStack(Material.SNOW_BALL, 1));
         }
     }
 
@@ -132,13 +143,12 @@ public class Spleef extends BaseEvent {
             return;
         }
         Player player = (Player) event.getEntity();
-        if (!(em.getPlayers().contains(player))) {
+        if (!(em.getPlayers().contains(player.getName()))) {
             return;
         }
         if (em.getStatus() == EventStatus.STARTED) {
-            if (event.getCause() == DamageCause.LAVA || (event.getCause() == DamageCause.FALL && event.getDamage() >= 4)) {
+            if (event.getCause() == DamageCause.LAVA || (event.getCause() == DamageCause.FALL && event.getDamage() >= 2)) {
                 em.broadcast(Util.formatMsg("&b&l" + player.getName() + " &3fell and is out!"));
-                ;
                 em.leaveEvent(player, true);
             }
         } else {

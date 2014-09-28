@@ -128,6 +128,7 @@ public class Bomberman extends BaseEvent {
     }
 
     public void Open() {
+        Reset();
         super.Open();
         //Limit slots to 12 because no more locations.
         if (em.getSlots() > 12 || em.getSlots() < 1) {
@@ -170,6 +171,7 @@ public class Bomberman extends BaseEvent {
 
     public void onPlayerJoin(Player player) {
         bombData.put(player.getName(), new BombermanData(player.getName()));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 99999999, -255));
     }
 
     public void bombExplode(Player player, Location loc) {
@@ -287,11 +289,11 @@ public class Bomberman extends BaseEvent {
 
     private void explodeParticle(Location loc, BlockFace dir) {
         if (dir == BlockFace.NORTH || dir == BlockFace.SOUTH) {
-            ParticleEffect.FLAME.display(loc, 0.25f, 0.2f, 0.35f, 0.005f, 15);
-            ParticleEffect.SMOKE.display(loc, 0.25f, 0.5f, 0.35f, 0.001f, 5);
+            ParticleEffect.FLAME.display(loc, 0.25f, 0.2f, 0.35f, 0.005f, 25);
+            ParticleEffect.SMOKE.display(loc, 0.25f, 0.5f, 0.35f, 0.001f, 8);
         } else {
-            ParticleEffect.FLAME.display(loc, 0.35f, 0.2f, 0.25f, 0.005f, 15);
-            ParticleEffect.SMOKE.display(loc, 0.35f, 0.5f, 0.25f, 0.001f, 5);
+            ParticleEffect.FLAME.display(loc, 0.35f, 0.2f, 0.25f, 0.005f, 25);
+            ParticleEffect.SMOKE.display(loc, 0.35f, 0.5f, 0.25f, 0.001f, 8);
         }
     }
 

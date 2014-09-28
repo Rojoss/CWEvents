@@ -7,8 +7,8 @@ import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
 import com.clashwars.cwevents.runnables.KohRunnable;
-import com.sk89q.worldguard.bukkit.event.RegionEnterEvent;
-import com.sk89q.worldguard.bukkit.event.RegionLeaveEvent;
+import com.sk89q.worldguard.internal.event.RegionEnterEvent;
+import com.sk89q.worldguard.internal.event.RegionLeaveEvent;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Bukkit;
@@ -44,12 +44,16 @@ public class KOH extends BaseEvent {
 
     public void Reset() {
         super.Reset();
-        kohRunnable = null;
+        if (kohRunnable != null) {
+            kohRunnable.cancel();
+            kohRunnable = null;
+        }
         CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.PVP, "deny");
         CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.POTION_SPLASH, "deny");
     }
 
     public void Open() {
+        Reset();
         super.Open();
         allSpawns.clear();
         for (String locName : cwe.getLocConfig().getLocations().keySet()) {
@@ -57,7 +61,7 @@ public class KOH extends BaseEvent {
                 allSpawns.add(locName);
             }
         }
-        spawns = allSpawns;
+        spawns = new ArrayList<String>(allSpawns);
     }
 
     public void Start() {
@@ -65,8 +69,6 @@ public class KOH extends BaseEvent {
     }
 
     public void Begin() {
-
-
         kohRunnable = new KohRunnable(this);
         kohRunnable.runTaskTimer(cwe, 20, 20);
 
@@ -81,7 +83,10 @@ public class KOH extends BaseEvent {
 
     public void Stop() {
         super.Stop();
-        kohRunnable.cancel();
+        if (kohRunnable != null) {
+            kohRunnable.cancel();
+            kohRunnable = null;
+        }
         CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.PVP, "deny");
         CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.POTION_SPLASH, "deny");
     }
@@ -91,7 +96,6 @@ public class KOH extends BaseEvent {
     }
 
     public void onPlayerJoin(Player player) {
-        Bukkit.broadcastMessage("Player join");
         ItemStack item = new ItemStack(Material.DIAMOND_HELMET);
         item.addUnsafeEnchantment(Enchantment.DURABILITY, 5);
         item.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 2);
@@ -129,18 +133,19 @@ public class KOH extends BaseEvent {
         player.getInventory().addItem(new ItemStack(Material.ARROW, 1));
         player.updateInventory();
 
-        if (allSpawns != null && !allSpawns.isEmpty() && spawns != null) {
-            if (spawns.size() <= 0) {
-                spawns = allSpawns;
+        if (allSpawns != null && !allSpawns.isEmpty()) {
+            if (spawns == null || spawns.size() <= 0) {
+                spawns = new ArrayList<String>(allSpawns);
             }
 
             player.teleport(cwe.getLoc(spawns.get(0)));
-            CWUtil.trimFirst(spawns);
+            spawns.remove(0);
         }
     }
 
     public void capture(Player capturer) {
         em.broadcast(Util.formatMsg("&a&l" + capturer.getName() + " &6&lis the king of the hill!"));
+        em.setStatus(EventStatus.ENDED);
     }
 
     @EventHandler
@@ -148,12 +153,12 @@ public class KOH extends BaseEvent {
         if (em.getEvent() != EventType.KOH) {
             return;
         }
-        if (em.getStatus() != EventStatus.STARTED) {
+        if (em.getStatus() != EventStatus.STARTED && em.getStatus() != EventStatus.ENDED) {
             return;
         }
         if (em.getPlayers().contains(event.getPlayer().getName())) {
             em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and is out of the game!"));
-            em.resetPlayer(event.getPlayer());
+            em.leaveEvent(event.getPlayer(), true);
         }
     }
 
@@ -166,7 +171,6 @@ public class KOH extends BaseEvent {
             return;
         }
         if (em.getPlayers().contains(event.getPlayer().getName()) == false) {
-            Bukkit.broadcastMessage("return 3");
             return;
         }
         Player player = event.getPlayer();
@@ -176,9 +180,11 @@ public class KOH extends BaseEvent {
                     capturingPlayers.add(player.getName());
                     if (capturingPlayers.size() == 1) {
                         //One player on the hill.
+                        cwe.getServer().broadcastMessage("First player on the hill. " + player.getName());
                         kohRunnable.startCapture(player);
                     } else {
                         //Multiple people on the hill.
+                        cwe.getServer().broadcastMessage("Multiple people on the hill.");
                         kohRunnable.stopCapture();
                     }
                 }
@@ -205,9 +211,11 @@ public class KOH extends BaseEvent {
                     capturingPlayers.remove(player.getName());
                     if (capturingPlayers.size() == 1) {
                         //Only 1 player remaining on the hill.
+                        cwe.getServer().broadcastMessage("Only 1 player remaining on the hill. " + capturingPlayers.get(0));
                         kohRunnable.startCapture(cwe.getServer().getPlayer(capturingPlayers.get(0)));
                     } else if (capturingPlayers.size() == 0) {
                         //Nobody left on the hill.
+                        cwe.getServer().broadcastMessage("Nobody left on the hill.");
                         kohRunnable.stopCapture();
                     }
                 }

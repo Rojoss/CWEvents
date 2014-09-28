@@ -6,6 +6,7 @@ public enum EventStatus {
     STARTING("&2Starting"),
     STARTED("&2Started"),
     STOPPED("&4Stopped"),
+    ENDED("&4Ended"),
     RESETTING("&cResetting"),
     CLOSED("&cClosed");
 

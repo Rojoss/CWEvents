@@ -9,7 +9,7 @@ import com.clashwars.cwevents.Util;
 import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
-import com.sk89q.worldguard.bukkit.event.RegionEnterEvent;
+import com.sk89q.worldguard.internal.event.RegionEnterEvent;
 import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Material;
@@ -50,6 +50,7 @@ public class Race extends BaseEvent {
     }
 
     public void Open() {
+        Reset();
         super.Open();
     }
 

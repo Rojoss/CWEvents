@@ -158,7 +158,7 @@ public class Commands {
                     sender.sendMessage(CWUtil.integrateColor("&6/event set {event} {arena} [slots] &8- &5Set active event."));
                     sender.sendMessage(CWUtil.integrateColor("&6/event setspawn &8- &5Set arena spawn."));
                     sender.sendMessage(CWUtil.integrateColor("&6/event spawn &8- &5Teleport to the active event."));
-                    sender.sendMessage(CWUtil.integrateColor("&6/event reset &8- &5Reset active event."));
+                    sender.sendMessage(CWUtil.integrateColor("&6/event reset &8- &5Reset active event. &7(no need to use)"));
                     sender.sendMessage(CWUtil.integrateColor("&6/event open &8- &5Open active event."));
                     sender.sendMessage(CWUtil.integrateColor("&6/event close &8- &5Close opened event."));
                     sender.sendMessage(CWUtil.integrateColor("&6/event start &8- &5Start active event."));
@@ -214,7 +214,7 @@ public class Commands {
                 //########################################### /event set {event} {arena} [slots] ###########################################
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("set")) {
-                    if (cwe.getEM().getStatus() == EventStatus.OPEN || cwe.getEM().getStatus() == EventStatus.STARTED || cwe.getEM().getStatus() == EventStatus.STARTING) {
+                    if (cwe.getEM().getStatus() == EventStatus.OPEN || cwe.getEM().getStatus() == EventStatus.STARTED || cwe.getEM().getStatus() == EventStatus.STARTING || cwe.getEM().getStatus() == EventStatus.ENDED) {
                         sender.sendMessage(Util.formatMsg("&cthe game is running or opened already!"));
                         sender.sendMessage(Util.formatMsg("&cUse &4/arena stop &cor &4/arena close &cbefore setting it again."));
                         return true;
@@ -296,7 +296,7 @@ public class Commands {
                 //##################################################### /event reset #######################################################
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("reset")) {
-                    if (cwe.getEM().getStatus() == EventStatus.OPEN || cwe.getEM().getStatus() == EventStatus.STARTED || cwe.getEM().getStatus() == EventStatus.STARTING) {
+                    if (cwe.getEM().getStatus() == EventStatus.OPEN || cwe.getEM().getStatus() == EventStatus.STARTED || cwe.getEM().getStatus() == EventStatus.STARTING || cwe.getEM().getStatus() == EventStatus.ENDED) {
                         sender.sendMessage(Util.formatMsg("&cthe game is running or opened!"));
                         sender.sendMessage(Util.formatMsg("&cUse &4/arena stop &cor &4/arena close &cbefore resetting."));
                         return true;
@@ -312,7 +312,7 @@ public class Commands {
                 //##################################################### /event open ########################################################
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("open")) {
-                    if (cwe.getEM().getStatus() == EventStatus.OPEN || cwe.getEM().getStatus() == EventStatus.STARTED || cwe.getEM().getStatus() == EventStatus.STARTING) {
+                    if (cwe.getEM().getStatus() == EventStatus.OPEN || cwe.getEM().getStatus() == EventStatus.STARTED || cwe.getEM().getStatus() == EventStatus.STARTING || cwe.getEM().getStatus() == EventStatus.ENDED) {
                         sender.sendMessage(Util.formatMsg("&cThe game is already running or opened."));
                         return true;
                     }
@@ -362,7 +362,7 @@ public class Commands {
                 //################################################# /event stop [winner] ###################################################
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("stop")) {
-                    if (cwe.getEM().getStatus() != EventStatus.STARTED) {
+                    if (cwe.getEM().getStatus() != EventStatus.STARTED && cwe.getEM().getStatus() != EventStatus.ENDED) {
                         sender.sendMessage(Util.formatMsg("&cthe game hasn't been started yet."));
                         return true;
                     }
