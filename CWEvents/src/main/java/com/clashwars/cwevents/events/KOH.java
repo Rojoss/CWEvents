@@ -1,7 +1,6 @@
 package com.clashwars.cwevents.events;
 
 import com.clashwars.cwcore.dependencies.CWWorldGuard;
-import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.Util;
 import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
@@ -17,7 +16,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -180,11 +178,9 @@ public class KOH extends BaseEvent {
                     capturingPlayers.add(player.getName());
                     if (capturingPlayers.size() == 1) {
                         //One player on the hill.
-                        cwe.getServer().broadcastMessage("First player on the hill. " + player.getName());
                         kohRunnable.startCapture(player);
                     } else {
                         //Multiple people on the hill.
-                        cwe.getServer().broadcastMessage("Multiple people on the hill.");
                         kohRunnable.stopCapture();
                     }
                 }
@@ -211,11 +207,9 @@ public class KOH extends BaseEvent {
                     capturingPlayers.remove(player.getName());
                     if (capturingPlayers.size() == 1) {
                         //Only 1 player remaining on the hill.
-                        cwe.getServer().broadcastMessage("Only 1 player remaining on the hill. " + capturingPlayers.get(0));
                         kohRunnable.startCapture(cwe.getServer().getPlayer(capturingPlayers.get(0)));
                     } else if (capturingPlayers.size() == 0) {
                         //Nobody left on the hill.
-                        cwe.getServer().broadcastMessage("Nobody left on the hill.");
                         kohRunnable.stopCapture();
                     }
                 }

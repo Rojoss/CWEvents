@@ -174,7 +174,8 @@ public class EventManager {
     public void updateEventItem() {
         for (Player p : cwe.getServer().getOnlinePlayers()) {
             if (!players.contains(p.getName())) {
-                p.getInventory().setItem(8, cwe.GetEventItem());
+                p.getInventory().setItem(0, cwe.GetEventItem());
+                p.getInventory().setItem(8, cwe.getLeaveItem());
             }
         }
     }

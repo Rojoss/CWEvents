@@ -170,4 +170,7 @@ public class CWEvents extends JavaPlugin {
             }
         }
     }
+    public CWItem getLeaveItem() {
+        return new CWItem(Material.REDSTONE_BLOCK, 1, (short) 0, "&4&lLeave Events").addLore("&7Go back to the PvP server!!");
+    }
 }

@@ -4,14 +4,15 @@ import com.clashwars.cwcore.CWCore;
 import com.clashwars.cwcore.CooldownManager;
 import com.clashwars.cwcore.dependencies.CWWorldGuard;
 import com.clashwars.cwcore.helpers.CWItem;
+import com.clashwars.cwcore.packet.ParticleEffect;
 import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.Util;
 import com.clashwars.cwevents.events.internal.BaseEvent;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
 import com.sk89q.worldguard.internal.event.RegionEnterEvent;
-import com.sk89q.worldguard.protection.flags.DefaultFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
@@ -31,6 +32,9 @@ public class Race extends BaseEvent {
 
     private List<String> finished = new ArrayList<String>();
     private CooldownManager cdm;
+
+    private List<String> allSpawns = new ArrayList<String>();
+    private List<String> spawns = new ArrayList<String>();
 
     public Race() {
         cdm = CWCore.inst().getCDM();
@@ -52,6 +56,13 @@ public class Race extends BaseEvent {
     public void Open() {
         Reset();
         super.Open();
+        allSpawns.clear();
+        for (String locName : cwe.getLocConfig().getLocations().keySet()) {
+            if (locName.toLowerCase().startsWith((em.getEvent().getPreifx() + "_" + em.getArena() + "_s").toLowerCase())) {
+                allSpawns.add(locName);
+            }
+        }
+        spawns = new ArrayList<String>(allSpawns);
     }
 
     public void Start() {
@@ -82,6 +93,15 @@ public class Race extends BaseEvent {
         boots.setItemMeta(armorMeta);
         player.getInventory().setBoots(boots);
         player.updateInventory();
+
+        if (allSpawns != null && !allSpawns.isEmpty()) {
+            if (spawns == null || spawns.size() <= 0) {
+                spawns = new ArrayList<String>(allSpawns);
+            }
+
+            player.teleport(cwe.getLoc(spawns.get(0)));
+            spawns.remove(0);
+        }
     }
 
     @EventHandler
@@ -96,28 +116,30 @@ public class Race extends BaseEvent {
             return;
         }
         Player player = event.getPlayer();
-        if (player.getItemInHand().getType() != Material.LEASH || event.getRightClicked() == null || (event.getRightClicked() instanceof Player)) {
+        if (player.getItemInHand().getType() != Material.LEASH || event.getRightClicked() == null || !(event.getRightClicked() instanceof Player)) {
             return;
         }
-        if (cdm.getCooldown(player.getName() + "-lasso").onCooldown()) {
+        CooldownManager.Cooldown cd = cdm.getCooldown(player.getName() + "-lasso");
+        if (cd != null && cd.onCooldown()) {
             player.sendMessage(Util.formatMsg("&cLasso is on cooldown."));
             return;
         }
         cdm.createCooldown(player.getName() + "-lasso", 3000);
-        if (CWUtil.random(0, 4) != 1) {
+        if (CWUtil.randomFloat() < 0.5f) {
             player.sendMessage(Util.formatMsg("&cMiss!"));
             player.playSound(player.getLocation(), Sound.ITEM_BREAK, 1.0f, 2.0f);
             return;
         }
         Player target = (Player) event.getRightClicked();
         Vector dir = player.getLocation().getDirection();
-        target.setVelocity(new Vector(dir.getX(), 0.3f, dir.getZ()));
-        world.playSound(target.getLocation(), Sound.BAT_TAKEOFF, 1.0f, 1.8f);
-
+        dir.multiply(-1);
+        target.setVelocity(new Vector(dir.getX() * 1.4, 0.35f, dir.getZ() * 1.4));
+        world.playSound(target.getLocation(), Sound.BAT_TAKEOFF, 1.0f, 1.5f);
+        ParticleEffect.CRIT.display(target.getLocation(), 0.5f, 1.0f, 0.5f, 0.001f, 50);
     }
 
     @EventHandler
-    public void respawn(PlayerRespawnEvent event) {
+    public void respawn(final PlayerRespawnEvent event) {
         if (em.getEvent() != EventType.RACE) {
             return;
         }
@@ -128,8 +150,12 @@ public class Race extends BaseEvent {
             return;
         }
         if (em.getPlayers().contains(event.getPlayer().getName())) {
-            em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and has to start over again!"));
-            event.getPlayer().teleport(em.getSpawn());
+            cwe.getServer().getScheduler().scheduleSyncDelayedTask(cwe, new Runnable() {
+                public void run() {
+                    em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and has to start over again!"));
+                    event.getPlayer().teleport(em.getSpawn());
+                }
+            }, 20L);
         }
     }
 

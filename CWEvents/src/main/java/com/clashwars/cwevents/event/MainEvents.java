@@ -3,6 +3,7 @@ package com.clashwars.cwevents.event;
 import com.clashwars.cwevents.CWEvents;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,7 +21,8 @@ public class MainEvents implements Listener {
     @EventHandler
     public void join(PlayerJoinEvent event) {
         cwe.getEM().resetPlayer(event.getPlayer());
-        event.getPlayer().getInventory().setItem(8, cwe.GetEventItem());
+        event.getPlayer().getInventory().setItem(0, cwe.GetEventItem());
+        event.getPlayer().getInventory().setItem(8, cwe.getLeaveItem());
     }
 
     @EventHandler
@@ -42,6 +44,9 @@ public class MainEvents implements Listener {
         if (item.getType() == Material.INK_SACK) {
             cwe.getEM().joinEvent(event.getPlayer());
         }
+        if (item.getType() == Material.REDSTONE_BLOCK) {
+            cwe.joinPvP(event.getPlayer());
+        }
     }
 
     @EventHandler
@@ -61,7 +66,11 @@ public class MainEvents implements Listener {
         }
         if (event.getItemDrop().getItemStack().getType() == Material.INK_SACK) {
             event.getItemDrop().remove();
-            event.getPlayer().getInventory().setItem(8, cwe.GetEventItem());
+            event.getPlayer().getInventory().setItem(0, cwe.GetEventItem());
+        }
+        if (event.getItemDrop().getItemStack().getType() == Material.REDSTONE_BLOCK) {
+            event.getItemDrop().remove();
+            event.getPlayer().getInventory().setItem(8, cwe.getLeaveItem());
         }
     }
 
@@ -74,8 +83,12 @@ public class MainEvents implements Listener {
             return;
         }
         if (cwe.getEM().getStatus() == EventStatus.STARTING || cwe.getEM().getStatus() == EventStatus.OPEN) {
-            event.setCancelled(true);
-            event.getPlayer().teleport(event.getFrom());
+            Location from = event.getFrom();
+            Location to = event.getTo();
+            if (to.getBlockX() != from.getBlockX() || to.getBlockZ() != from.getBlockZ()) {
+                event.setCancelled(true);
+                event.getPlayer().teleport(event.getFrom());
+            }
         }
     }
 }

@@ -43,7 +43,7 @@ public class PluginMessageEvents implements PluginMessageListener {
                             out.writeUTF(server);
                             out.writeUTF(cwe.getEM().getEvent() == null ? "none" : cwe.getEM().getEvent().getName());
                             out.writeUTF(cwe.getEM().getArena() == null || cwe.getEM().getArena() == "" ? "none" : cwe.getEM().getArena());
-                            out.writeInt(cwe.getEM().getPlayers().size());
+                            out.writeUTF(cwe.getEM().getPlayers() == null ? "0" : "" + cwe.getEM().getPlayers().size());
                             out.writeUTF(cwe.getEM().getSlots() < 2 ? "Infinite" : "" + cwe.getEM().getSlots());
                             out.writeUTF(cwe.getEM().getStatus() == null ? "&cUnknown" : cwe.getEM().getStatus().getName());
 

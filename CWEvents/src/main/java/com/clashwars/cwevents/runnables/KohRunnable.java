@@ -25,7 +25,6 @@ public class KohRunnable extends BukkitRunnable {
 
     public KohRunnable(KOH koh) {
         this.koh = koh;
-        Bukkit.broadcastMessage("Created new KOH Runnable!");
         seconds = CAPTURE_TIME;
         ProtectedRegion region = CWWorldGuard.getRegion(koh.world, koh.em.getRegionName("hill"));
         Vector centerVector = region.getMinimumPoint().add(region.getMaximumPoint()).divide(2).floor();
@@ -33,14 +32,12 @@ public class KohRunnable extends BukkitRunnable {
     }
 
     public void stopCapture() {
-        Bukkit.broadcastMessage("Stopped runnable.");
         this.capturer = null;
         running = false;
         seconds = CAPTURE_TIME;
     }
 
     public void startCapture(Player capturer) {
-        Bukkit.broadcastMessage("Started runnable. " + capturer.getName());
         this.capturer = capturer;
         running = true;
         seconds = CAPTURE_TIME;

@@ -171,7 +171,7 @@ public class Bomberman extends BaseEvent {
 
     public void onPlayerJoin(Player player) {
         bombData.put(player.getName(), new BombermanData(player.getName()));
-        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 99999999, -255));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 99999999, -128));
     }
 
     public void bombExplode(Player player, Location loc) {
