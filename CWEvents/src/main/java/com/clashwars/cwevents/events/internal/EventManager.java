@@ -2,9 +2,13 @@ package com.clashwars.cwevents.events.internal;
 
 import com.clashwars.cwevents.CWEvents;
 import com.clashwars.cwevents.Util;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -148,22 +152,22 @@ public class EventManager {
 
 
     public void resetPlayer(Player player) {
-//		player.closeInventory();
-//		player.resetMaxHealth();
-//		player.setHealth(20);
-//		player.setFoodLevel(20);
-//		player.setSaturation(9999);
-//		player.setFireTicks(0);
-//		player.setGameMode(GameMode.SURVIVAL);
-//		player.setFlying(false);
-//		player.getInventory().clear();
-//		player.getInventory().setHelmet(new ItemStack(Material.AIR));
-//		player.getInventory().setChestplate(new ItemStack(Material.AIR));
-//		player.getInventory().setLeggings(new ItemStack(Material.AIR));
-//		player.getInventory().setBoots(new ItemStack(Material.AIR));
-//		for (PotionEffect effect : player.getActivePotionEffects()) {
-//			player.removePotionEffect(effect.getType());
-//		}
+		player.closeInventory();
+		player.resetMaxHealth();
+		player.setHealth(20);
+		player.setFoodLevel(20);
+		player.setSaturation(9999);
+		player.setFireTicks(0);
+		player.setGameMode(GameMode.SURVIVAL);
+		player.setFlying(false);
+		player.getInventory().clear();
+		player.getInventory().setHelmet(new ItemStack(Material.AIR));
+		player.getInventory().setChestplate(new ItemStack(Material.AIR));
+		player.getInventory().setLeggings(new ItemStack(Material.AIR));
+		player.getInventory().setBoots(new ItemStack(Material.AIR));
+		for (PotionEffect effect : player.getActivePotionEffects()) {
+			player.removePotionEffect(effect.getType());
+		}
     }
 
 

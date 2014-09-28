@@ -205,7 +205,7 @@ public class KOH extends BaseEvent {
                     capturingPlayers.remove(player.getName());
                     if (capturingPlayers.size() == 1) {
                         //Only 1 player remaining on the hill.
-                        kohRunnable.startCapture(player);
+                        kohRunnable.startCapture(cwe.getServer().getPlayer(capturingPlayers.get(0)));
                     } else if (capturingPlayers.size() == 0) {
                         //Nobody left on the hill.
                         kohRunnable.stopCapture();
