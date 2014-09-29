@@ -156,7 +156,6 @@ public class Commands {
                     sender.sendMessage(CWUtil.integrateColor("&6/event join &8- &5Go to the events server or join event."));
                     sender.sendMessage(CWUtil.integrateColor("&6/event leave &8- &5Leave current event or server if on server."));
                     sender.sendMessage(CWUtil.integrateColor("&6/event set {event} {arena} [slots] &8- &5Set active event."));
-                    sender.sendMessage(CWUtil.integrateColor("&6/event setspawn &8- &5Set arena spawn."));
                     sender.sendMessage(CWUtil.integrateColor("&6/event spawn &8- &5Teleport to the active event."));
                     sender.sendMessage(CWUtil.integrateColor("&6/event reset &8- &5Reset active event. &7(no need to use)"));
                     sender.sendMessage(CWUtil.integrateColor("&6/event open &8- &5Open active event."));
@@ -186,23 +185,6 @@ public class Commands {
                     return true;
                 }
 
-                //##########################################################################################################################
-                //##################################################### /event spawn #######################################################
-                //##########################################################################################################################
-                if (args[0].equalsIgnoreCase("spawn")) {
-                    if ((cwe.getEM().getPlayers() != null && cwe.getEM().getPlayers().contains(player.getName())) || player.isOp() || player.hasPermission("cwevents.cmd.admin")) {
-                        if (cwe.getEM().getSpawn() != null) {
-                            player.teleport(cwe.getEM().getSpawn());
-                            sender.sendMessage(Util.formatMsg("&6Teleported to &5" + cwe.getEM().getEvent().getName() + " &6arena &5" + cwe.getEM().getArena() + "&6."));
-                        } else {
-                            sender.sendMessage(Util.formatMsg("&cNo cached event/arena data found. &7Set it with &8/event set"));
-                        }
-                    } else {
-                        sender.sendMessage(Util.formatMsg("&cYou're not playing an event."));
-                    }
-                    return true;
-                }
-
 
                 //Admin commands...
                 if (!player.isOp() && !player.hasPermission("cwevents.cmd.admin")) {
@@ -224,7 +206,6 @@ public class Commands {
                         cwe.getEM().setEvent(null);
                         cwe.getEM().setArena(null);
                         cwe.getEM().setSlots(-1);
-                        cwe.getEM().setSpawn(null);
                         cwe.getEM().updateEventItem();
                         sender.sendMessage(Util.formatMsg("&6Cached arena data has been cleared."));
                         return true;
@@ -240,11 +221,6 @@ public class Commands {
                         return true;
                     }
 
-                    String arena = args[2];
-                    if (!event.getEventClass().checkSetup(event, arena, sender)) {
-                        return true;
-                    }
-
                     int slots = 0;
                     if (args.length >= 4) {
                         slots = CWUtil.getInt(args[3]);
@@ -255,12 +231,26 @@ public class Commands {
                     } else {
                         slots = -1;
                     }
+                    if (slots > 100) {
+                        slots = 100;
+                    }
+
+                    String arena = args[2];
+                    if (!event.getEventClass().checkSetup(event, arena, sender)) {
+                        return true;
+                    }
+                    if (!cwe.getEM().checkSetup(event, arena, slots, sender)) {
+                        return true;
+                    }
 
                     cwe.getEM().setStatus(EventStatus.CLOSED);
                     cwe.getEM().setEvent(event);
                     cwe.getEM().setArena(arena);
-                    cwe.getEM().setSlots(slots);
-                    cwe.getEM().setSpawn(player.getLocation());
+                    if (!event.getEventClass().allowMultiplePeoplePerSpawn() && slots < 1) {
+                        cwe.getEM().setSlots(12);
+                    } else {
+                        cwe.getEM().setSlots(slots);
+                    }
 
                     cwe.getEM().updateEventItem();
 
@@ -271,7 +261,6 @@ public class Commands {
                     } else {
                         sender.sendMessage(Util.formatMsg("&7No slots are set. Infinite players can join."));
                     }
-                    sender.sendMessage(Util.formatMsg("&6Spawn set to&8: &aX&8:&7" + player.getLocation().getBlockX() + " &9Y&8:&7" + player.getLocation().getBlockY() + " &cZ&8:&7" + player.getLocation().getBlockZ()));
                     return true;
                 }
 
@@ -284,11 +273,15 @@ public class Commands {
                 }
 
                 //##########################################################################################################################
-                //#################################################### /event setspawn #####################################################
+                //##################################################### /event spawn #######################################################
                 //##########################################################################################################################
-                if (args[0].equalsIgnoreCase("setspawn")) {
-                    cwe.getEM().setSpawn(player.getLocation());
-                    sender.sendMessage(Util.formatMsg("&6Spawn set to&8: &aX&8:&7" + player.getLocation().getBlockX() + " &9Y&8:&7" + player.getLocation().getBlockY() + " &cZ&8:&7" + player.getLocation().getBlockZ()));
+                if (args[0].equalsIgnoreCase("spawn")) {
+                    if (cwe.getEM().getAllSpawns() != null && cwe.getEM().getAllSpawns().size() > 0) {
+                        cwe.getEM().teleportToArena(player, true);
+                        sender.sendMessage(Util.formatMsg("&6Teleported to &5" + cwe.getEM().getEvent().getName() + " &6arena &5" + cwe.getEM().getArena() + "&6."));
+                    } else {
+                        sender.sendMessage(Util.formatMsg("&cNo cached event/arena data found. &7Set it with &8/event set"));
+                    }
                     return true;
                 }
 
@@ -330,11 +323,6 @@ public class Commands {
                     if (cwe.getEM().getStatus() != EventStatus.OPEN) {
                         sender.sendMessage(Util.formatMsg("&cthe game hasn't been opened yet."));
                         return true;
-                    }
-                    if (cwe.getEM().getPlayers().size() < 2) {
-                        sender.sendMessage(Util.formatMsg("&cThere need to be at least 2 players to start the game!"));
-                        //TODO: Uncomment this for public version.
-                        //return true;
                     }
                     activeEvent.getEventClass().Start();
                     cwe.getEM().setStatus(EventStatus.STARTING);
@@ -424,7 +412,7 @@ public class Commands {
                 sender.sendMessage(CWUtil.integrateColor("&6Slots&8: &a" + cwe.getEM().getPlayers().size() + "&7/&2" + (cwe.getEM().getSlots() < 1 ? "Infinite" : cwe.getEM().getSlots())));
                 sender.sendMessage(CWUtil.integrateColor("&6Status&8: &5" + cwe.getEM().getStatus().getName()));
                 String playerStr = "";
-                for (String p : cwe.getEM().getPlayers()) {
+                for (String p : cwe.getEM().getPlayers().keySet()) {
                     playerStr = playerStr + "&5" + p + "&8, ";
                 }
                 sender.sendMessage(CWUtil.integrateColor("&6Players&8: &5" + playerStr));

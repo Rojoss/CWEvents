@@ -2,16 +2,13 @@ package com.clashwars.cwevents.events.internal;
 
 import com.clashwars.cwevents.CWEvents;
 import com.clashwars.cwevents.Util;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class EventManager {
     private CWEvents cwe;
@@ -19,9 +16,11 @@ public class EventManager {
     private EventType event;
     private String arena;
     private int slots = -1;
-    private Location spawn;
     private EventStatus status;
-    private Set<String> players = new HashSet<String>();
+    private Map<String, Integer> players = new HashMap<String, Integer>();
+
+    private List<String> allSpawns = new ArrayList<String>();
+    private List<String> spawns = new ArrayList<String>();
 
     public EventManager(CWEvents cwe) {
         this.cwe = cwe;
@@ -40,7 +39,7 @@ public class EventManager {
         }
 
         //Make sure player isn't already in the event.
-        if (players.contains(player.getName())) {
+        if (players.containsKey(player.getName())) {
             player.sendMessage(Util.formatMsg("&cYou're already in the game."));
             player.sendMessage(Util.formatMsg("&cYou can use &4/event spawn &cif you didn't get teleported."));
             return;
@@ -51,7 +50,7 @@ public class EventManager {
             int priority = getPlayerPriority(player);
             Player kick = null;
             //Find a player to kick if none found kick is null and player can't join.
-            for (String p : players) {
+            for (String p : players.keySet()) {
                 if (priority > getPlayerPriority(cwe.getServer().getPlayer(p))) {
                     kick = cwe.getServer().getPlayer(p);
                     break;
@@ -68,18 +67,25 @@ public class EventManager {
         }
 
         //Join
-        player.sendMessage(Util.formatMsg("&3You have joined &9" + event.getName() + "! &3Arena&8: &9" + arena));
-        broadcast(Util.formatMsg("&9" + player.getDisplayName() + " &3joined the event. &8Players: &7" + (players.size() + 1)));
-        resetPlayer(player);
-        player.teleport(spawn);
-        players.add(player.getName());
-        event.getEventClass().onPlayerJoin(player);
-        updateEventItem();
+        for (int i = 0; i < 100; i++) {
+            if (players.values().contains(i)) {
+                continue;
+            }
+            players.put(player.getName(), i);
+            break;
+        }
+        if (teleportToArena(player, false)) {
+            player.sendMessage(Util.formatMsg("&3You have joined &9" + event.getName() + "! &3Arena&8: &9" + arena));
+            broadcast(Util.formatMsg("&9" + player.getDisplayName() + " &3joined the event. &8Players: &7" + players.size()));
+            resetPlayer(player);
+            event.getEventClass().onPlayerJoin(player);
+            updateEventItem();
+        }
     }
 
 
     public boolean leaveEvent(Player player, boolean force) {
-        if (players.contains(player.getName())) {
+        if (players.containsKey(player.getName())) {
             event.getEventClass().onPlayerLeft(player);
             resetPlayer(player);
             player.teleport(player.getWorld().getSpawnLocation());
@@ -94,6 +100,75 @@ public class EventManager {
             return true;
         }
         return false;
+    }
+
+
+    public boolean teleportToArena(Player player, boolean force) {
+        if (event == null) {
+            return false;
+        }
+        if (force) {
+            if (allSpawns != null && allSpawns.size() > 0) {
+                player.teleport(cwe.getLoc(allSpawns.get(0)));
+                return true;
+            }
+            return false;
+        }
+        if (event.getEventClass().allowMultiplePeoplePerSpawn()) {
+            if (spawns == null || spawns.size() <= 0) {
+                spawns = new ArrayList<String>(allSpawns);
+            }
+            player.teleport(cwe.getLoc(spawns.get(0)));
+            spawns.remove(0);
+            return true;
+        } else {
+            if (!players.containsKey(player.getName())) {
+                return false;
+            }
+            String locName = event.getPreifx() + "_" + arena + "_s" + players.get(player.getName());
+            if (!cwe.getLocConfig().getLocations().containsKey(locName)) {
+                return false;
+            }
+            player.teleport(cwe.getLoc(locName));
+            return true;
+        }
+    }
+
+
+    public boolean checkSetup(EventType eventt, String arenaa, int slotss, CommandSender sender) {
+        allSpawns.clear();
+        if (eventt.getEventClass().allowMultiplePeoplePerSpawn()) {
+            //Require at least 1 spawn as it can be used by multiple people.
+            for (String locName : cwe.getLocConfig().getLocations().keySet()) {
+                if (locName.toLowerCase().startsWith((eventt.getPreifx() + "_" + arenaa + "_s").toLowerCase())) {
+                    allSpawns.add(locName);
+                }
+            }
+            if (allSpawns.size() < 1) {
+                sender.sendMessage(Util.formatMsg("&cInvalid arena name or spawn location not set."));
+                sender.sendMessage(Util.formatMsg("&cThis event needs to have at least 1 spawn."));
+                sender.sendMessage(Util.formatMsg("&cSet spawn points like&8: &4" + eventt.getPreifx() + "_" + arenaa + "_s0 &c_s1 etc... "));
+                return false;
+            }
+        } else {
+            //Require a spawn for each slot.
+            if (slotss <= 1) {
+                slotss = 12;
+            }
+            String locName = "";
+            for (int i = 0; i < slotss; i++) {
+                locName = eventt.getPreifx() + "_" + arenaa + "_s" + i;
+                if (!cwe.getLocConfig().getLocations().keySet().contains(locName)) {
+                    sender.sendMessage(Util.formatMsg("&cInvalid arena name or spawn locations not set."));
+                    sender.sendMessage(Util.formatMsg("&cThis event needs a spawn location for each slot."));
+                    sender.sendMessage(Util.formatMsg("&cMissing spawn location&8: &4" + locName));
+                    return false;
+                }
+                allSpawns.add(locName);
+            }
+        }
+        spawns = new ArrayList<String>(allSpawns);
+        return true;
     }
 
 
@@ -124,15 +199,6 @@ public class EventManager {
     }
 
 
-    public Location getSpawn() {
-        return spawn;
-    }
-
-    public void setSpawn(Location spawn) {
-        this.spawn = spawn;
-    }
-
-
     public EventStatus getStatus() {
         return status;
     }
@@ -142,11 +208,20 @@ public class EventManager {
     }
 
 
-    public Set<String> getPlayers() {
+    public List<String> getAllSpawns() {
+        return allSpawns;
+    }
+
+    public List<String> getSpawns() {
+        return spawns;
+    }
+
+
+    public Map<String, Integer> getPlayers() {
         return players;
     }
 
-    public void setPlayers(Set<String> players) {
+    public void setPlayers(Map<String, Integer> players) {
         this.players = players;
     }
 
@@ -173,7 +248,7 @@ public class EventManager {
 
     public void updateEventItem() {
         for (Player p : cwe.getServer().getOnlinePlayers()) {
-            if (!players.contains(p.getName())) {
+            if (!players.containsKey(p.getName())) {
                 p.getInventory().setItem(0, cwe.GetEventItem());
                 p.getInventory().setItem(8, cwe.getLeaveItem());
             }
@@ -183,7 +258,7 @@ public class EventManager {
 
     public void broadcast(String msg) {
         for (Player p : cwe.getServer().getOnlinePlayers()) {
-            if (players.contains(p.getName())) {
+            if (players.containsKey(p.getName())) {
                 p.sendMessage(msg);
             } else if (p.hasPermission("event.notifiy") || p.isOp()) {
                 p.sendMessage(msg);
@@ -193,7 +268,7 @@ public class EventManager {
 
     public void playSound(Sound sound, float volume, float pitch) {
         for (Player p : cwe.getServer().getOnlinePlayers()) {
-            if (players.contains(p.getName())) {
+            if (players.containsKey(p.getName())) {
                 p.playSound(p.getLocation(), sound, volume, pitch);
             } else if (p.hasPermission("event.notifiy") || p.isOp()) {
                 p.playSound(p.getLocation(), sound, volume, pitch);

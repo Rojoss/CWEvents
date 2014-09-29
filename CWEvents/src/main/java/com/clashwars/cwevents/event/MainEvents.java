@@ -82,7 +82,7 @@ public class MainEvents implements Listener {
         if (cwe.getEM().getEvent() != EventType.KOH && cwe.getEM().getEvent() != EventType.RACE) {
             return;
         }
-        if (cwe.getEM().getPlayers() == null || !cwe.getEM().getPlayers().contains(event.getPlayer().getName())) {
+        if (cwe.getEM().getPlayers() == null || !cwe.getEM().getPlayers().containsKey(event.getPlayer().getName())) {
             return;
         }
         if (cwe.getEM().getStatus() == EventStatus.STARTING || cwe.getEM().getStatus() == EventStatus.OPEN) {

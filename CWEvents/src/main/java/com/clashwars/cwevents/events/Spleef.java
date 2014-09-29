@@ -61,11 +61,6 @@ public class Spleef extends BaseEvent {
 
     @SuppressWarnings("deprecation")
     public void Begin() {
-        cwe.getServer().broadcastMessage("Spleef Begin");
-        for (String p : em.getPlayers()) {
-            cwe.getServer().getPlayer(p).getInventory().addItem(new ItemStack(Material.DIAMOND_SPADE, 1));
-            cwe.getServer().getPlayer(p).updateInventory();
-        }
         CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "allow");
     }
 
@@ -78,6 +73,8 @@ public class Spleef extends BaseEvent {
     }
 
     public void onPlayerJoin(Player player) {
+        player.getInventory().addItem(new ItemStack(Material.DIAMOND_SPADE, 1));
+        player.updateInventory();
     }
 
 
@@ -87,7 +84,7 @@ public class Spleef extends BaseEvent {
             return;
         }
         Player player = (Player) event.getPlayer();
-        if (!(em.getPlayers().contains(player.getName()))) {
+        if (!(em.getPlayers().containsKey(player.getName()))) {
             return;
         }
         Block block = event.getBlock();
@@ -143,7 +140,7 @@ public class Spleef extends BaseEvent {
             return;
         }
         Player player = (Player) event.getEntity();
-        if (!(em.getPlayers().contains(player.getName()))) {
+        if (!(em.getPlayers().containsKey(player.getName()))) {
             return;
         }
         if (em.getStatus() == EventStatus.STARTED) {
@@ -152,7 +149,7 @@ public class Spleef extends BaseEvent {
                 em.leaveEvent(player, true);
             }
         } else {
-            player.teleport(em.getSpawn());
+            em.teleportToArena(player, false);
         }
     }
 

@@ -33,8 +33,7 @@ public class Race extends BaseEvent {
     private List<String> finished = new ArrayList<String>();
     private CooldownManager cdm;
 
-    private List<String> allSpawns = new ArrayList<String>();
-    private List<String> spawns = new ArrayList<String>();
+
 
     public Race() {
         cdm = CWCore.inst().getCDM();
@@ -56,13 +55,7 @@ public class Race extends BaseEvent {
     public void Open() {
         Reset();
         super.Open();
-        allSpawns.clear();
-        for (String locName : cwe.getLocConfig().getLocations().keySet()) {
-            if (locName.toLowerCase().startsWith((em.getEvent().getPreifx() + "_" + em.getArena() + "_s").toLowerCase())) {
-                allSpawns.add(locName);
-            }
-        }
-        spawns = new ArrayList<String>(allSpawns);
+
     }
 
     public void Start() {
@@ -93,15 +86,6 @@ public class Race extends BaseEvent {
         boots.setItemMeta(armorMeta);
         player.getInventory().setBoots(boots);
         player.updateInventory();
-
-        if (allSpawns != null && !allSpawns.isEmpty()) {
-            if (spawns == null || spawns.size() <= 0) {
-                spawns = new ArrayList<String>(allSpawns);
-            }
-
-            player.teleport(cwe.getLoc(spawns.get(0)));
-            spawns.remove(0);
-        }
     }
 
     @EventHandler
@@ -112,7 +96,7 @@ public class Race extends BaseEvent {
         if (em.getStatus() != EventStatus.STARTED) {
             return;
         }
-        if (!em.getPlayers().contains(event.getPlayer().getName())) {
+        if (!em.getPlayers().containsKey(event.getPlayer().getName())) {
             return;
         }
         Player player = event.getPlayer();
@@ -146,17 +130,15 @@ public class Race extends BaseEvent {
         if (em.getStatus() != EventStatus.STARTED) {
             return;
         }
-        if (!em.getPlayers().contains(event.getPlayer().getName())) {
+        if (!em.getPlayers().containsKey(event.getPlayer().getName())) {
             return;
         }
-        if (em.getPlayers().contains(event.getPlayer().getName())) {
-            cwe.getServer().getScheduler().scheduleSyncDelayedTask(cwe, new Runnable() {
-                public void run() {
-                    em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and has to start over again!"));
-                    event.getPlayer().teleport(em.getSpawn());
-                }
-            }, 20L);
-        }
+        cwe.getServer().getScheduler().scheduleSyncDelayedTask(cwe, new Runnable() {
+            public void run() {
+                em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and has to start over again!"));
+                em.teleportToArena(event.getPlayer(), false);
+            }
+        }, 20L);
     }
 
     @EventHandler
@@ -168,7 +150,7 @@ public class Race extends BaseEvent {
             return;
         }
         Player player = event.getPlayer();
-        if (!em.getPlayers().contains(player.getName())) {
+        if (!em.getPlayers().containsKey(player.getName())) {
             return;
         }
         if (finished.contains(player.getName())) {

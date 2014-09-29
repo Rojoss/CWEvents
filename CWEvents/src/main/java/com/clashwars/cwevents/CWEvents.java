@@ -36,7 +36,7 @@ public class CWEvents extends JavaPlugin {
     private final Logger log = Logger.getLogger("Minecraft");
 
     public void onDisable() {
-        Set<String> playerClone = new HashSet<String>(em.getPlayers());
+        Set<String> playerClone = new HashSet<String>(em.getPlayers().keySet());
         for (String p : playerClone) {
             if (getServer().getPlayer(p) != null) {
                 em.leaveEvent(getServer().getPlayer(p), true);

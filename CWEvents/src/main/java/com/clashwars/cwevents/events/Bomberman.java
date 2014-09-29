@@ -52,7 +52,6 @@ public class Bomberman extends BaseEvent {
     private HashMap<String, ItemStack> badPowerups = new HashMap<String, ItemStack>();
     private HashMap<String, ItemStack> allPowerups = new HashMap<String, ItemStack>();
 
-
     private ItemStack bombItem;
     private int bombsToRemove = 0;
 
@@ -77,19 +76,7 @@ public class Bomberman extends BaseEvent {
     }
 
     public boolean checkSetup(EventType event, String arena, CommandSender sender) {
-        String name = em.getRegionName(event, arena, "arena");
-        if (CWWorldGuard.getRegion(world, name) == null) {
-            sender.sendMessage(Util.formatMsg("&cInvalid arena name or region not set properly. &7Missing region &8'&4" + name + "&8'&7!"));
-            return false;
-        }
-        for (int i = 1; i <= 12; i++) {
-            name = em.getRegionName(event, arena, "s" + i);
-            if (!cwe.getLocConfig().getLocations().containsKey(name)) {
-                sender.sendMessage(Util.formatMsg("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + name + "&8'&7!"));
-                return false;
-            }
-        }
-        name = em.getRegionName(event, arena, "schem_arena");
+        String name = em.getRegionName(event, arena, "schem_arena");
         if (!cwe.getLocConfig().getLocations().containsKey(name)) {
             sender.sendMessage(Util.formatMsg("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + name + "&8'&7!"));
             return false;
@@ -110,9 +97,12 @@ public class Bomberman extends BaseEvent {
         return true;
     }
 
+    public boolean allowMultiplePeoplePerSpawn() {
+        return false;
+    }
+
     public void Reset() {
         super.Reset();
-        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
         try {
             try {
                 File schemFile = CWWorldGuard.getSchematicFile(cwe.getEM().getRegionName("arena"));
@@ -136,37 +126,17 @@ public class Bomberman extends BaseEvent {
     public void Open() {
         Reset();
         super.Open();
-        //Limit slots to 12 because no more locations.
-        if (em.getSlots() > 12 || em.getSlots() < 1) {
-            em.setSlots(12);
-        }
     }
 
     public void Start() {
         super.Start();
-        int playerID = 1;
-        for (String p : em.getPlayers()) {
-            //Give each player a unique ID and tp them.
-            if (!bombData.containsKey(p)) {
-                bombData.put(p, new BombermanData(p));
-            }
-            bombData.get(p).setID(playerID);
-
-            cwe.tpLoc(Bukkit.getServer().getPlayer(p), em.getRegionName("s" + playerID));
-            playerID++;
-        }
     }
 
     public void Begin() {
-        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "allow");
-        for (String p : em.getPlayers()) {
-            cwe.getServer().getPlayer(p).getInventory().addItem(bombItem);
-        }
     }
 
     public void Stop() {
         super.Stop();
-        CWWorldGuard.setFlag(world, em.getRegionName("arena"), DefaultFlag.PVP, "deny");
     }
 
     public void onPlayerLeft(Player player) {
@@ -178,6 +148,7 @@ public class Bomberman extends BaseEvent {
     public void onPlayerJoin(Player player) {
         bombData.put(player.getName(), new BombermanData(player.getName()));
         player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 99999999, -128));
+        player.getInventory().addItem(bombItem);
     }
 
     public void bombExplode(Player player, Location loc) {
@@ -210,7 +181,7 @@ public class Bomberman extends BaseEvent {
                     explodeParticle(b.getLocation().add(0.5f, 0.5f, 0.5f), dir);
 
                     //Check if player is at this block and kill him if he is.
-                    for (String p : em.getPlayers()) {
+                    for (String p : em.getPlayers().keySet()) {
                         otherPlayer = cwe.getServer().getPlayer(p);
                         if (otherPlayer.getLocation().getBlockX() == b.getLocation().getBlockX() && otherPlayer.getLocation().getBlockZ() == b.getLocation().getBlockZ()) {
                             //Player hit by bomb remove life and check for no more lifes etc.
@@ -317,19 +288,18 @@ public class Bomberman extends BaseEvent {
             return;
         }
         Player player = (Player) event.getEntity();
-        if (em.getPlayers().contains(player.getName())) {
+        if (em.getPlayers().containsKey(player.getName())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void bombPlace(BlockPlaceEvent event) {
-        Bukkit.broadcastMessage("Block place");
         if (em.getEvent() != EventType.BOMBERMAN) {
             return;
         }
         Player player = (Player) event.getPlayer();
-        if (!(em.getPlayers().contains(player.getName()))) {
+        if (!(em.getPlayers().containsKey(player.getName()))) {
             return;
         }
         Block block = event.getBlock();
@@ -357,7 +327,7 @@ public class Bomberman extends BaseEvent {
             return;
         }
         Player player = event.getPlayer();
-        if (!em.getPlayers().contains(player.getName())) {
+        if (!em.getPlayers().containsKey(player.getName())) {
             return;
         }
         event.setCancelled(true);
@@ -376,7 +346,7 @@ public class Bomberman extends BaseEvent {
             return;
         }
         final Player player = event.getPlayer();
-        if (!em.getPlayers().contains(player.getName())) {
+        if (!em.getPlayers().containsKey(player.getName())) {
             return;
         }
         BombermanData bd = bombData.get(player.getName());
@@ -455,11 +425,11 @@ public class Bomberman extends BaseEvent {
                         }.runTaskLater(cwe, 200L);
 
                     } else if (key.equals("blind")) {
-                        for (String p : em.getPlayers()) {
+                        for (String p : em.getPlayers().keySet()) {
                             if (p == player.getName()) {
                                 continue;
                             }
-                            cwe.getServer().getPlayer(p).addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 0, true), true);
+                            cwe.getServer().getPlayer(p).addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 80, 0, true), true);
                         }
 
                     }

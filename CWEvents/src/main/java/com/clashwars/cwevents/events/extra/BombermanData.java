@@ -3,7 +3,6 @@ package com.clashwars.cwevents.events.extra;
 public class BombermanData {
 
     private String playerName;
-    private int id;
     private int lives;
     private long fuseTime;
     private int explosionSize;
@@ -13,7 +12,6 @@ public class BombermanData {
 
     public BombermanData(String playerName) {
         this.setPlayerName(playerName);
-        id = -1;
         lives = 3;
         fuseTime = 80;
         explosionSize = 1;
@@ -29,15 +27,6 @@ public class BombermanData {
 
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
-    }
-
-
-    public int getID() {
-        return id;
-    }
-
-    public void setID(int playerID) {
-        this.id = playerID;
     }
 
 

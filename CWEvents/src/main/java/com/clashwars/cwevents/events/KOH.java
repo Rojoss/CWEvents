@@ -30,9 +30,6 @@ public class KOH extends BaseEvent {
     private KohRunnable kohRunnable;
     private BukkitTask task;
 
-    private List<String> allSpawns = new ArrayList<String>();
-    private List<String> spawns = new ArrayList<String>();
-
     public boolean checkSetup(EventType event, String arena, CommandSender sender) {
         String name = em.getRegionName(event, arena, "hill");
         if (CWWorldGuard.getRegion(world, name) == null) {
@@ -54,13 +51,6 @@ public class KOH extends BaseEvent {
     public void Open() {
         Reset();
         super.Open();
-        allSpawns.clear();
-        for (String locName : cwe.getLocConfig().getLocations().keySet()) {
-            if (locName.toLowerCase().startsWith((em.getEvent().getPreifx() + "_" + em.getArena() + "_s").toLowerCase())) {
-                allSpawns.add(locName);
-            }
-        }
-        spawns = new ArrayList<String>(allSpawns);
     }
 
     public void Start() {
@@ -131,15 +121,6 @@ public class KOH extends BaseEvent {
         player.getInventory().addItem(new ItemStack(Material.POTION, 3, (short) 16396)); /* harming */
         player.getInventory().addItem(new ItemStack(Material.ARROW, 1));
         player.updateInventory();
-
-        if (allSpawns != null && !allSpawns.isEmpty()) {
-            if (spawns == null || spawns.size() <= 0) {
-                spawns = new ArrayList<String>(allSpawns);
-            }
-
-            player.teleport(cwe.getLoc(spawns.get(0)));
-            spawns.remove(0);
-        }
     }
 
     public void capture(Player capturer) {
@@ -155,7 +136,7 @@ public class KOH extends BaseEvent {
         if (em.getStatus() != EventStatus.STARTED && em.getStatus() != EventStatus.ENDED) {
             return;
         }
-        if (em.getPlayers().contains(event.getPlayer().getName())) {
+        if (em.getPlayers().containsKey(event.getPlayer().getName())) {
             em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and is out of the game!"));
             em.leaveEvent(event.getPlayer(), true);
         }
@@ -169,7 +150,7 @@ public class KOH extends BaseEvent {
         if (em.getStatus() != EventStatus.STARTED) {
             return;
         }
-        if (em.getPlayers().contains(event.getPlayer().getName()) == false) {
+        if (em.getPlayers().containsKey(event.getPlayer().getName()) == false) {
             return;
         }
         Player player = event.getPlayer();
@@ -198,7 +179,7 @@ public class KOH extends BaseEvent {
         if (em.getStatus() != EventStatus.STARTED) {
             return;
         }
-        if (!em.getPlayers().contains(event.getPlayer().getName())) {
+        if (!em.getPlayers().containsKey(event.getPlayer().getName())) {
             return;
         }
         Player player = event.getPlayer();

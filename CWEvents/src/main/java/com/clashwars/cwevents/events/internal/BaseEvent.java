@@ -40,7 +40,7 @@ public class BaseEvent implements Listener {
     @SuppressWarnings("deprecation")
     public void Close() {
         em.broadcast(Util.formatMsg("&cThe game has been closed before it was started!"));
-        Set<String> playerClone = new HashSet<String>(em.getPlayers());
+        Set<String> playerClone = new HashSet<String>(em.getPlayers().keySet());
         for (String p : playerClone) {
             em.leaveEvent(cwe.getServer().getPlayer(p), true);
         }
@@ -57,7 +57,7 @@ public class BaseEvent implements Listener {
     @SuppressWarnings("deprecation")
     public void Stop() {
         em.broadcast(Util.formatMsg("&cThe game has been stopped/ended!"));
-        Set<String> playerClone = new HashSet<String>(em.getPlayers());
+        Set<String> playerClone = new HashSet<String>(em.getPlayers().keySet());
         for (String p : playerClone) {
             em.leaveEvent(cwe.getServer().getPlayer(p), true);
         }
@@ -73,6 +73,10 @@ public class BaseEvent implements Listener {
 
     public boolean checkSetup(EventType event, String arena, CommandSender sender) {
         //Overridden
+        return true;
+    }
+
+    public boolean allowMultiplePeoplePerSpawn() {
         return true;
     }
 }
