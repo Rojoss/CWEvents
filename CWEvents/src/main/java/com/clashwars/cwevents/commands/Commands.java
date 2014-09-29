@@ -380,6 +380,10 @@ public class Commands {
                     sender.sendMessage(Util.formatMsg("&6Stopped &5" + activeEvent.getName() + " &6arena &5" + activeArena + "&6."));
                     if (winner != null) {
                         sender.sendMessage(Util.formatMsg("&6Winner set to &a&l" + w.getName() + " &7(&8" + winner.toString() + "&7)"));
+                        if (w!= null && w.isOnline()) {
+                            ((Player)w).sendMessage(Util.formatMsg("&a&lYou won the game!"));
+                            ((Player)w).sendMessage(Util.formatMsg("&6When you join the pvp server you will receive a reward."));
+                        }
                     }
 
                     cwe.getEM().setStatus(EventStatus.STOPPED);
