@@ -15,7 +15,7 @@ public class BombermanData {
         this.setPlayerName(playerName);
         id = -1;
         lives = 3;
-        fuseTime = 100;
+        fuseTime = 80;
         explosionSize = 1;
         speed = 0;
         bombs = 1;

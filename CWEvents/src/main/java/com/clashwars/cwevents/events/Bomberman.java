@@ -48,7 +48,10 @@ public class Bomberman extends BaseEvent {
     private BlockFace[] directions = new BlockFace[]{BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
 
     private HashMap<String, BombermanData> bombData = new HashMap<String, BombermanData>();
-    private HashMap<String, ItemStack> powerups = new HashMap<String, ItemStack>();
+    private HashMap<String, ItemStack> goodPowerups = new HashMap<String, ItemStack>();
+    private HashMap<String, ItemStack> badPowerups = new HashMap<String, ItemStack>();
+    private HashMap<String, ItemStack> allPowerups = new HashMap<String, ItemStack>();
+
 
     private ItemStack bombItem;
     private int bombsToRemove = 0;
@@ -57,18 +60,20 @@ public class Bomberman extends BaseEvent {
         bombItem = new CWItem(Material.TNT, 1, (short) 0, "&4&lBomb", new String[]
                 {"&7Place this on the ground to create an explosion.", "&7Bombs will will slowly regenerate based on ur stats."});
 
-        powerups.put("life", new CWItem(Material.GOLDEN_APPLE, 1, (short) 1, "&6&lExtra Life", new String[]{"&7You get one extra life!"}));
-        powerups.put("bombUp", new CWItem(Material.TNT, 1, (short) 0, "&a&l+1 Bomb", new String[]{"&7You get one extra bomb!"}));
-        powerups.put("bombDown", new CWItem(Material.SULPHUR, 1, (short) 0, "&c&l-1 Bomb", new String[]{"&7You lose one bomb!"}));
-        powerups.put("fuseTimeDown", new CWItem(Material.REDSTONE_TORCH_ON, 1, (short) 0, "&a&l-1s FuseTime", new String[]{"&7Bombs will take 1 less second to explode."}));
-        powerups.put("fuseTimeUp", new CWItem(Material.STRING, 1, (short) 0, "&c&l+1s FuseTime", new String[]{"&7Bombs will take 1 more second to explode."}));
-        powerups.put("speed", new CWItem(Material.GOLD_BOOTS, 1, (short) 0, "&b&lSpeed", new String[]{"&7You get 1 extra speed."}));
-        powerups.put("slow", new CWItem(Material.LEATHER_BOOTS, 1, (short) 0, "&c&lSlow", new String[]{"&7You lose 1 extra speed."}));
-        powerups.put("powerUp", new CWItem(Material.BLAZE_POWDER, 1, (short) 0, "&4&l+1 Power", new String[]{"&7Bombs will explode 1 block further."}));
-        powerups.put("powerDown", new CWItem(Material.QUARTZ, 1, (short) 0, "&c&l-1 Power", new String[]{"&7Bombs will explode 1 block less."}));
-        powerups.put("pierce", new CWItem(Material.ARROW, 1, (short) 0, "&e&lPierce", new String[]{"&7Bombs will blow all blocks in range up."}));
-        powerups.put("shield", new CWItem(Material.IRON_CHESTPLATE, 1, (short) 0, "&5&lShield", new String[]{"&7Can't be killed by bombs for 8 seconds."}));
-        powerups.put("blind", new CWItem(Material.COAL, 1, (short) 1, "&8&lBlind", new String[]{"&7All players will be blinded."}));
+        goodPowerups.put("life", new CWItem(Material.GOLDEN_APPLE, 1, (short) 1, "&6&lExtra Life", new String[]{"&7You get one extra life!"}));
+        goodPowerups.put("bombUp", new CWItem(Material.TNT, 1, (short) 0, "&a&l+1 Bomb", new String[]{"&7You get one extra bomb!"}));
+        badPowerups.put("bombDown", new CWItem(Material.SULPHUR, 1, (short) 0, "&c&l-1 Bomb", new String[]{"&7You lose one bomb!"}));
+        goodPowerups.put("fuseTimeDown", new CWItem(Material.REDSTONE_TORCH_ON, 1, (short) 0, "&a&l-1s FuseTime", new String[]{"&7Bombs will take 1 less second to explode."}));
+        badPowerups.put("fuseTimeUp", new CWItem(Material.STRING, 1, (short) 0, "&c&l+1s FuseTime", new String[]{"&7Bombs will take 1 more second to explode."}));
+        goodPowerups.put("speed", new CWItem(Material.GOLD_BOOTS, 1, (short) 0, "&b&lSpeed", new String[]{"&7You get 1 extra speed."}));
+        badPowerups.put("slow", new CWItem(Material.LEATHER_BOOTS, 1, (short) 0, "&c&lSlow", new String[]{"&7You lose 1 extra speed."}));
+        goodPowerups.put("powerUp", new CWItem(Material.BLAZE_POWDER, 1, (short) 0, "&4&l+1 Power", new String[]{"&7Bombs will explode 1 block further."}));
+        badPowerups.put("powerDown", new CWItem(Material.QUARTZ, 1, (short) 0, "&c&l-1 Power", new String[]{"&7Bombs will explode 1 block less."}));
+        goodPowerups.put("pierce", new CWItem(Material.ARROW, 1, (short) 0, "&e&lPierce", new String[]{"&7Bombs will blow all blocks in range up."}));
+        goodPowerups.put("shield", new CWItem(Material.IRON_CHESTPLATE, 1, (short) 0, "&5&lShield", new String[]{"&7Can't be killed by bombs for 8 seconds."}));
+        goodPowerups.put("blind", new CWItem(Material.COAL, 1, (short) 1, "&8&lBlind", new String[]{"&7All players will be blinded."}));
+        allPowerups.putAll(badPowerups);
+        allPowerups.putAll(goodPowerups);
     }
 
     public boolean checkSetup(EventType event, String arena, CommandSender sender) {
@@ -280,9 +285,14 @@ public class Bomberman extends BaseEvent {
     }
 
     private void spawnPowerup(Location location) {
-        if (random.nextFloat() <= 0.4f) {
-            String[] powerupKeys = powerups.keySet().toArray(new String[powerups.size()]);
-            location.getWorld().dropItem(location.add(0.5f, 0.5f, 0.5f), powerups.get(CWUtil.random(powerupKeys)));
+        if (random.nextFloat() <= 0.5f) {
+            if (random.nextFloat() <= 0.1f) {
+                String[] powerupKeys = badPowerups.keySet().toArray(new String[badPowerups.size()]);
+                location.getWorld().dropItem(location.add(0.5f, 0.5f, 0.5f), badPowerups.get(CWUtil.random(powerupKeys)));
+            } else {
+                String[] powerupKeys = goodPowerups.keySet().toArray(new String[goodPowerups.size()]);
+                location.getWorld().dropItem(location.add(0.5f, 0.5f, 0.5f), goodPowerups.get(CWUtil.random(powerupKeys)));
+            }
             location.getWorld().playSound(location, Sound.ORB_PICKUP, 0.6f, 2.0f);
             ParticleEffect.WITCH_MAGIC.display(location.add(0.5f, 0.5f, 0.5f), 0.25f, 1, 0.25f, 0.01f, 30);
         }
@@ -371,8 +381,9 @@ public class Bomberman extends BaseEvent {
         }
         BombermanData bd = bombData.get(player.getName());
         ItemStack powerup = null;
-        for (String key : powerups.keySet()) {
-            powerup = powerups.get(key);
+
+        for (String key : allPowerups.keySet()) {
+            powerup = allPowerups.get(key);
             if (powerup.getType() == item.getType()) {
                 if (item.hasItemMeta() && item.getItemMeta().getDisplayName() != null && item.getItemMeta().getLore().size() > 0) {
                     player.sendMessage(CWUtil.integrateColor("&6&lPowerup!!! &a&l" + powerup.getItemMeta().getDisplayName() + " &8- &7" + item.getItemMeta().getLore()));

@@ -106,7 +106,7 @@ public class Spleef extends BaseEvent {
         block.setType(Material.AIR);
         //Give snowball
         float randomFloat = random.nextFloat();
-        if (randomFloat <= 0.05f) {
+        if (randomFloat <= 0.1f) {
             player.getInventory().addItem(new ItemStack(Material.SNOW_BALL, 1));
         }
     }

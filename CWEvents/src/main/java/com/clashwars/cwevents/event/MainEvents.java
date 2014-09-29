@@ -54,7 +54,10 @@ public class MainEvents implements Listener {
         if (event.getCurrentItem() == null) {
             return;
         }
-        if (event.getCurrentItem().getType() == Material.INK_SACK) {
+        if (event.getWhoClicked().isOp()) {
+            return;
+        }
+        if (event.getCurrentItem().getType() == Material.INK_SACK || event.getCurrentItem().getType() == Material.REDSTONE_BLOCK) {
             event.setCancelled(true);
         }
     }
