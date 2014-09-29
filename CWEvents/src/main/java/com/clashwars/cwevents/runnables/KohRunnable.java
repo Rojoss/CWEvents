@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 public class KohRunnable extends BukkitRunnable {
 
@@ -24,11 +25,10 @@ public class KohRunnable extends BukkitRunnable {
 
 
     public KohRunnable(KOH koh) {
-        this.koh = koh;
-        seconds = CAPTURE_TIME;
         ProtectedRegion region = CWWorldGuard.getRegion(koh.world, koh.em.getRegionName("hill"));
         Vector centerVector = region.getMinimumPoint().add(region.getMaximumPoint()).divide(2).floor();
         hillCenter = new Location(koh.world, centerVector.getX(), centerVector.getY(), centerVector.getZ());
+        this.koh = koh;
     }
 
     public void stopCapture() {
@@ -43,6 +43,7 @@ public class KohRunnable extends BukkitRunnable {
         seconds = CAPTURE_TIME;
         koh.em.broadcast(Util.formatMsg("&5" + capturer.getName() + " &6started to capture the hill!"));
     }
+
 
     @Override
     public void run() {

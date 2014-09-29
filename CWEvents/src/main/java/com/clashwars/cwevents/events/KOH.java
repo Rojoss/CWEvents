@@ -18,6 +18,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
+import java.lang.IllegalStateException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,7 @@ public class KOH extends BaseEvent {
 
     private List<String> capturingPlayers = new ArrayList<String>();
     private KohRunnable kohRunnable;
+    private BukkitTask task;
 
     private List<String> allSpawns = new ArrayList<String>();
     private List<String> spawns = new ArrayList<String>();
@@ -42,10 +45,8 @@ public class KOH extends BaseEvent {
 
     public void Reset() {
         super.Reset();
-        if (kohRunnable != null) {
-            kohRunnable.cancel();
-            kohRunnable = null;
-        }
+        kohRunnable = null;
+        capturingPlayers.clear();
         CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.PVP, "deny");
         CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.POTION_SPLASH, "deny");
     }
@@ -68,9 +69,9 @@ public class KOH extends BaseEvent {
 
     public void Begin() {
         kohRunnable = new KohRunnable(this);
-        kohRunnable.runTaskTimer(cwe, 20, 20);
+        kohRunnable.runTaskTimer(cwe, 0 , 20);
 
-        Bukkit.getScheduler().scheduleSyncDelayedTask(cwe, new Runnable() {
+        cwe.getServer().getScheduler().scheduleSyncDelayedTask(cwe, new Runnable() {
             public void run() {
                 em.broadcast(Util.formatMsg("&6You can now &4&lPvP&6!"));
                 CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.PVP, "allow");
@@ -83,8 +84,8 @@ public class KOH extends BaseEvent {
         super.Stop();
         if (kohRunnable != null) {
             kohRunnable.cancel();
-            kohRunnable = null;
         }
+        kohRunnable = null;
         CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.PVP, "deny");
         CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.POTION_SPLASH, "deny");
     }

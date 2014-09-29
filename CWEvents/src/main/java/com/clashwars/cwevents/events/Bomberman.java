@@ -22,6 +22,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -311,16 +312,24 @@ public class Bomberman extends BaseEvent {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void bombPlace(BlockPlaceEvent event) {
+        Bukkit.broadcastMessage("Block place");
         if (em.getEvent() != EventType.BOMBERMAN) {
             return;
         }
-        if (event.getBlock().getType() != Material.TNT) {
+        Player player = (Player) event.getPlayer();
+        if (!(em.getPlayers().contains(player.getName()))) {
             return;
         }
-        Player player = event.getPlayer();
-        if (!em.getPlayers().contains(player.getName())) {
+        Block block = event.getBlock();
+        if (block.getType() != Material.TNT) {
+            event.setCancelled(true);
+            return;
+        }
+        if (em.getStatus() != EventStatus.STARTED) {
+            player.sendMessage(Util.formatMsg("&cThe game hasn't started yet!"));
+            event.setCancelled(true);
             return;
         }
         if (!floorBlocks.contains(event.getBlock().getRelative(BlockFace.DOWN).getType())) {
@@ -328,6 +337,7 @@ public class Bomberman extends BaseEvent {
             event.setCancelled(true);
             return;
         }
+        event.setCancelled(false);
         new BombRunnable(this, player, event.getBlock().getLocation().add(0.5f, 0.5f, 0.5f), bombData.get(player.getName()).getFuseTime()).runTaskTimer(cwe, 0, 1);
     }
 
