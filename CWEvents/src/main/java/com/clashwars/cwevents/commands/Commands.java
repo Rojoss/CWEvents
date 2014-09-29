@@ -98,14 +98,52 @@ public class Commands {
 
 
                 //##########################################################################################################################
-                //####################################################### /loc list ########################################################
+                //############################################### /loc list [event] [arena] ################################################
                 //##########################################################################################################################
                 if (args[0].equalsIgnoreCase("list")) {
+                    String event = "";
+                    if (args.length > 1) {
+                        event = args[1];
+                    }
+                    String arena = "";
+                    if (args.length > 2) {
+                        arena = args[2];
+                    }
+
                     String locs = "";
                     for (String name : cwe.getLocConfig().getLocations().keySet()) {
-                        locs += name + "&8, &5";
+                        String[] split = name.split("_");
+                        if (!event.isEmpty()) {
+                            if (split.length > 0) {
+                                EventType eventType = EventType.fromPrefix(split[0]);
+                                if (eventType != null) {
+                                    name = eventType.getColor() + name;
+                                }
+                                if (event.equalsIgnoreCase(split[0])) {
+                                    if (!arena.isEmpty() && split.length > 1) {
+                                        if (arena.equalsIgnoreCase(split[1])) {
+                                            locs += name + "&8, &5";
+                                        }
+                                    } else {
+                                        locs += name + "&8, &5";
+                                    }
+                                }
+                            }
+                        } else {
+                            if (split.length > 0) {
+                                EventType eventType = EventType.fromPrefix(split[0]);
+                                if (eventType != null) {
+                                    name = eventType.getColor() + name;
+                                }
+                            }
+                            locs += name + "&8, &5";
+                        }
                     }
-                    player.sendMessage(CWUtil.integrateColor("&6&lLocations&8: &5" + locs));
+                    if (locs.isEmpty()) {
+                        player.sendMessage(CWUtil.integrateColor("&6&lLocations&8: &4None found..."));
+                    } else {
+                        player.sendMessage(CWUtil.integrateColor("&6&lLocations&8: &5" + locs));
+                    }
                     return true;
                 }
             }
@@ -119,7 +157,7 @@ public class Commands {
             sender.sendMessage(CWUtil.integrateColor("&6/loc set [name] &8- &5Set location or add location."));
             sender.sendMessage(CWUtil.integrateColor("&6/loc remove [name] &8- &5Remove location."));
             sender.sendMessage(CWUtil.integrateColor("&6/loc tp [name] &8- &5Teleport to location."));
-            sender.sendMessage(CWUtil.integrateColor("&6/loc list &8- &5List all locations."));
+            sender.sendMessage(CWUtil.integrateColor("&6/loc list [event] [arena] &8- &5List all locations."));
             return true;
         }
 
