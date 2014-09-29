@@ -248,20 +248,38 @@ public class Commands {
                         sender.sendMessage(Util.formatMsg("&6Cached arena data has been cleared."));
                         return true;
                     }
-                    if (args.length < 3) {
+                    EventType event = null;
+                    String arena = "";
+                    boolean arenaSet = false;
+                    if (args.length > 1 && args[1].contains("_")) {
+                        String[] split = args[1].split("_");
+                        if (split.length > 1) {
+                            event = EventType.fromPrefix(split[0]);
+                            if (event == null) {
+                                sender.sendMessage(Util.formatMsg("&cInvalid event prefix."));
+                                return true;
+                            }
+                            arena = split[1];
+                            arenaSet = true;
+                        }
+                    }
+                    if (!arenaSet && args.length < 3) {
                         sender.sendMessage(Util.formatMsg("&cInvalid usage. &7/event set {event|'none'} {arena} [slots]"));
                         return true;
                     }
 
-                    EventType event = EventType.fromString(args[1]);
                     if (event == null) {
-                        sender.sendMessage(Util.formatMsg("&cInvalid event name."));
-                        return true;
+                        event = EventType.fromString(args[1]);
+                        if (event == null) {
+                            sender.sendMessage(Util.formatMsg("&cInvalid event name."));
+                            return true;
+                        }
                     }
 
                     int slots = 0;
-                    if (args.length >= 4) {
-                        slots = CWUtil.getInt(args[3]);
+                    int argsNeeded = arenaSet ? 3 : 4;
+                    if (args.length >= argsNeeded) {
+                        slots = CWUtil.getInt(arenaSet ? args[2] : args[3]);
                         if (slots <= 1) {
                             sender.sendMessage(Util.formatMsg("&cInvalid slot amount. Must be number and at least 2."));
                             return true;
@@ -273,7 +291,9 @@ public class Commands {
                         slots = 100;
                     }
 
-                    String arena = args[2];
+                    if (arena.isEmpty() && !arenaSet) {
+                        arena = args[2];
+                    }
                     if (!event.getEventClass().checkSetup(event, arena, sender)) {
                         return true;
                     }
@@ -295,7 +315,7 @@ public class Commands {
                     sender.sendMessage(Util.formatMsg("&6Event set to&8: &5" + event.getName()));
                     sender.sendMessage(Util.formatMsg("&6Arena set to&8: &5" + arena));
                     if (slots > 0) {
-                        sender.sendMessage(Util.formatMsg("&6Slots set to&8: &5" + event.getName()));
+                        sender.sendMessage(Util.formatMsg("&6Slots set to&8: &5" + slots));
                     } else {
                         sender.sendMessage(Util.formatMsg("&7No slots are set. Infinite players can join."));
                     }
