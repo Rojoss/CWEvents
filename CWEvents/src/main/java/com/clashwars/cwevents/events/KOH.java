@@ -137,8 +137,8 @@ public class KOH extends BaseEvent {
             return;
         }
         if (em.getPlayers().containsKey(event.getPlayer().getName())) {
-            em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and is out of the game!"));
-            em.leaveEvent(event.getPlayer(), true);
+            em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getName() + " &3died and is out of the game!"));
+            em.spectateEvent(event.getPlayer());
         }
     }
 

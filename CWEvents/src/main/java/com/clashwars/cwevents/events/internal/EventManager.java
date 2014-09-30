@@ -1,7 +1,10 @@
 package com.clashwars.cwevents.events.internal;
 
+import com.clashwars.cwcore.CWCore;
+import com.clashwars.cwcore.helpers.CWItem;
 import com.clashwars.cwevents.CWEvents;
 import com.clashwars.cwevents.Util;
+import com.earth2me.essentials.Essentials;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -18,6 +21,7 @@ public class EventManager {
     private int slots = -1;
     private EventStatus status;
     private Map<String, Integer> players = new HashMap<String, Integer>();
+    private Map<String, SpectateData> spectators = new HashMap<String, SpectateData>();
 
     private List<String> allSpawns = new ArrayList<String>();
     private List<String> spawns = new ArrayList<String>();
@@ -31,6 +35,11 @@ public class EventManager {
         //Make sure the event is joinable.
         if (event == null || arena == null) {
             player.sendMessage(Util.formatMsg("&cThere is no active event set."));
+            return;
+        }
+        if (status == EventStatus.STARTED || status == EventStatus.STARTING || status == EventStatus.ENDED) {
+            player.sendMessage(Util.formatMsg("&cThe game was already started."));
+            spectateEvent(player);
             return;
         }
         if (status != EventStatus.OPEN) {
@@ -99,7 +108,40 @@ public class EventManager {
             updateEventItem();
             return true;
         }
+        if (spectators.containsKey(player.getName())) {
+            resetPlayer(player);
+            player.teleport(player.getWorld().getSpawnLocation());
+            if (force) {
+                player.sendMessage(Util.formatMsg("&cYou have been removed from &4" + event.getName() + "! &cArena&8: &4" + arena));
+            } else {
+                player.sendMessage(Util.formatMsg("&3You have stopped spectating &9" + event.getName() + "! &3Arena&8: &9" + arena));
+                broadcast(Util.formatMsg("&9" + player.getDisplayName() + " &3stopped spectating."));
+            }
+            spectators.remove(player.getName());
+            updateEventItem();
+            return true;
+        }
         return false;
+    }
+
+    public void spectateEvent(Player player) {
+        if (spectators.containsKey(player)) {
+            return;
+        }
+        resetPlayer(player);
+        if (players.containsKey(player.getName())) {
+            leaveEvent(player, true);
+        }
+        spectators.put(player.getName(), new SpectateData(player.getName(), players.values().iterator().next()));
+        cwe.getSpecTeam().addPlayer(player);
+        player.setAllowFlight(true);
+        player.setFlying(true);
+        setVanished(player, true);
+        //TODO: Put player in spectator team.
+        teleportToArena(player, true);
+        updateSpectatorInv(player);
+        player.sendMessage(Util.formatMsg("&3You are now spectating &9" + event.getName() + "! &3Arena&8: &9" + arena));
+        broadcast(Util.formatMsg("&9" + player.getDisplayName() + " &3is now spectating. &8Spectators: &7" + spectators.size()));
     }
 
 
@@ -225,6 +267,14 @@ public class EventManager {
         this.players = players;
     }
 
+    public Map<String, SpectateData> getSpectators() {
+        return spectators;
+    }
+
+    public void setSpectators(Map<String, SpectateData> spectators) {
+        this.spectators = spectators;
+    }
+
 
     public void resetPlayer(Player player) {
 		player.closeInventory();
@@ -243,6 +293,17 @@ public class EventManager {
 		for (PotionEffect effect : player.getActivePotionEffects()) {
 			player.removePotionEffect(effect.getType());
 		}
+        setVanished(player, false);
+        if (cwe.getSpecTeam().getPlayers().contains(player)) {
+            cwe.getSpecTeam().removePlayer(player);
+        }
+    }
+
+    public void setVanished(Player player, boolean vanished) {
+        if (CWCore.inst().GetDM().getEssentials() != null) {
+            Essentials ess = CWCore.inst().GetDM().getEssentials();
+            ess.getUser(player).setVanished(false);
+        }
     }
 
 
@@ -255,6 +316,36 @@ public class EventManager {
         }
     }
 
+    public void updateSpectatorInv(Player player) {
+        if (!spectators.containsKey(player.getName())) {
+            return;
+        }
+        SpectateData data = spectators.get(player.getName());
+        if (data.isFollowing()) {
+            player.getInventory().setItem(0, new CWItem(Material.REDSTONE).setName("&4&lStop Following")
+                    .addLore("&7Stop following this player.").addLore("&7You will be able to move around freely again."));
+        } else {
+            player.getInventory().setItem(0, new CWItem(Material.REDSTONE).setName("&4&lStart Following")
+                    .addLore("&7Click to start following a player.").addLore("&7You will follow the player in your 5th slot."));
+        }
+        int ID = -1;
+        for (String p : players.keySet()) {
+            ID = players.get(p);
+            if (data.getPlayerIndex() == ID) {
+                player.getInventory().setItem(4, new CWItem(Material.SKULL_ITEM).setSkullOwner(p).setName("&6&l" + p)
+                        .addLore("&7This indicates the player you're following or can follow.")
+                        .addLore("&2Left click&8: &aTeleport to this player.").addLore("&9Right click&8: &3Switch to another player."));
+                break;
+            }
+        }
+        player.getInventory().setItem(8, new CWItem(Material.REDSTONE_BLOCK).setName("&4&lStop Spectating")
+                .addLore("&7Use this to stop spectating.").addLore("&7You will be teleported back to the lobby."));
+    }
+
+
+    public void setFollowing(Player player, boolean follow) {
+        spectators.get(player.getName()).setFollowing(follow);
+    }
 
     public void broadcast(String msg) {
         for (Player p : cwe.getServer().getOnlinePlayers()) {
@@ -274,6 +365,15 @@ public class EventManager {
                 p.playSound(p.getLocation(), sound, volume, pitch);
             }
         }
+    }
+
+    public String getPlayerByID(int ID) {
+        for (String player : players.keySet()) {
+            if (players.get(player) == ID) {
+                return player;
+            }
+        }
+        return null;
     }
 
 

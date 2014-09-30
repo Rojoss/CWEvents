@@ -162,9 +162,11 @@ public class Race extends BaseEvent {
                 if (finished.size() == 1) {
                     em.broadcast(Util.formatMsg("&a&l" + player.getName() + " &6wins the race!"));
                     em.playSound(Sound.ORB_PICKUP, 0.8f, 0f);
+                    em.spectateEvent(player);
                 } else {
                     em.broadcast(Util.formatMsg("&5" + player.getName() + " &6finished on place &5" + finished.size() + "&6."));
                     em.playSound(Sound.ORB_PICKUP, 0.4f, 2f);
+                    em.spectateEvent(player);
                 }
                 return;
             }

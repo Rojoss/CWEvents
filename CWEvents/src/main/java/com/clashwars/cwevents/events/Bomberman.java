@@ -210,8 +210,8 @@ public class Bomberman extends BaseEvent {
                             if (obd.getLives() <= 0) {
                                 //No more lives remove player.
                                 otherPlayer.sendMessage(Util.formatMsg("&cYou have no more lives!"));
-                                em.broadcast(Util.formatMsg("&b" + otherPlayer.getDisplayName() + " &3is out of the game!"));
-                                em.leaveEvent(otherPlayer, true);
+                                em.broadcast(Util.formatMsg("&b" + otherPlayer.getName() + " &3is out of the game!"));
+                                em.spectateEvent(otherPlayer);
                             } else {
                                 //More lives tell player and set player invis.
                                 otherPlayer.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 60, 0), true);
@@ -271,11 +271,11 @@ public class Bomberman extends BaseEvent {
 
     private void explodeParticle(Location loc, BlockFace dir) {
         if (dir == BlockFace.NORTH || dir == BlockFace.SOUTH) {
-            ParticleEffect.FLAME.display(loc, 0.25f, 0.2f, 0.35f, 0.005f, 25);
-            ParticleEffect.SMOKE.display(loc, 0.25f, 0.5f, 0.35f, 0.001f, 8);
+            ParticleEffect.FLAME.display(loc, 0.25f, 0.3f, 0.35f, 0.005f, 30);
+            ParticleEffect.SMOKE.display(loc, 0.25f, 0.7f, 0.35f, 0.001f, 8);
         } else {
-            ParticleEffect.FLAME.display(loc, 0.35f, 0.2f, 0.25f, 0.005f, 25);
-            ParticleEffect.SMOKE.display(loc, 0.35f, 0.5f, 0.25f, 0.001f, 8);
+            ParticleEffect.FLAME.display(loc, 0.35f, 0.3f, 0.25f, 0.005f, 30);
+            ParticleEffect.SMOKE.display(loc, 0.35f, 0.7f, 0.25f, 0.001f, 8);
         }
     }
 
