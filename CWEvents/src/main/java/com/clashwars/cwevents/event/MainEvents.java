@@ -8,9 +8,13 @@ import com.clashwars.cwevents.events.internal.EventType;
 import com.clashwars.cwevents.events.internal.SpectateData;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
@@ -140,22 +144,6 @@ public class MainEvents implements Listener {
 
     @EventHandler
     public void move(PlayerMoveEvent event) {
-        if (em == null) {
-            return;
-        }
-        //Make spectators follow players.
-        if (em.getPlayers() != null && em.getPlayers().containsKey(event.getPlayer().getName())) {
-            int ID = em.getPlayers().get(event.getPlayer().getName());
-
-            SpectateData data;
-            for (String player : em.getSpectators().keySet()) {
-                data = em.getSpectators().get(player);
-                if (data.isFollowing() && ID == data.getPlayerIndex()) {
-                    cwe.getServer().getPlayer(player).teleport(event.getPlayer());
-                }
-            }
-        }
-
         //Prevent movement at start.
         if (em.getEvent() != EventType.KOH && em.getEvent() != EventType.RACE) {
             return;
@@ -172,4 +160,5 @@ public class MainEvents implements Listener {
             }
         }
     }
+
 }
