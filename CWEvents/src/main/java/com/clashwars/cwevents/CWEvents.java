@@ -7,6 +7,7 @@ import com.clashwars.cwevents.commands.Commands;
 import com.clashwars.cwevents.config.LocConfig;
 import com.clashwars.cwevents.event.MainEvents;
 import com.clashwars.cwevents.event.PluginMessageEvents;
+import com.clashwars.cwevents.event.SpectateEvents;
 import com.clashwars.cwevents.events.internal.EventManager;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
@@ -75,8 +76,10 @@ public class CWEvents extends JavaPlugin {
         em = new EventManager(this);
 
         sbm = getServer().getScoreboardManager();
-        sb = sbm.getNewScoreboard();
-        sb.registerNewTeam("Spectators");
+        sb = sbm.getMainScoreboard();
+        if (!sb.getTeams().contains("Spectators") && getSpecTeam() == null) {
+            sb.registerNewTeam("Spectators");
+        }
         getSpecTeam().setCanSeeFriendlyInvisibles(true);
         getSpecTeam().setPrefix(CWUtil.integrateColor("&5"));
 
@@ -100,6 +103,7 @@ public class CWEvents extends JavaPlugin {
     private void registerEvents() {
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new MainEvents(this), this);
+        pm.registerEvents(new SpectateEvents(this), this);
         for (EventType event : EventType.values()) {
             if (event.getEventClass() != null) {
                 pm.registerEvents(event.getEventClass(), this);

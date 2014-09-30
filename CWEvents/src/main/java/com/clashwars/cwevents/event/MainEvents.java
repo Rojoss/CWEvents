@@ -21,7 +21,7 @@ public class MainEvents implements Listener {
 
     public MainEvents(CWEvents cwe) {
         this.cwe = cwe;
-        em = em;
+        em = cwe.getEM();
     }
 
     @EventHandler
@@ -75,6 +75,7 @@ public class MainEvents implements Listener {
                 if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
                     if (!em.getSpectators().get(event.getPlayer().getName()).isFollowing()) {
                         if (em.getPlayerByID(data.getPlayerIndex()) != null) {
+                            event.getPlayer().sendMessage(Util.formatMsg("&6Teleported to &5" + em.getPlayerByID(data.getPlayerIndex())));
                             event.getPlayer().teleport(cwe.getServer().getPlayer(em.getPlayerByID(data.getPlayerIndex())));
                         } else {
                             event.getPlayer().sendMessage(Util.formatMsg("&cThis player is no longer in the game."));
@@ -100,8 +101,10 @@ public class MainEvents implements Listener {
                     }
                     if (firstID > 0) {
                         data.setPlayerIndex(firstID);
-                        em.updateSpectatorInv(event.getPlayer());
+                    } else {
+                        event.getPlayer().sendMessage(Util.formatMsg("&cNo other players to switch to."));
                     }
+                    em.updateSpectatorInv(event.getPlayer());
                 }
             }
         }
@@ -137,9 +140,12 @@ public class MainEvents implements Listener {
 
     @EventHandler
     public void move(PlayerMoveEvent event) {
+        if (em == null) {
+            return;
+        }
         //Make spectators follow players.
         if (em.getPlayers() != null && em.getPlayers().containsKey(event.getPlayer().getName())) {
-            int ID = em.getPlayers().get(event.getPlayer().toString());
+            int ID = em.getPlayers().get(event.getPlayer().getName());
 
             SpectateData data;
             for (String player : em.getSpectators().keySet()) {

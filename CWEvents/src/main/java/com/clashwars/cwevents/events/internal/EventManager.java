@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
 
@@ -124,7 +125,7 @@ public class EventManager {
         return false;
     }
 
-    public void spectateEvent(Player player) {
+    public void spectateEvent(final Player player) {
         if (spectators.containsKey(player)) {
             return;
         }
@@ -132,13 +133,19 @@ public class EventManager {
         if (players.containsKey(player.getName())) {
             leaveEvent(player, true);
         }
-        spectators.put(player.getName(), new SpectateData(player.getName(), players.values().iterator().next()));
+        spectators.put(player.getName(), new SpectateData(player.getName(), players.size() > 0 ? players.values().iterator().next() : -1));
         cwe.getSpecTeam().addPlayer(player);
         player.setAllowFlight(true);
         player.setFlying(true);
-        setVanished(player, true);
-        //TODO: Put player in spectator team.
-        teleportToArena(player, true);
+        for (String p : players.keySet()) {
+            cwe.getServer().getPlayer(p).hidePlayer(player);
+        }
+        player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 99999999, 0));
+        cwe.getServer().getScheduler().scheduleSyncDelayedTask(cwe, new Runnable() {
+            public void run() {
+                teleportToArena(player, true);
+            }
+        }, 10L);
         updateSpectatorInv(player);
         player.sendMessage(Util.formatMsg("&3You are now spectating &9" + event.getName() + "! &3Arena&8: &9" + arena));
         broadcast(Util.formatMsg("&9" + player.getDisplayName() + " &3is now spectating. &8Spectators: &7" + spectators.size()));
@@ -293,25 +300,22 @@ public class EventManager {
 		for (PotionEffect effect : player.getActivePotionEffects()) {
 			player.removePotionEffect(effect.getType());
 		}
-        setVanished(player, false);
+        for (Player p : cwe.getServer().getOnlinePlayers()) {
+            p.showPlayer(player);
+            player.showPlayer(p);
+        }
         if (cwe.getSpecTeam().getPlayers().contains(player)) {
             cwe.getSpecTeam().removePlayer(player);
-        }
-    }
-
-    public void setVanished(Player player, boolean vanished) {
-        if (CWCore.inst().GetDM().getEssentials() != null) {
-            Essentials ess = CWCore.inst().GetDM().getEssentials();
-            ess.getUser(player).setVanished(false);
         }
     }
 
 
     public void updateEventItem() {
         for (Player p : cwe.getServer().getOnlinePlayers()) {
-            if (!players.containsKey(p.getName())) {
+            if (!players.containsKey(p.getName()) && !spectators.containsKey(p.getName())) {
                 p.getInventory().setItem(0, cwe.GetEventItem());
                 p.getInventory().setItem(8, cwe.getLeaveItem());
+                p.updateInventory();
             }
         }
     }
@@ -322,29 +326,62 @@ public class EventManager {
         }
         SpectateData data = spectators.get(player.getName());
         if (data.isFollowing()) {
-            player.getInventory().setItem(0, new CWItem(Material.REDSTONE).setName("&4&lStop Following")
+            player.getInventory().setItem(0, new CWItem(Material.INK_SACK, 1, (byte)10).setName("&4&lStop Following")
                     .addLore("&7Stop following this player.").addLore("&7You will be able to move around freely again."));
         } else {
-            player.getInventory().setItem(0, new CWItem(Material.REDSTONE).setName("&4&lStart Following")
+            player.getInventory().setItem(0, new CWItem(Material.INK_SACK, 1, (byte)9).setName("&4&lStart Following")
                     .addLore("&7Click to start following a player.").addLore("&7You will follow the player in your 5th slot."));
         }
         int ID = -1;
+        boolean set = false;
         for (String p : players.keySet()) {
             ID = players.get(p);
             if (data.getPlayerIndex() == ID) {
-                player.getInventory().setItem(4, new CWItem(Material.SKULL_ITEM).setSkullOwner(p).setName("&6&l" + p)
+                player.getInventory().setItem(4, new CWItem(Material.SKULL_ITEM).setName("&6&l" + p)
                         .addLore("&7This indicates the player you're following or can follow.")
-                        .addLore("&2Left click&8: &aTeleport to this player.").addLore("&9Right click&8: &3Switch to another player."));
+                        .addLore("&2Left click&8: &aTeleport to this player.").addLore("&9Right click&8: &3Switch to another player.").setSkullOwner(p));
+                set = true;
                 break;
             }
         }
+        if (!set) {
+            player.getInventory().setItem(4, new CWItem(Material.SKULL_ITEM).setSkullOwner("steve").setName("&4&lNo players")
+                    .addLore("&7There are no players in the game who you can spectate.")
+                    .addLore("&9Right click&8: &3Try switch to another player."));
+            set = true;
+        }
         player.getInventory().setItem(8, new CWItem(Material.REDSTONE_BLOCK).setName("&4&lStop Spectating")
                 .addLore("&7Use this to stop spectating.").addLore("&7You will be teleported back to the lobby."));
+        player.updateInventory();
     }
 
 
     public void setFollowing(Player player, boolean follow) {
-        spectators.get(player.getName()).setFollowing(follow);
+        if (!spectators.containsKey(player.getName())) {
+            return;
+        }
+        SpectateData data = spectators.get(player.getName());
+        Player target = null;
+        if (data.getPlayerIndex() < 0) {
+            player.sendMessage(Util.formatMsg("&cNo player selected."));
+            player.sendMessage(Util.formatMsg("&cYou can try selecting one by right clicking the skull"));
+            return;
+        }
+        if (getPlayerByID(data.getPlayerIndex()) == null) {
+            player.sendMessage(Util.formatMsg("&cInvalid player."));
+        }
+        target = Bukkit.getServer().getPlayer(getPlayerByID(data.getPlayerIndex()));
+        data.setFollowing(follow);
+        if (target != null) {
+            if (follow) {
+                player.sendMessage(Util.formatMsg("&6You are now following &5" + target.getName()));
+                player.teleport(target);
+                player.hidePlayer(target);
+            } else {
+                player.sendMessage(Util.formatMsg("&cYou stopped following &5" + target.getName()));
+                player.showPlayer(target);
+            }
+        }
     }
 
     public void broadcast(String msg) {

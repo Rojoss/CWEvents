@@ -5,16 +5,24 @@ import com.clashwars.cwevents.events.internal.EventManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.player.*;
-import org.bukkit.event.vehicle.*;
+import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerBucketEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.vehicle.VehicleDamageEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.bukkit.event.vehicle.VehicleExitEvent;
 
-public class SpectateEvents {
+public class SpectateEvents implements Listener {
 
     private CWEvents cwe;
     private EventManager em;
@@ -24,7 +32,7 @@ public class SpectateEvents {
         em = cwe.getEM();
     }
 
-    public boolean isSpectating(Player player) {
+    private boolean isSpectating(Player player) {
         if (em == null || em.getSpectators() == null || em.getSpectators().isEmpty() || player == null) {
             return false;
         }
@@ -134,13 +142,6 @@ public class SpectateEvents {
     }
 
     @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onBucketUse(PlayerBucketEvent event) {
-        if (isSpectating(event.getPlayer())) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler (priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onItemPickup(PlayerPickupItemEvent event) {
         if (isSpectating(event.getPlayer())) {
             event.setCancelled(true);
@@ -163,6 +164,4 @@ public class SpectateEvents {
             }
         }
     }
-
-    //TODO: Might need more checks.
 }
