@@ -12,6 +12,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.util.*;
 
 public class EventManager {
@@ -221,68 +223,6 @@ public class EventManager {
     }
 
 
-    public EventType getEvent() {
-        return event;
-    }
-
-    public void setEvent(EventType event) {
-        this.event = event;
-    }
-
-
-    public String getArena() {
-        return arena;
-    }
-
-    public void setArena(String arena) {
-        this.arena = arena;
-    }
-
-
-    public int getSlots() {
-        return slots;
-    }
-
-    public void setSlots(int slots) {
-        this.slots = slots;
-    }
-
-
-    public EventStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(EventStatus status) {
-        this.status = status;
-    }
-
-
-    public List<String> getAllSpawns() {
-        return allSpawns;
-    }
-
-    public List<String> getSpawns() {
-        return spawns;
-    }
-
-
-    public Map<String, Integer> getPlayers() {
-        return players;
-    }
-
-    public void setPlayers(Map<String, Integer> players) {
-        this.players = players;
-    }
-
-    public Map<String, SpectateData> getSpectators() {
-        return spectators;
-    }
-
-    public void setSpectators(Map<String, SpectateData> spectators) {
-        this.spectators = spectators;
-    }
-
-
     public void resetPlayer(Player player) {
 		player.closeInventory();
 		player.resetMaxHealth();
@@ -306,6 +246,42 @@ public class EventManager {
         }
         if (cwe.getSpecTeam().getPlayers().contains(player)) {
             cwe.getSpecTeam().removePlayer(player);
+        }
+    }
+
+
+    public void stopGame(Player winner) {
+        stopGame(winner.getUniqueId());
+    }
+
+    public void stopGame(UUID winner) {
+        OfflinePlayer w = cwe.getServer().getOfflinePlayer(winner);
+        if (winner != null && w != null && w.isOnline()) {
+            ((Player)w).sendMessage(Util.formatMsg("&a&lYou won the game!"));
+            ((Player)w).sendMessage(Util.formatMsg("&6When you join the pvp server you will receive a reward."));
+        }
+
+        setStatus(EventStatus.STOPPED);
+        getEvent().getEventClass().Stop();
+
+        cwe.getStats().syncAllStats();
+
+        //Send winner data to pvp server.
+        if (winner != null) {
+            try {
+                ByteArrayOutputStream b = new ByteArrayOutputStream();
+                DataOutputStream out = new DataOutputStream(b);
+
+                out.writeUTF("queue");
+                out.writeUTF("pvp");
+                out.writeUTF(winner.toString());
+                out.writeUTF("cmd");
+                out.writeUTF("eventreward {PLAYER}");
+
+                Bukkit.getOnlinePlayers()[0].sendPluginMessage(cwe, "CWBungee", b.toByteArray());
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -404,6 +380,7 @@ public class EventManager {
         }
     }
 
+
     public String getPlayerByID(int ID) {
         for (String player : players.keySet()) {
             if (players.get(player) == ID) {
@@ -434,6 +411,8 @@ public class EventManager {
         return priority;
     }
 
+
+
     public String getRegionName(EventType event, String arena, String type) {
         return event.getPreifx() + "_" + arena + "_" + type;
     }
@@ -444,5 +423,67 @@ public class EventManager {
 
     public String getRegionName(String type) {
         return getRegionName(event, arena, type);
+    }
+
+    public EventType getEvent() {
+        return event;
+    }
+
+    public void setEvent(EventType event) {
+        this.event = event;
+    }
+
+
+
+    public String getArena() {
+        return arena;
+    }
+
+    public void setArena(String arena) {
+        this.arena = arena;
+    }
+
+
+    public int getSlots() {
+        return slots;
+    }
+
+    public void setSlots(int slots) {
+        this.slots = slots;
+    }
+
+
+    public EventStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(EventStatus status) {
+        this.status = status;
+    }
+
+
+    public List<String> getAllSpawns() {
+        return allSpawns;
+    }
+
+    public List<String> getSpawns() {
+        return spawns;
+    }
+
+
+    public Map<String, Integer> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(Map<String, Integer> players) {
+        this.players = players;
+    }
+
+    public Map<String, SpectateData> getSpectators() {
+        return spectators;
+    }
+
+    public void setSpectators(Map<String, SpectateData> spectators) {
+        this.spectators = spectators;
     }
 }

@@ -5,6 +5,7 @@ import com.clashwars.cwevents.CWEvents;
 import com.clashwars.cwevents.Util;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
+import com.clashwars.cwevents.stats.Stats;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -169,6 +170,79 @@ public class Commands {
                 return true;
             }
             cwe.joinPvP((Player)sender);
+            return true;
+        }
+
+
+        //STATS COMMAND
+        if (label.equalsIgnoreCase("stats") || label.equalsIgnoreCase("stat")) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(Util.formatMsg("&cThis is a player command only."));
+                return true;
+            }
+            Player player = (Player) sender;
+            EventType eventType = null;
+            OfflinePlayer otherPlayer = null;
+
+            if (args.length > 0) {
+                //Get event filter
+                if (EventType.fromPrefix(args[0]) != null) {
+                    eventType = EventType.fromPrefix(args[0]);
+                } else if (EventType.fromString(args[0]) != null) {
+                    eventType = EventType.fromString(args[0]);
+                }
+                if (!args[0].equalsIgnoreCase("list") &&eventType == null) {
+                    player.sendMessage(Util.formatMsg("&cInvalid player."));
+                    player.sendMessage(Util.formatMsg("&cCommand usage: &7/stats [event|list] [player]"));
+                    return true;
+                }
+
+                //Get player
+                if (args.length > 1) {
+                    otherPlayer = cwe.getServer().getOfflinePlayer(args[1]);
+                    if (otherPlayer != null) {
+                        player.sendMessage(Util.formatMsg("&cInvalid player."));
+                        player.sendMessage(Util.formatMsg("&cCommand usage: &7/stats " + args[0] + " [player]"));
+                        return true;
+                    }
+                }
+            }
+
+            //Get the stats
+            Stats stats = otherPlayer == null ? cwe.getStats().getStats(player) : cwe.getStats().getStats(otherPlayer);
+            if (stats == null) {
+                player.sendMessage(Util.formatMsg("&cNo stats could be found. &c" + otherPlayer == null ? "You" : otherPlayer.getName() + " probably haven't played any events or it hasn't synced yet."));
+                return true;
+            }
+
+            //Display stats
+            player.sendMessage(CWUtil.integrateColor("&8========== &4&l" + otherPlayer == null ? "Your" : (otherPlayer.getName() + "'s") + " &4event stats &8=========="));
+            if (eventType == null || eventType == EventType.SPLEEF) {
+                player.sendMessage(CWUtil.integrateColor("&6&lSpleef &8[&a" + stats.getSpleefGamesPlayed() + " &7games&8]"));
+                player.sendMessage(CWUtil.integrateColor("&8- Wins&8: &5" + stats.getSpleefWins()));
+                player.sendMessage(CWUtil.integrateColor("&8- Blocks spleefed&8: &5" + stats.getSpleefBlocks()));
+                player.sendMessage(CWUtil.integrateColor("&8- Snowballs farmed&8: &5" + stats.getSpleefSnowballsFarmed()));
+            }
+            if (eventType == null || eventType == EventType.RACE) {
+                player.sendMessage(CWUtil.integrateColor("&6&lRace &8[&a" + stats.getRaceGamesPlayed() + " &7games&8]"));
+                player.sendMessage(CWUtil.integrateColor("&8- Wins&8: &5" + stats.getRaceWins()));
+                player.sendMessage(CWUtil.integrateColor("&8- Deaths&8: &5" + stats.getRaceDeaths()));
+                player.sendMessage(CWUtil.integrateColor("&8- Lasso uses&8: &5" + stats.getRaceLassoUses()));
+            }
+            if (eventType == null || eventType == EventType.KOH) {
+                player.sendMessage(CWUtil.integrateColor("&6&lKOH &8[&a" + stats.getKohGamesPlayed() + " &7games&8]"));
+                player.sendMessage(CWUtil.integrateColor("&8- Wins&8: &5" + stats.getKohWins()));
+                player.sendMessage(CWUtil.integrateColor("&8- Kills&8: &5" + stats.getKohKills()));
+                player.sendMessage(CWUtil.integrateColor("&8- Deaths&8: &5" + stats.getKohDeaths()));
+            }
+            if (eventType == null || eventType == EventType.BOMBERMAN) {
+                player.sendMessage(CWUtil.integrateColor("&6&lBomberman &8[&a" + stats.getBombermanGamesPlayed() + " &7games&8]"));
+                player.sendMessage(CWUtil.integrateColor("&8- Wins&8: &5" + stats.getKohWins()));
+                player.sendMessage(CWUtil.integrateColor("&8- Kills&8: &5" + stats.getBombermanKills()));
+                player.sendMessage(CWUtil.integrateColor("&8- Deaths&8: &5" + stats.getBombermanDeaths()));
+                player.sendMessage(CWUtil.integrateColor("&8- Bombs placed&8: &5" + stats.getBombermanBombsPlaced()));
+                player.sendMessage(CWUtil.integrateColor("&8- Powerups used&8: &5" + stats.getBombermanPowerups()));
+            }
             return true;
         }
 
@@ -426,34 +500,8 @@ public class Commands {
                     sender.sendMessage(Util.formatMsg("&6Stopped &5" + activeEvent.getName() + " &6arena &5" + activeArena + "&6."));
                     if (winner != null) {
                         sender.sendMessage(Util.formatMsg("&6Winner set to &a&l" + w.getName() + " &7(&8" + winner.toString() + "&7)"));
-                        if (w!= null && w.isOnline()) {
-                            ((Player)w).sendMessage(Util.formatMsg("&a&lYou won the game!"));
-                            ((Player)w).sendMessage(Util.formatMsg("&6When you join the pvp server you will receive a reward."));
-                        }
                     }
-
-                    cwe.getEM().setStatus(EventStatus.STOPPED);
-                    activeEvent.getEventClass().Stop();
-
-                    //Send winner data to pvp server.
-                    if (winner != null) {
-                        try {
-                            ByteArrayOutputStream b = new ByteArrayOutputStream();
-                            DataOutputStream out = new DataOutputStream(b);
-
-                            out.writeUTF("queue");
-                            out.writeUTF("pvp");
-                            out.writeUTF(winner.toString());
-                            out.writeUTF("cmd");
-                            out.writeUTF("eventreward {PLAYER}");
-
-                            Bukkit.getOnlinePlayers()[0].sendPluginMessage(cwe, "CWBungee", b.toByteArray());
-                        } catch (Throwable e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    cwe.getEM().updateEventItem();
+                    cwe.getEM().stopGame(winner);
                     return true;
                 }
             }

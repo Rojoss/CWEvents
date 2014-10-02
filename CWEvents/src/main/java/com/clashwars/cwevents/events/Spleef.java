@@ -62,6 +62,9 @@ public class Spleef extends BaseEvent {
     @SuppressWarnings("deprecation")
     public void Begin() {
         CWWorldGuard.setFlag(world, em.getRegionName("floor"), DefaultFlag.BUILD, "allow");
+        for (String p : em.getPlayers().keySet()) {
+            cwe.getStats().getLocalStats(p).incSpleefGamesPlayed(1);
+        }
     }
 
     public void Stop() {
@@ -101,9 +104,11 @@ public class Spleef extends BaseEvent {
         event.setCancelled(true);
         player.getWorld().spawnFallingBlock(block.getLocation(), Material.SNOW_BLOCK, (byte) 0).setDropItem(false);
         block.setType(Material.AIR);
+        cwe.getStats().getLocalStats(player).incSpleefBlocks(1);
         //Give snowball
         float randomFloat = random.nextFloat();
         if (randomFloat <= 0.1f) {
+            cwe.getStats().getLocalStats(player).incSpleefSnowballsFarmed(1);
             player.getInventory().addItem(new ItemStack(Material.SNOW_BALL, 1));
         }
     }
@@ -147,6 +152,12 @@ public class Spleef extends BaseEvent {
             if (event.getCause() == DamageCause.LAVA || (event.getCause() == DamageCause.FALL && event.getDamage() >= 2)) {
                 em.broadcast(Util.formatMsg("&b&l" + player.getName() + " &3fell and is out!"));
                 em.spectateEvent(player);
+            }
+            if (em.getPlayers().size() == 1) {
+                Player winner = cwe.getServer().getPlayer(em.getPlayers().keySet().iterator().next());
+                cwe.getStats().getLocalStats(winner).incSpleefWins(1);
+                em.broadcast(Util.formatMsg("&a&l" + winner.getName() + " &6is the last player alive and wins!"));
+                em.stopGame(winner);
             }
         } else {
             em.teleportToArena(player, false);

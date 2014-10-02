@@ -11,6 +11,9 @@ import com.clashwars.cwevents.event.SpectateEvents;
 import com.clashwars.cwevents.events.internal.EventManager;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
+import com.clashwars.cwevents.sql.MySql;
+import com.clashwars.cwevents.config.SqlInfo;
+import com.clashwars.cwevents.stats.StatsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,6 +30,7 @@ import org.bukkit.scoreboard.Team;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.sql.Connection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -36,7 +40,12 @@ public class CWEvents extends JavaPlugin {
 
     private Commands cmds;
     private EventManager em;
+    private StatsManager stats;
+
     private LocConfig locCfg;
+
+    private MySql sql = null;
+    private Connection c = null;
 
     private ScoreboardManager sbm;
     private Scoreboard sb;
@@ -50,6 +59,7 @@ public class CWEvents extends JavaPlugin {
                 em.leaveEvent(getServer().getPlayer(p), true);
             }
         }
+        stats.syncAllStats();
         em.setStatus(EventStatus.CLOSED);
         em.setArena(null);
         em.setEvent(null);
@@ -67,6 +77,17 @@ public class CWEvents extends JavaPlugin {
         }
 
         instance = this;
+
+        SqlInfo sqli = new SqlInfo("plugins/CWEvents/sql.yml");
+        sqli.load();
+
+        sql = new MySql(this, sqli.getAddress(), sqli.getPort(), sqli.getDb(), sqli.getUser(), sqli.getPass());
+        c = sql.openConnection();
+        if (c == null) {
+            log("Can't connect to database!");
+            getPluginLoader().disablePlugin(this);
+            return;
+        }
 
         locCfg = new LocConfig("plugins/CWEvents/locs.yml");
         locCfg.load();
@@ -90,12 +111,14 @@ public class CWEvents extends JavaPlugin {
         registerEvents();
         registerChannels();
 
+        stats = new StatsManager(this);
+        stats.syncAllStats();
+
         for (Player p : getServer().getOnlinePlayers()) {
             em.resetPlayer(p);
             p.teleport(p.getWorld().getSpawnLocation());
         }
         em.updateEventItem();
-
 
         log("Successfully enabled.");
     }
@@ -151,6 +174,14 @@ public class CWEvents extends JavaPlugin {
 
     public EventManager getEM() {
         return em;
+    }
+
+    public StatsManager getStats() {
+        return stats;
+    }
+
+    public Connection getSql() {
+        return c;
     }
 
     public Scoreboard getSB() {

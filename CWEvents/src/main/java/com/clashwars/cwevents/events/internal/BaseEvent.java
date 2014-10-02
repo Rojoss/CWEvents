@@ -61,6 +61,7 @@ public class BaseEvent implements Listener {
         for (String p : playerClone) {
             em.leaveEvent(cwe.getServer().getPlayer(p), true);
         }
+        cwe.getStats().syncAllStats();
     }
 
     public void onPlayerLeft(Player player) {

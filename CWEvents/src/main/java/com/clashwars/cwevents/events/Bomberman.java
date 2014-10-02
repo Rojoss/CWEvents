@@ -126,6 +126,9 @@ public class Bomberman extends BaseEvent {
     public void Open() {
         Reset();
         super.Open();
+        for (String p : em.getPlayers().keySet()) {
+            cwe.getStats().getLocalStats(p).incBombermanGamesPlayed(1);
+        }
     }
 
     public void Start() {
@@ -204,14 +207,24 @@ public class Bomberman extends BaseEvent {
                                 continue;
                             }
 
-                            em.broadcast(Util.formatMsg("&4" + otherPlayer.getDisplayName() + " &cwas exploded by &4" + player.getName() + "&4's &cbomb! &8[&4" + (obd.getLives() - 1) + "❤&8]"));
+                            em.broadcast(Util.formatMsg("&4" + otherPlayer.getDisplayName() + " &cwas exploded by &4" + player.getName() + "&4's &cbomb! &4" + (obd.getLives() - 1) + "❤"));
                             obd.setLives(obd.getLives() - 1);
+                            cwe.getStats().getLocalStats(otherPlayer).incBombermanDeaths(1);
+                            cwe.getStats().getLocalStats(player).incBombermanKills(1);
 
                             if (obd.getLives() <= 0) {
                                 //No more lives remove player.
                                 otherPlayer.sendMessage(Util.formatMsg("&cYou have no more lives!"));
                                 em.broadcast(Util.formatMsg("&b" + otherPlayer.getName() + " &3is out of the game!"));
                                 em.spectateEvent(otherPlayer);
+
+                                //If one player remaining end the game.
+                                if (em.getPlayers().size() == 1) {
+                                    Player winner = cwe.getServer().getPlayer(em.getPlayers().keySet().iterator().next());
+                                    cwe.getStats().getLocalStats(winner).incBombermanWins(1);
+                                    em.broadcast(Util.formatMsg("&a&l" + winner.getName() + " &6is the last player alive and wins!"));
+                                    em.stopGame(winner);
+                                }
                             } else {
                                 //More lives tell player and set player invis.
                                 otherPlayer.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 60, 0), true);
@@ -318,6 +331,7 @@ public class Bomberman extends BaseEvent {
             return;
         }
         event.setCancelled(false);
+        cwe.getStats().getLocalStats(player).incBombermanBombsPlaced(1);
         new BombRunnable(this, player, event.getBlock().getLocation().add(0.5f, 0.5f, 0.5f), bombData.get(player.getName()).getFuseTime()).runTaskTimer(cwe, 0, 1);
     }
 
@@ -356,6 +370,7 @@ public class Bomberman extends BaseEvent {
             powerup = allPowerups.get(key);
             if (powerup.getType() == item.getType()) {
                 if (item.hasItemMeta() && item.getItemMeta().getDisplayName() != null && item.getItemMeta().getLore().size() > 0) {
+                    cwe.getStats().getLocalStats(player).incBombermanPowerups(1);
                     player.sendMessage(CWUtil.integrateColor("&6&lPowerup!!! &a&l" + powerup.getItemMeta().getDisplayName() + " &8- &7" + item.getItemMeta().getLore()));
                     if (key.equals("life")) {
                         bd.setLives(bd.getLives() + 1);

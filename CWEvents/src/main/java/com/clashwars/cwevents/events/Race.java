@@ -23,6 +23,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import java.util.List;
 public class Race extends BaseEvent {
 
     private List<String> finished = new ArrayList<String>();
+    private Player winner;
     private CooldownManager cdm;
 
 
@@ -55,7 +57,6 @@ public class Race extends BaseEvent {
     public void Open() {
         Reset();
         super.Open();
-
     }
 
     public void Start() {
@@ -64,6 +65,10 @@ public class Race extends BaseEvent {
 
     public void Begin() {
         finished.clear();
+        winner = null;
+        for (String p : em.getPlayers().keySet()) {
+            cwe.getStats().getLocalStats(p).incRaceGamesPlayed(1);
+        }
     }
 
     public void Stop() {
@@ -120,6 +125,7 @@ public class Race extends BaseEvent {
         target.setVelocity(new Vector(dir.getX() * 1.4, 0.35f, dir.getZ() * 1.4));
         world.playSound(target.getLocation(), Sound.BAT_TAKEOFF, 1.0f, 1.5f);
         ParticleEffect.CRIT.display(target.getLocation(), 0.5f, 1.0f, 0.5f, 0.001f, 50);
+        cwe.getStats().getLocalStats(player).incRaceLassoUses(1);
     }
 
     @EventHandler
@@ -137,6 +143,7 @@ public class Race extends BaseEvent {
             public void run() {
                 em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and has to start over again!"));
                 em.teleportToArena(event.getPlayer(), false);
+                cwe.getStats().getLocalStats(event.getPlayer()).incRaceDeaths(1);
             }
         }, 20L);
     }
@@ -161,12 +168,34 @@ public class Race extends BaseEvent {
                 finished.add(player.getName());
                 if (finished.size() == 1) {
                     em.broadcast(Util.formatMsg("&a&l" + player.getName() + " &6wins the race!"));
+                    em.broadcast(Util.formatMsg("&6Other players have 30 seconds to finish!"));
+                    cwe.getStats().getLocalStats(player).incRaceWins(1);
                     em.playSound(Sound.ORB_PICKUP, 0.8f, 0f);
                     em.spectateEvent(player);
+
+                    //After 30 seconds end the game if it hasn't ended yet.
+                    winner = player;
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            if (em.getStatus() != null && em.getStatus() == EventStatus.STARTED) {
+                                cwe.getStats().getLocalStats(winner).incRaceWins(1);
+                                em.broadcast(Util.formatMsg("&6Time ran out. &a" + winner.getName() + " &6wins!"));
+                                em.stopGame(winner);
+                            }
+                        }
+                    }.runTaskLater(cwe, 30);
                 } else {
                     em.broadcast(Util.formatMsg("&5" + player.getName() + " &6finished on place &5" + finished.size() + "&6."));
                     em.playSound(Sound.ORB_PICKUP, 0.4f, 2f);
                     em.spectateEvent(player);
+
+                    //End game if all players finished.
+                    if (em.getPlayers().size() == finished.size()) {
+                        cwe.getStats().getLocalStats(winner).incRaceWins(1);
+                        em.broadcast(Util.formatMsg("&6All players finished! &a" + winner.getName() + " &6wins!"));
+                        em.stopGame(winner);
+                    }
                 }
                 return;
             }

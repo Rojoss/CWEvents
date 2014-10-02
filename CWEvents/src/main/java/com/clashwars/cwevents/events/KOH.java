@@ -16,6 +16,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
@@ -60,6 +62,10 @@ public class KOH extends BaseEvent {
     public void Begin() {
         kohRunnable = new KohRunnable(this);
         kohRunnable.runTaskTimer(cwe, 0 , 20);
+
+        for (String p : em.getPlayers().keySet()) {
+            cwe.getStats().getLocalStats(p).incKohGamesPlayed(1);
+        }
 
         cwe.getServer().getScheduler().scheduleSyncDelayedTask(cwe, new Runnable() {
             public void run() {
@@ -125,21 +131,40 @@ public class KOH extends BaseEvent {
 
     public void capture(Player capturer) {
         em.broadcast(Util.formatMsg("&a&l" + capturer.getName() + " &6&lis the king of the hill!"));
-        em.setStatus(EventStatus.ENDED);
+        cwe.getStats().getLocalStats(capturer).incKohWins(1);
+        em.stopGame(capturer);
     }
 
     @EventHandler
-    public void respawn(PlayerRespawnEvent event) {
+    public void respawn(final PlayerRespawnEvent event) {
         if (em.getEvent() != EventType.KOH) {
             return;
         }
         if (em.getStatus() != EventStatus.STARTED && em.getStatus() != EventStatus.ENDED) {
             return;
         }
-        if (em.getPlayers().containsKey(event.getPlayer().getName())) {
-            em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getName() + " &3died and is out of the game!"));
-            em.spectateEvent(event.getPlayer());
+        if (!em.getPlayers().containsKey(event.getPlayer().getName())) {
+            return;
         }
+        cwe.getServer().getScheduler().scheduleSyncDelayedTask(cwe, new Runnable() {
+            public void run() {
+                em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getName() + " &3died and has to start over again!"));
+                em.teleportToArena(event.getPlayer(), false);
+                cwe.getStats().getLocalStats(event.getPlayer()).incKohDeaths(1);
+            }
+        }, 20L);
+    }
+
+    @EventHandler
+    public void kill(PlayerDeathEvent event) {
+        if (event.getEntity() == null || event.getEntity().getKiller() == null) {
+            return;
+        }
+        Player killer = event.getEntity().getKiller();
+        if (!em.getPlayers().containsKey(killer.getName())) {
+            return;
+        }
+        cwe.getStats().getLocalStats(killer).incKohKills(1);
     }
 
     @EventHandler

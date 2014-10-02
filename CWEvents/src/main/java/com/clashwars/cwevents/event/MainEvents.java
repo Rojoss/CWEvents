@@ -1,5 +1,6 @@
 package com.clashwars.cwevents.event;
 
+import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.CWEvents;
 import com.clashwars.cwevents.Util;
 import com.clashwars.cwevents.events.internal.EventManager;
@@ -8,6 +9,8 @@ import com.clashwars.cwevents.events.internal.EventType;
 import com.clashwars.cwevents.events.internal.SpectateData;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrownPotion;
@@ -18,6 +21,10 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.HashMap;
+import java.util.UUID;
 
 public class MainEvents implements Listener {
     private CWEvents cwe;
@@ -47,6 +54,42 @@ public class MainEvents implements Listener {
 
     @EventHandler
     public void interact(PlayerInteractEvent event) {
+        //Sign interaction
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            Block block = event.getClickedBlock();
+            if (block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN_POST) {
+                Sign sign = (Sign) block.getState();
+                for (String lineTxt : sign.getLines()) {
+                    lineTxt = CWUtil.stripAllColor(lineTxt);
+                    if (lineTxt.equalsIgnoreCase("&5[LEAVE]")) {
+                        cwe.joinPvP(event.getPlayer());
+                        return;
+                    }
+                    if (lineTxt.equalsIgnoreCase("&5[JOIN]")) {
+                        if (em.getStatus() != null) {
+                            if (em.getStatus() == EventStatus.STARTED || em.getStatus() == EventStatus.STARTING || em.getStatus() == EventStatus.ENDED) {
+                                em.spectateEvent(event.getPlayer());
+                            } else {
+                                em.joinEvent(event.getPlayer());
+                            }
+                        } else {
+                            event.getPlayer().sendMessage(Util.formatMsg("&cThere is no active event set right now."));
+                            event.getPlayer().sendMessage(Util.formatMsg("&cEvents are hosted by staff and you can only play them when they are hosted."));
+                        }
+                        return;
+                    }
+                    if (lineTxt.equalsIgnoreCase("&5[STATS]")) {
+                        cwe.getServer().dispatchCommand(event.getPlayer(), "stats");
+                        return;
+                    }
+                }
+                return;
+            }
+        }
+
+
+
+        //Item interaction
         ItemStack item = event.getItem();
         if (event.getItem() == null) {
             return;
