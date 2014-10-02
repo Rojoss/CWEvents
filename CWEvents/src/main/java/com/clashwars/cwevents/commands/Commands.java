@@ -192,7 +192,7 @@ public class Commands {
                     eventType = EventType.fromString(args[0]);
                 }
                 if (!args[0].equalsIgnoreCase("list") &&eventType == null) {
-                    player.sendMessage(Util.formatMsg("&cInvalid player."));
+                    player.sendMessage(Util.formatMsg("&cInvalid event name."));
                     player.sendMessage(Util.formatMsg("&cCommand usage: &7/stats [event|list] [player]"));
                     return true;
                 }
@@ -200,7 +200,7 @@ public class Commands {
                 //Get player
                 if (args.length > 1) {
                     otherPlayer = cwe.getServer().getOfflinePlayer(args[1]);
-                    if (otherPlayer != null) {
+                    if (otherPlayer == null) {
                         player.sendMessage(Util.formatMsg("&cInvalid player."));
                         player.sendMessage(Util.formatMsg("&cCommand usage: &7/stats " + args[0] + " [player]"));
                         return true;
@@ -209,6 +209,11 @@ public class Commands {
             }
 
             //Get the stats
+            if (cwe.getStats() == null) {
+                player.sendMessage(Util.formatMsg("&cNo stats could be loaded."));
+                player.sendMessage(Util.formatMsg("&cPlease try again later."));
+                return true;
+            }
             Stats stats = otherPlayer == null ? cwe.getStats().getStats(player) : cwe.getStats().getStats(otherPlayer);
             if (stats == null) {
                 player.sendMessage(Util.formatMsg("&cNo stats could be found. &c" + otherPlayer == null ? "You" : otherPlayer.getName() + " probably haven't played any events or it hasn't synced yet."));
@@ -216,7 +221,7 @@ public class Commands {
             }
 
             //Display stats
-            player.sendMessage(CWUtil.integrateColor("&8========== &4&l" + otherPlayer == null ? "Your" : (otherPlayer.getName() + "'s") + " &4event stats &8=========="));
+            player.sendMessage(CWUtil.integrateColor("&8========== &4&l" + (otherPlayer == null ? "Your" : (otherPlayer.getName() + "'s")) + " &4event stats &8=========="));
             if (eventType == null || eventType == EventType.SPLEEF) {
                 player.sendMessage(CWUtil.integrateColor("&6&lSpleef &8[&a" + stats.getSpleefGamesPlayed() + " &7games&8]"));
                 player.sendMessage(CWUtil.integrateColor("&8- Wins&8: &5" + stats.getSpleefWins()));
@@ -237,7 +242,7 @@ public class Commands {
             }
             if (eventType == null || eventType == EventType.BOMBERMAN) {
                 player.sendMessage(CWUtil.integrateColor("&6&lBomberman &8[&a" + stats.getBombermanGamesPlayed() + " &7games&8]"));
-                player.sendMessage(CWUtil.integrateColor("&8- Wins&8: &5" + stats.getKohWins()));
+                player.sendMessage(CWUtil.integrateColor("&8- Wins&8: &5" + stats.getBombermanWins()));
                 player.sendMessage(CWUtil.integrateColor("&8- Kills&8: &5" + stats.getBombermanKills()));
                 player.sendMessage(CWUtil.integrateColor("&8- Deaths&8: &5" + stats.getBombermanDeaths()));
                 player.sendMessage(CWUtil.integrateColor("&8- Bombs placed&8: &5" + stats.getBombermanBombsPlaced()));

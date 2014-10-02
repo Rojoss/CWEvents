@@ -1,8 +1,9 @@
 package com.clashwars.cwevents.stats;
 
 import com.clashwars.cwevents.CWEvents;
-import com.google.gson.Gson;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 import org.bukkit.entity.Player;
 
 import java.sql.ResultSet;
@@ -98,14 +99,14 @@ public class StatsManager {
             }
         }
         //Update local stats with the merged stats.
-        allStats = mergedStats;
+        allStats = new HashMap<UUID, Stats>(mergedStats);
         localStats.clear();
 
         //Insert new users to database.
         for (UUID uuid : newSqlUsers) {
             try {
                 Statement statement = cwe.getSql().createStatement();
-                statement.executeUpdate("INSERT INTO Stats (UUID, Stats) VALUES ('" + uuid.toString() + "', '" + gson.toJson(mergedStats.get(uuid)) + "');");
+                statement.executeUpdate("INSERT INTO Stats (UUID, Name, Stats) VALUES ('" + uuid.toString() + "', '" + cwe.getServer().getOfflinePlayer(uuid).getName() + "', '" + gson.toJson(mergedStats.get(uuid)) + "');");
             } catch (SQLException e) {
                 cwe.log("Can't connect to database. User " + uuid + " not inserted.");
                 e.printStackTrace();
@@ -149,11 +150,11 @@ public class StatsManager {
     //Returns null if not found.
     //These stats should only be used to read values as modifying them wont modify them in the database.
     public Stats geStats(String player) {
-        return getLocalStats(cwe.getServer().getPlayer(player).getUniqueId());
+        return getStats(cwe.getServer().getPlayer(player).getUniqueId());
     }
 
     public Stats getStats(OfflinePlayer player) {
-        return getLocalStats(player.getUniqueId());
+        return getStats(player.getUniqueId());
     }
 
     public Stats getStats(UUID uuid) {

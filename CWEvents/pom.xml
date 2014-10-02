@@ -28,6 +28,13 @@
             <type>jar</type>
         </dependency>
         <dependency>
+            <groupId>org.bukkit.craftbukkit</groupId>
+            <artifactId>craftbukkit</artifactId>
+            <version>1.7.2-R0.3</version>
+            <scope>compile</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
             <groupId>com.clashwars</groupId>
             <artifactId>CWCore</artifactId>
             <version>1.0</version>
@@ -54,12 +61,6 @@
             <version>2.13-SNAPSHOT</version>
             <scope>compile</scope>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.3</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

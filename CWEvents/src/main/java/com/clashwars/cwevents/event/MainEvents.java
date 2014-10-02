@@ -60,7 +60,7 @@ public class MainEvents implements Listener {
             if (block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN_POST) {
                 Sign sign = (Sign) block.getState();
                 for (String lineTxt : sign.getLines()) {
-                    lineTxt = CWUtil.stripAllColor(lineTxt);
+                    lineTxt = CWUtil.removeColour(lineTxt);
                     if (lineTxt.equalsIgnoreCase("&5[LEAVE]")) {
                         cwe.joinPvP(event.getPlayer());
                         return;

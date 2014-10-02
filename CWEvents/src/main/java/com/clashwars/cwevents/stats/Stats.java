@@ -27,13 +27,6 @@ public class Stats {
     public Stats() {
     }
 
-    public Stats(int koh_gamesPlayed, int koh_wins, int koh_kills, int koh_deaths) {
-        this.koh_gamesPlayed = koh_gamesPlayed;
-        this.koh_wins = koh_wins;
-        this.koh_kills = koh_kills;
-        this.koh_deaths = koh_deaths;
-    }
-
     // KOH
     public int getKohGamesPlayed() {
         return koh_gamesPlayed;
