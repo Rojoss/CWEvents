@@ -12,8 +12,8 @@ public class BombermanData {
 
     public BombermanData(String playerName) {
         this.setPlayerName(playerName);
-        lives = 3;
-        fuseTime = 80;
+        lives = 1;
+        fuseTime = 60;
         explosionSize = 1;
         speed = 0;
         bombs = 1;

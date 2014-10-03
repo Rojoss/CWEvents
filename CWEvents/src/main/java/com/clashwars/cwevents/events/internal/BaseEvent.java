@@ -57,6 +57,10 @@ public class BaseEvent implements Listener {
         for (String p : playerClone) {
             em.leaveEvent(cwe.getServer().getPlayer(p), true);
         }
+        Set<String> spectatorClone = new HashSet<String>(em.getSpectators().keySet());
+        for (String p : spectatorClone) {
+            em.leaveEvent(cwe.getServer().getPlayer(p), true);
+        }
     }
 
     public void Start() {
@@ -72,6 +76,10 @@ public class BaseEvent implements Listener {
         em.broadcast(Util.formatMsg("&cThe game has been stopped/ended!"));
         Set<String> playerClone = new HashSet<String>(em.getPlayers().keySet());
         for (String p : playerClone) {
+            em.leaveEvent(cwe.getServer().getPlayer(p), true);
+        }
+        Set<String> spectatorClone = new HashSet<String>(em.getSpectators().keySet());
+        for (String p : spectatorClone) {
             em.leaveEvent(cwe.getServer().getPlayer(p), true);
         }
         cwe.getStats().syncAllStats();

@@ -82,7 +82,7 @@ public class Race extends BaseEvent {
 
     public void onPlayerJoin(Player player) {
         player.getInventory().addItem(new CWItem(Material.LEASH, 1, (short) 0, "&6&lLasso", new String[]{"&7Use this on other players.", "&7It will pull them towards you!"}));
-        player.getInventory().addItem(new CWItem(Material.POTION, 3, (short)1897).setName("c6&lHealing potion").addLore("&7Get &c3 hearts &7back.").addLore("&7Also stops &6fire&7!"));
+        player.getInventory().addItem(new CWItem(Material.POTION, 3, (short)1897).setName("&6&lHealing potion").addLore("&7Get &c3 hearts &7back.").addLore("&7Also stops &6fire&7!"));
 
         //Random colored boots.
         ItemStack boots = new ItemStack(Material.LEATHER_BOOTS, 1);
@@ -204,22 +204,25 @@ public class Race extends BaseEvent {
                         @Override
                         public void run() {
                             if (em.getStatus() != null && em.getStatus() == EventStatus.STARTED) {
-                                cwe.getStats().getLocalStats(winner).incRaceWins(1);
                                 em.broadcast(Util.formatMsg("&6Time ran out. &a" + winner.getName() + " &6wins!"));
                                 em.stopGame(winner);
                             }
                         }
-                    }.runTaskLater(cwe, 30);
+                    }.runTaskLater(cwe, 600L);
                 } else {
                     em.broadcast(Util.formatMsg("&5" + player.getName() + " &6finished on place &5" + finished.size() + "&6."));
                     em.playSound(Sound.ORB_PICKUP, 0.4f, 2f);
                     em.spectateEvent(player);
 
                     //End game if all players finished.
-                    if (em.getPlayers().size() == finished.size()) {
-                        cwe.getStats().getLocalStats(winner).incRaceWins(1);
+                    if (em.getPlayers().size() == 0) {
                         em.broadcast(Util.formatMsg("&6All players finished! &a" + winner.getName() + " &6wins!"));
-                        em.stopGame(winner);
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                em.stopGame(winner);
+                            }
+                        }.runTaskLater(cwe, 30L);
                     }
                 }
                 return;

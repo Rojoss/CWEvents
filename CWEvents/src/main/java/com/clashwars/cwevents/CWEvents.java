@@ -67,6 +67,12 @@ public class CWEvents extends JavaPlugin {
                 em.leaveEvent(getServer().getPlayer(p), true);
             }
         }
+        Set<String> spectatorClone = new HashSet<String>(em.getSpectators().keySet());
+        for (String p : spectatorClone) {
+            if (getServer().getPlayer(p) != null) {
+                em.leaveEvent(getServer().getPlayer(p), true);
+            }
+        }
         stats.syncAllStats();
 
         if (lobbyHologram != null) {
@@ -252,11 +258,9 @@ public class CWEvents extends JavaPlugin {
     }
 
     public void updateHologram() {
-        Bukkit.broadcastMessage("Update hologram");
         if (lobbyHologram == null) {
             return;
         }
-        Bukkit.broadcastMessage("Update hologram2");
         lobbyHologram.teleport(getLoc("hologram_lobby"));
         lobbyHologram.clearLines();
         lobbyHologram.addLine(CWUtil.integrateColor("&5&l✦&d&l✦&5&l✦ &6&lEVENT STATUS &5&l✦&d&l✦&5&l✦"));
@@ -303,6 +307,6 @@ public class CWEvents extends JavaPlugin {
         return new CWItem(Material.REDSTONE_BLOCK, 1, (short) 0, "&4&lLeave Events").addLore("&7Go back to the PvP server!!");
     }
     public CWItem getStatsItem() {
-        return new CWItem(Material.WRITTEN_BOOK, 1, (short) 0, "&5&lStatss").addLore("&7Check your stats!!");
+        return new CWItem(Material.WRITTEN_BOOK, 1, (short) 0, "&5&lStats").addLore("&7Check your stats!!");
     }
 }

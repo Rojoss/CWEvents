@@ -230,6 +230,7 @@ public class EventManager {
 		player.setSaturation(9999);
 		player.setFireTicks(0);
 		player.setGameMode(GameMode.SURVIVAL);
+        player.setAllowFlight(false);
 		player.setFlying(false);
 		player.getInventory().clear();
 		player.getInventory().setHelmet(new ItemStack(Material.AIR));
@@ -292,6 +293,7 @@ public class EventManager {
         for (Player p : cwe.getServer().getOnlinePlayers()) {
             if (!players.containsKey(p.getName()) && !spectators.containsKey(p.getName())) {
                 p.getInventory().setItem(0, cwe.GetEventItem());
+                p.getInventory().setItem(4, cwe.getStatsItem());
                 p.getInventory().setItem(8, cwe.getLeaveItem());
                 p.updateInventory();
             }
@@ -347,8 +349,13 @@ public class EventManager {
         }
         if (getPlayerByID(data.getPlayerIndex()) == null) {
             player.sendMessage(Util.formatMsg("&cInvalid player."));
+            return;
         }
         target = Bukkit.getServer().getPlayer(getPlayerByID(data.getPlayerIndex()));
+        if (target == null) {
+            player.sendMessage(Util.formatMsg("&cInvalid player."));
+            return;
+        }
         data.setFollowing(follow);
         if (target != null) {
             if (follow) {
@@ -363,18 +370,19 @@ public class EventManager {
     }
 
     public void broadcast(String msg) {
-        for (Player p : cwe.getServer().getOnlinePlayers()) {
+        cwe.getServer().broadcastMessage(msg);
+        /*for (Player p : cwe.getServer().getOnlinePlayers()) {
             if (players.containsKey(p.getName())) {
                 p.sendMessage(msg);
             } else if (p.hasPermission("event.notifiy") || p.isOp()) {
                 p.sendMessage(msg);
             }
-        }
+        }*/
     }
 
     public void playSound(Sound sound, float volume, float pitch) {
         for (Player p : cwe.getServer().getOnlinePlayers()) {
-            if (players.containsKey(p.getName())) {
+            if (players.containsKey(p.getName()) || spectators.containsKey(p.getName())) {
                 p.playSound(p.getLocation(), sound, volume, pitch);
             } else if (p.hasPermission("event.notifiy") || p.isOp()) {
                 p.playSound(p.getLocation(), sound, volume, pitch);

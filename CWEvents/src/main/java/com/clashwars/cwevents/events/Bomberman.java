@@ -134,6 +134,9 @@ public class Bomberman extends BaseEvent {
     }
 
     public void Begin() {
+        for (String p : em.getPlayers().keySet()) {
+            cwe.getStats().getLocalStats(p).incBombermanGamesPlayed(1);
+        }
     }
 
     public void Stop() {
@@ -218,10 +221,15 @@ public class Bomberman extends BaseEvent {
 
                                 //If one player remaining end the game.
                                 if (em.getPlayers().size() == 1) {
-                                    Player winner = cwe.getServer().getPlayer(em.getPlayers().keySet().iterator().next());
+                                    final Player winner = cwe.getServer().getPlayer(em.getPlayers().keySet().iterator().next());
                                     cwe.getStats().getLocalStats(winner).incBombermanWins(1);
                                     em.broadcast(Util.formatMsg("&a&l" + winner.getName() + " &6is the last player alive and wins!"));
-                                    em.stopGame(winner);
+                                    new BukkitRunnable() {
+                                        @Override
+                                        public void run() {
+                                            em.stopGame(winner);
+                                        }
+                                    }.runTaskLater(cwe, 30L);
                                 }
                             } else {
                                 //More lives tell player and set player invis.

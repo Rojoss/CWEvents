@@ -154,10 +154,15 @@ public class Spleef extends BaseEvent {
                 em.spectateEvent(player);
             }
             if (em.getPlayers().size() == 1) {
-                Player winner = cwe.getServer().getPlayer(em.getPlayers().keySet().iterator().next());
+                final Player winner = cwe.getServer().getPlayer(em.getPlayers().keySet().iterator().next());
                 cwe.getStats().getLocalStats(winner).incSpleefWins(1);
                 em.broadcast(Util.formatMsg("&a&l" + winner.getName() + " &6is the last player alive and wins!"));
-                em.stopGame(winner);
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        em.stopGame(winner);
+                    }
+                }.runTaskLater(cwe, 30L);
             }
         } else {
             em.teleportToArena(player, false);
