@@ -15,6 +15,9 @@ import com.clashwars.cwevents.events.internal.EventType;
 import com.clashwars.cwevents.sql.MySql;
 import com.clashwars.cwevents.config.SqlInfo;
 import com.clashwars.cwevents.stats.StatsManager;
+import com.gmail.filoghost.holograms.HolographicDisplays;
+import com.gmail.filoghost.holograms.api.Hologram;
+import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -49,10 +52,13 @@ public class CWEvents extends JavaPlugin {
     private MySql sql = null;
     private Connection c = null;
 
+    private Hologram lobbyHologram;
+
     private ScoreboardManager sbm;
     private Scoreboard sb;
 
     private final Logger log = Logger.getLogger("Minecraft");
+
 
     public void onDisable() {
         Set<String> playerClone = new HashSet<String>(em.getPlayers().keySet());
@@ -62,7 +68,13 @@ public class CWEvents extends JavaPlugin {
             }
         }
         stats.syncAllStats();
-        em.setStatus(EventStatus.CLOSED);
+
+        if (lobbyHologram != null) {
+            lobbyHologram.delete();
+            lobbyHologram = null;
+        }
+
+        em.setStatus(null);
         em.setArena(null);
         em.setEvent(null);
         em.updateEventItem();
@@ -71,15 +83,29 @@ public class CWEvents extends JavaPlugin {
 
     @SuppressWarnings("deprecation")
     public void onEnable() {
+        //Make sure CWCore is loaded.
         Plugin plugin = getServer().getPluginManager().getPlugin("CWCore");
         if (plugin == null || !(plugin instanceof CWCore)) {
             log("CWCore dependency couldn't be loaded!");
             setEnabled(false);
             return;
         }
-
         instance = this;
 
+        locCfg = new LocCfg("plugins/CWEvents/locs.yml");
+        locCfg.load();
+
+        //Create hologram
+        plugin = getServer().getPluginManager().getPlugin("HolographicDisplays");
+        if (plugin == null || !(plugin instanceof HolographicDisplays)) {
+            log("HolographicDisplays dependency couldn't be loaded!");
+            log("No holograms will be created...");
+        } else {
+            lobbyHologram = HolographicDisplaysAPI.createHologram(this, getLoc("hologram_lobby"), CWUtil.integrateColor(new String[] {"&aLoading event data..."}));
+        }
+        updateHologram();
+
+        //MySql connection
         SqlInfo sqli = new SqlInfo("plugins/CWEvents/sql.yml");
         sqli.load();
 
@@ -91,16 +117,17 @@ public class CWEvents extends JavaPlugin {
             return;
         }
 
-        locCfg = new LocCfg("plugins/CWEvents/locs.yml");
-        locCfg.load();
-
+        //AutoJoin config load
         autojoinCfg = new AutojoinCfg("plugins/CWEvents/autojoiners.yml");
         autojoinCfg.load();
 
+        //Commands
         cmds = new Commands(this);
 
+        //The events manager
         em = new EventManager(this);
 
+        //Spectators scoreboard team.
         sbm = getServer().getScoreboardManager();
         sb = sbm.getMainScoreboard();
         if (!sb.getTeams().contains("Spectators") && getSpecTeam() == null) {
@@ -109,16 +136,20 @@ public class CWEvents extends JavaPlugin {
         getSpecTeam().setCanSeeFriendlyInvisibles(true);
         getSpecTeam().setPrefix(CWUtil.integrateColor("&5"));
 
+        //Init all events
         for (EventType event : EventType.values()) {
             event.getEventClass().Init(this, em);
         }
 
+        //Register events and bungee message channel.
         registerEvents();
         registerChannels();
 
+        //Stats
         stats = new StatsManager(this);
         stats.syncAllStats();
 
+        //Reset all players.
         for (Player p : getServer().getOnlinePlayers()) {
             em.resetPlayer(p);
             p.teleport(p.getWorld().getSpawnLocation());
@@ -218,6 +249,35 @@ public class CWEvents extends JavaPlugin {
             return locCfg.getLoc(properName);
         }
         return null;
+    }
+
+    public void updateHologram() {
+        Bukkit.broadcastMessage("Update hologram");
+        if (lobbyHologram == null) {
+            return;
+        }
+        Bukkit.broadcastMessage("Update hologram2");
+        lobbyHologram.teleport(getLoc("hologram_lobby"));
+        lobbyHologram.clearLines();
+        lobbyHologram.addLine(CWUtil.integrateColor("&5&l✦&d&l✦&5&l✦ &6&lEVENT STATUS &5&l✦&d&l✦&5&l✦"));
+        if (em == null || em.getEvent() == null) {
+            lobbyHologram.addLine(CWUtil.integrateColor("&4&lNo event right now..."));
+            lobbyHologram.addLine(CWUtil.integrateColor("&7(Events are manually hosted by staff)"));
+            lobbyHologram.addLine(CWUtil.integrateColor("&7(This means you can't always play events!)"));
+            lobbyHologram.update();
+            return;
+        }
+        lobbyHologram.addLine(CWUtil.integrateColor("&6&lEvent&8&l: &5" + em.getEvent().getColor() + em.getEvent().getName()));
+        lobbyHologram.addLine(CWUtil.integrateColor("&6&lArena&8&l: &5" + em.getArena()));
+        lobbyHologram.addLine(CWUtil.integrateColor("&6&lStatus&8&l: &5" + em.getStatus().getName()));
+        lobbyHologram.addLine(CWUtil.integrateColor("&6&lPlayers&8&l: " + (em.getPlayers().size() < 1 ? "&c" : "&a") + em.getPlayers().size() + "&7/"
+                + (em.getPlayers().size() < 1 ? "&4" : "&2") + (em.getSlots() < 1 ? "Inf" : em.getSlots()) + " &7- &8[&d" + em.getSpectators().size() + " &5spec&8]"));
+        if (em.getStatus() == EventStatus.OPEN) {
+            lobbyHologram.addLine(CWUtil.integrateColor("&aYou can &2join &athis event now!"));
+        } else if (em.getStatus() == EventStatus.STARTED || em.getStatus() == EventStatus.STARTING) {
+            lobbyHologram.addLine(CWUtil.integrateColor("&dYou can &5spectate &dthis event now!"));
+        }
+        lobbyHologram.update();
     }
 
     public CWItem GetEventItem() {

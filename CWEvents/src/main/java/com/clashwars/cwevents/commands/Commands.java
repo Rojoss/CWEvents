@@ -259,12 +259,12 @@ public class Commands {
             Player player = (Player) sender;
 
             AutojoinCfg ajCfg = cwe.getAutoJoinCfg();
-            if (ajCfg.getAutoJoin(player.getName())) {
-                ajCfg.setAutoJoin(player.getName(), false);
+            if (ajCfg.getAutoJoin(player)) {
+                ajCfg.setAutoJoin(player, false);
                 player.sendMessage(Util.formatMsg("&6Auto joining &cdisabled&6."));
                 player.sendMessage(Util.formatMsg("&7You will have to use &8/event join &7to join events."));
             } else {
-                ajCfg.setAutoJoin(player.getName(), true);
+                ajCfg.setAutoJoin(player, true);
                 player.sendMessage(Util.formatMsg("&6Auto joining &aenabled&6."));
                 player.sendMessage(CWUtil.integrateColor("&7When events open you will join automatically. Also when you join and there is an open event you will join automatically."));
             }

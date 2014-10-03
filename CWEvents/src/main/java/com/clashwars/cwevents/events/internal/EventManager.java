@@ -149,6 +149,7 @@ public class EventManager {
         updateSpectatorInv(player);
         player.sendMessage(Util.formatMsg("&3You are now spectating &9" + event.getName() + "! &3Arena&8: &9" + arena));
         broadcast(Util.formatMsg("&9" + player.getDisplayName() + " &3is now spectating. &8Spectators: &7" + spectators.size()));
+        updateEventItem();
     }
 
 
@@ -253,10 +254,12 @@ public class EventManager {
     }
 
     public void stopGame(UUID winner) {
-        OfflinePlayer w = cwe.getServer().getOfflinePlayer(winner);
-        if (winner != null && w != null && w.isOnline()) {
-            ((Player)w).sendMessage(Util.formatMsg("&a&lYou won the game!"));
-            ((Player)w).sendMessage(Util.formatMsg("&6When you join the pvp server you will receive a reward."));
+        if (winner != null) {
+            OfflinePlayer w = cwe.getServer().getOfflinePlayer(winner);
+            if (winner != null && w != null && w.isOnline()) {
+                ((Player)w).sendMessage(Util.formatMsg("&a&lYou won the game!"));
+                ((Player)w).sendMessage(Util.formatMsg("&6When you join the pvp server you will receive a reward."));
+            }
         }
 
         setStatus(EventStatus.STOPPED);
@@ -285,6 +288,7 @@ public class EventManager {
 
 
     public void updateEventItem() {
+        cwe.updateHologram();
         for (Player p : cwe.getServer().getOnlinePlayers()) {
             if (!players.containsKey(p.getName()) && !spectators.containsKey(p.getName())) {
                 p.getInventory().setItem(0, cwe.GetEventItem());

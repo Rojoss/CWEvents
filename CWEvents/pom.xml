@@ -30,7 +30,7 @@
         <dependency>
             <groupId>org.bukkit.craftbukkit</groupId>
             <artifactId>craftbukkit</artifactId>
-            <version>1.7.2-R0.3</version>
+            <version>1.7.10-R0.1</version>
             <scope>compile</scope>
             <type>jar</type>
         </dependency>
@@ -59,6 +59,13 @@
             <groupId>net.ess3</groupId>
             <artifactId>Essentials</artifactId>
             <version>2.13-SNAPSHOT</version>
+            <scope>compile</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.gmail.filoghost.holograms</groupId>
+            <artifactId>HolographicDisplays</artifactId>
+            <version>LATEST</version>
             <scope>compile</scope>
             <type>jar</type>
         </dependency>
