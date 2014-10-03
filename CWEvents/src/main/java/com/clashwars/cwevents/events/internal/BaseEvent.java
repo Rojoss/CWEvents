@@ -33,8 +33,21 @@ public class BaseEvent implements Listener {
 
     public void Open() {
         cwe.getServer().broadcastMessage(Util.formatMsg("&a&l" + em.getEvent().getName() + " &2&lhas opened! &6Arena&8: &5" + em.getArena()));
-        //TODO: Broadcast to pvp server.
         cwe.getServer().broadcastMessage(Util.formatMsg("&4The game will start soon so join quickly!"));
+
+        //Broadcast to the pvp server.
+        //TODO: Broadcast to pvp server.
+
+        //Automatic make players with autojoin enabled join.
+        for (Player player : cwe.getServer().getOnlinePlayers()) {
+            if (em.getPlayers().containsKey(player.getName())) {
+                continue;
+            }
+            if (cwe.getAutoJoinCfg().getAutoJoin(player)) {
+                player.sendMessage(Util.formatMsg("&6Automatically joined. &8/autojoin &7to toggle this off."));
+                em.joinEvent(player);
+            }
+        }
     }
 
     @SuppressWarnings("deprecation")

@@ -19,6 +19,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -81,7 +82,7 @@ public class Race extends BaseEvent {
 
     public void onPlayerJoin(Player player) {
         player.getInventory().addItem(new CWItem(Material.LEASH, 1, (short) 0, "&6&lLasso", new String[]{"&7Use this on other players.", "&7It will pull them towards you!"}));
-        player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 8));
+        player.getInventory().addItem(new CWItem(Material.POTION, 3, (short)1897).setName("c6&lHealing potion").addLore("&7Get &c3 hearts &7back.").addLore("&7Also stops &6fire&7!"));
 
         //Random colored boots.
         ItemStack boots = new ItemStack(Material.LEATHER_BOOTS, 1);
@@ -126,6 +127,30 @@ public class Race extends BaseEvent {
         world.playSound(target.getLocation(), Sound.BAT_TAKEOFF, 1.0f, 1.5f);
         ParticleEffect.CRIT.display(target.getLocation(), 0.5f, 1.0f, 0.5f, 0.001f, 50);
         cwe.getStats().getLocalStats(player).incRaceLassoUses(1);
+    }
+
+    @EventHandler
+    public void healPotionUse(PlayerInteractEvent event) {
+        if (em.getEvent() != EventType.RACE) {
+            return;
+        }
+        if (em.getStatus() != EventStatus.STARTED) {
+            return;
+        }
+        if (!em.getPlayers().containsKey(event.getPlayer().getName())) {
+            return;
+        }
+        Player player = event.getPlayer();
+        ItemStack item = player.getItemInHand();
+        if (item.getType() != Material.POTION) {
+            return;
+        }
+        player.setFireTicks(0);
+        player.setHealth(Math.max(player.getHealth() + 6, 20));
+        player.playSound(player.getLocation(), Sound.DRINK, 0.5f, 1.5f);
+        ParticleEffect.HEART.display(player.getLocation().add(0,0.5f,0), 0.5f, 1.0f, 0.5f, 0.01f, 10);
+        player.getInventory().remove(new ItemStack(item.getType(), 1));
+        event.setCancelled(true);
     }
 
     @EventHandler

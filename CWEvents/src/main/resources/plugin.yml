@@ -19,3 +19,7 @@ commands:
     description: Check stats.
     usage: /<command> [event|list] [player]
     aliases: [stat]
+  autojoin:
+    description: Toggle automatic joining of events.
+    usage: /<command>
+    aliases: [automaticjoin, joinauto, joinautomatic, autoplay]

@@ -12,8 +12,6 @@ import com.clashwars.cwevents.events.internal.EventType;
 import com.clashwars.cwevents.runnables.BombRunnable;
 import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.worldedit.FilenameException;
-import com.sk89q.worldguard.protection.flags.DefaultFlag;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -77,7 +75,7 @@ public class Bomberman extends BaseEvent {
 
     public boolean checkSetup(EventType event, String arena, CommandSender sender) {
         String name = em.getRegionName(event, arena, "schem_arena");
-        if (!cwe.getLocConfig().getLocations().containsKey(name)) {
+        if (!cwe.getLocCfg().getLocations().containsKey(name)) {
             sender.sendMessage(Util.formatMsg("&cInvalid arena name or locations not set properly. &7Missing location &8'&4" + name + "&8'&7!"));
             return false;
         }

@@ -40,6 +40,14 @@ public class MainEvents implements Listener {
         em.resetPlayer(event.getPlayer());
         event.getPlayer().getInventory().setItem(0, cwe.GetEventItem());
         event.getPlayer().getInventory().setItem(8, cwe.getLeaveItem());
+        event.getPlayer().getInventory().setItem(4, cwe.getStatsItem());
+
+        if (cwe.getAutoJoinCfg().getAutoJoin(event.getPlayer())) {
+            if (em.getStatus() != null && em.getStatus() == EventStatus.OPEN) {
+                event.getPlayer().sendMessage(Util.formatMsg("&6Automatically joined. &8/autojoin &7to toggle this off."));
+                em.joinEvent(event.getPlayer());
+            }
+        }
     }
 
     @EventHandler
@@ -116,6 +124,10 @@ public class MainEvents implements Listener {
                 cwe.joinPvP(event.getPlayer());
             }
         }
+        if (item.getType() == Material.WRITTEN_BOOK) {
+            cwe.getServer().dispatchCommand(event.getPlayer(), "stats");
+            event.setCancelled(true);
+        }
         if (item.getType() == Material.SKULL_ITEM) {
             if (em.getSpectators().containsKey(event.getPlayer().getName())) {
                 SpectateData data = em.getSpectators().get(event.getPlayer().getName());
@@ -165,7 +177,8 @@ public class MainEvents implements Listener {
         if (event.getWhoClicked().isOp()) {
             return;
         }
-        if (event.getCurrentItem().getType() == Material.INK_SACK || event.getCurrentItem().getType() == Material.REDSTONE_BLOCK || em.getSpectators().containsKey(event.getWhoClicked().getName())) {
+        if (event.getCurrentItem().getType() == Material.INK_SACK || event.getCurrentItem().getType() == Material.REDSTONE_BLOCK
+                || event.getCurrentItem().getType() == Material.WRITTEN_BOOK || em.getSpectators().containsKey(event.getWhoClicked().getName())) {
             event.setCancelled(true);
         }
     }
@@ -182,6 +195,10 @@ public class MainEvents implements Listener {
         if (event.getItemDrop().getItemStack().getType() == Material.REDSTONE_BLOCK) {
             event.getItemDrop().remove();
             event.getPlayer().getInventory().setItem(8, cwe.getLeaveItem());
+        }
+        if (event.getItemDrop().getItemStack().getType() == Material.WRITTEN_BOOK) {
+            event.getItemDrop().remove();
+            event.getPlayer().getInventory().setItem(4, cwe.getLeaveItem());
         }
     }
 

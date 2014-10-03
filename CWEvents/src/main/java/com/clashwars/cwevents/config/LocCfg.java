@@ -6,11 +6,11 @@ import org.bukkit.Location;
 
 import java.util.HashMap;
 
-public class LocConfig extends EasyConfig {
+public class LocCfg extends EasyConfig {
 
     public HashMap<String, Location> locations = new HashMap<String, Location>();
 
-    public LocConfig(String fileName) {
+    public LocCfg(String fileName) {
         this.setFile(fileName);
     }
 

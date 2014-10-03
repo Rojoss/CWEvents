@@ -3,17 +3,15 @@ package com.clashwars.cwevents.commands;
 import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.CWEvents;
 import com.clashwars.cwevents.Util;
+import com.clashwars.cwevents.config.AutojoinCfg;
 import com.clashwars.cwevents.events.internal.EventStatus;
 import com.clashwars.cwevents.events.internal.EventType;
 import com.clashwars.cwevents.stats.Stats;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.util.UUID;
 
 public class Commands {
@@ -55,7 +53,7 @@ public class Commands {
                         player.sendMessage(Util.formatMsg("&cLocation name is too short."));
                         return true;
                     }
-                    cwe.getLocConfig().setLocation(args[1], player.getLocation());
+                    cwe.getLocCfg().setLocation(args[1], player.getLocation());
                     player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' &6set to your location!"));
                     return true;
                 }
@@ -68,12 +66,12 @@ public class Commands {
                         player.sendMessage(Util.formatMsg("&cInvalid usage. &7/loc remove {name}"));
                         return true;
                     }
-                    String name = cwe.getLocConfig().getName(args[1]);
+                    String name = cwe.getLocCfg().getName(args[1]);
                     if (name == "") {
                         player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' &6doesn't exist!"));
                         return true;
                     }
-                    cwe.getLocConfig().removeLoction(name);
+                    cwe.getLocCfg().removeLoction(name);
                     player.sendMessage(Util.formatMsg("&6Location &8'&5" + name + "&8' &6has been removed!"));
                     return true;
                 }
@@ -87,12 +85,12 @@ public class Commands {
                         player.sendMessage(Util.formatMsg("&cInvalid usage. &7/loc tp {name}"));
                         return true;
                     }
-                    String name = cwe.getLocConfig().getName(args[1]);
+                    String name = cwe.getLocCfg().getName(args[1]);
                     if (name == "") {
                         player.sendMessage(Util.formatMsg("&6Location &8'&5" + args[1] + "&8' &6doesn't exist!"));
                         return true;
                     }
-                    player.teleport(cwe.getLocConfig().getLoc(name));
+                    player.teleport(cwe.getLocCfg().getLoc(name));
                     player.sendMessage(Util.formatMsg("&6Teleported to location &8'&5" + name + "&8'&6."));
                     return true;
                 }
@@ -112,7 +110,7 @@ public class Commands {
                     }
 
                     String locs = "";
-                    for (String name : cwe.getLocConfig().getLocations().keySet()) {
+                    for (String name : cwe.getLocCfg().getLocations().keySet()) {
                         String[] split = name.split("_");
                         if (!event.isEmpty()) {
                             if (split.length > 0) {
@@ -252,6 +250,28 @@ public class Commands {
         }
 
 
+        //AUTOJOIN COMMAND
+        if (label.equalsIgnoreCase("autojoin") || label.equalsIgnoreCase("autoplay") || label.equalsIgnoreCase("joinauto") || label.equalsIgnoreCase("automaticjoin") || label.equalsIgnoreCase("joinautomatic")) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(Util.formatMsg("&cThis is a player command only."));
+                return true;
+            }
+            Player player = (Player) sender;
+
+            AutojoinCfg ajCfg = cwe.getAutoJoinCfg();
+            if (ajCfg.getAutoJoin(player.getName())) {
+                ajCfg.setAutoJoin(player.getName(), false);
+                player.sendMessage(Util.formatMsg("&6Auto joining &cdisabled&6."));
+                player.sendMessage(Util.formatMsg("&7You will have to use &8/event join &7to join events."));
+            } else {
+                ajCfg.setAutoJoin(player.getName(), true);
+                player.sendMessage(Util.formatMsg("&6Auto joining &aenabled&6."));
+                player.sendMessage(CWUtil.integrateColor("&7When events open you will join automatically. Also when you join and there is an open event you will join automatically."));
+            }
+            return true;
+        }
+
+
         //EVENT COMMAND
         if (label.equalsIgnoreCase("event") || label.equalsIgnoreCase("e") || label.equalsIgnoreCase("events")) {
             if (!(sender instanceof Player)) {
@@ -286,7 +306,7 @@ public class Commands {
                 //##########################################################################################################################
                 //###################################################### /event join #######################################################
                 //##########################################################################################################################
-                if (args[0].equalsIgnoreCase("join")) {
+                if (args[0].equalsIgnoreCase("join") || args[0].equalsIgnoreCase("play")) {
                     cwe.getEM().joinEvent(player);
                     return true;
                 }
@@ -294,7 +314,7 @@ public class Commands {
                 //##########################################################################################################################
                 //##################################################### /event leave #######################################################
                 //##########################################################################################################################
-                if (args[0].equalsIgnoreCase("leave")) {
+                if (args[0].equalsIgnoreCase("leave") || args[0].equalsIgnoreCase("quit")) {
                     if (!cwe.getEM().leaveEvent(player, false)) {
                         //Not in a event so teleport player to pvp server.
                         cwe.joinPvP((Player)sender);

@@ -4,7 +4,8 @@ import com.clashwars.cwcore.CWCore;
 import com.clashwars.cwcore.helpers.CWItem;
 import com.clashwars.cwcore.utils.CWUtil;
 import com.clashwars.cwevents.commands.Commands;
-import com.clashwars.cwevents.config.LocConfig;
+import com.clashwars.cwevents.config.AutojoinCfg;
+import com.clashwars.cwevents.config.LocCfg;
 import com.clashwars.cwevents.event.MainEvents;
 import com.clashwars.cwevents.event.PluginMessageEvents;
 import com.clashwars.cwevents.event.SpectateEvents;
@@ -42,7 +43,8 @@ public class CWEvents extends JavaPlugin {
     private EventManager em;
     private StatsManager stats;
 
-    private LocConfig locCfg;
+    private LocCfg locCfg;
+    private AutojoinCfg autojoinCfg;
 
     private MySql sql = null;
     private Connection c = null;
@@ -89,8 +91,11 @@ public class CWEvents extends JavaPlugin {
             return;
         }
 
-        locCfg = new LocConfig("plugins/CWEvents/locs.yml");
+        locCfg = new LocCfg("plugins/CWEvents/locs.yml");
         locCfg.load();
+
+        autojoinCfg = new AutojoinCfg("plugins/CWEvents/autojoiners.yml");
+        autojoinCfg.load();
 
         cmds = new Commands(this);
 
@@ -192,8 +197,12 @@ public class CWEvents extends JavaPlugin {
         return sb.getTeam("Spectators");
     }
 
-    public LocConfig getLocConfig() {
+    public LocCfg getLocCfg() {
         return locCfg;
+    }
+
+    public AutojoinCfg getAutoJoinCfg() {
+        return autojoinCfg;
     }
 
     public void tpLoc(Player player, String name) {
@@ -232,5 +241,8 @@ public class CWEvents extends JavaPlugin {
     }
     public CWItem getLeaveItem() {
         return new CWItem(Material.REDSTONE_BLOCK, 1, (short) 0, "&4&lLeave Events").addLore("&7Go back to the PvP server!!");
+    }
+    public CWItem getStatsItem() {
+        return new CWItem(Material.WRITTEN_BOOK, 1, (short) 0, "&5&lStatss").addLore("&7Check your stats!!");
     }
 }

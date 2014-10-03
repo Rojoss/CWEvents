@@ -1,10 +1,8 @@
 package com.clashwars.cwevents.events.internal;
 
-import com.clashwars.cwcore.CWCore;
 import com.clashwars.cwcore.helpers.CWItem;
 import com.clashwars.cwevents.CWEvents;
 import com.clashwars.cwevents.Util;
-import com.earth2me.essentials.Essentials;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -177,7 +175,7 @@ public class EventManager {
                 return false;
             }
             String locName = event.getPreifx() + "_" + arena + "_s" + players.get(player.getName());
-            if (!cwe.getLocConfig().getLocations().containsKey(locName)) {
+            if (!cwe.getLocCfg().getLocations().containsKey(locName)) {
                 return false;
             }
             player.teleport(cwe.getLoc(locName));
@@ -190,7 +188,7 @@ public class EventManager {
         allSpawns.clear();
         if (eventt.getEventClass().allowMultiplePeoplePerSpawn()) {
             //Require at least 1 spawn as it can be used by multiple people.
-            for (String locName : cwe.getLocConfig().getLocations().keySet()) {
+            for (String locName : cwe.getLocCfg().getLocations().keySet()) {
                 if (locName.toLowerCase().startsWith((eventt.getPreifx() + "_" + arenaa + "_s").toLowerCase())) {
                     allSpawns.add(locName);
                 }
@@ -209,7 +207,7 @@ public class EventManager {
             String locName = "";
             for (int i = 0; i < slotss; i++) {
                 locName = eventt.getPreifx() + "_" + arenaa + "_s" + i;
-                if (!cwe.getLocConfig().getLocations().keySet().contains(locName)) {
+                if (!cwe.getLocCfg().getLocations().keySet().contains(locName)) {
                     sender.sendMessage(Util.formatMsg("&cInvalid arena name or spawn locations not set."));
                     sender.sendMessage(Util.formatMsg("&cThis event needs a spawn location for each slot."));
                     sender.sendMessage(Util.formatMsg("&cMissing spawn location&8: &4" + locName));
