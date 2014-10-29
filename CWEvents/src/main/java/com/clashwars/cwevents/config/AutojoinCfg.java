@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public class AutojoinCfg extends EasyConfig {
 
-    public List<UUID> autojoiners = new ArrayList<UUID>();
+    public List<String> autojoiners = new ArrayList<String>();
 
     public AutojoinCfg(String fileName) {
         this.setFile(fileName);
@@ -23,14 +23,14 @@ public class AutojoinCfg extends EasyConfig {
     }
 
     public void setAutoJoin(UUID uuid, boolean auto) {
-        if (autojoiners.contains(uuid)) {
+        if (autojoiners.contains(uuid.toString())) {
             if (!auto) {
-                autojoiners.remove(uuid);
+                autojoiners.remove(uuid.toString());
                 save();
             }
         } else {
             if (auto) {
-                autojoiners.add(uuid);
+                autojoiners.add(uuid.toString());
                 save();
             }
         }
@@ -41,10 +41,10 @@ public class AutojoinCfg extends EasyConfig {
     }
 
     public boolean getAutoJoin(UUID uuid) {
-        return autojoiners.contains(uuid);
+        return autojoiners.contains(uuid.toString());
     }
 
-    public List<UUID> getAutoJoiners() {
+    public List<String> getAutoJoiners() {
         return autojoiners;
     }
 }

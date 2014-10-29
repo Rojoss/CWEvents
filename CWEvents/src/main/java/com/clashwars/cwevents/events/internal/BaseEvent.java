@@ -32,6 +32,9 @@ public class BaseEvent implements Listener {
     }
 
     public void Open() {
+        cwe.getEM().setStatus(EventStatus.OPEN);
+        cwe.getEM().updateEventItem();
+
         cwe.getServer().broadcastMessage(Util.formatMsg("&a&l" + em.getEvent().getName() + " &2&lhas opened! &6Arena&8: &5" + em.getArena()));
         cwe.getServer().broadcastMessage(Util.formatMsg("&4The game will start soon so join quickly!"));
 

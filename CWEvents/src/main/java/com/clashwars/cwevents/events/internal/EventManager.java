@@ -223,6 +223,9 @@ public class EventManager {
 
 
     public void resetPlayer(Player player) {
+        if (player.getGameMode() == GameMode.CREATIVE) {
+            return;
+        }
 		player.closeInventory();
 		player.resetMaxHealth();
 		player.setHealth(20);
@@ -306,10 +309,10 @@ public class EventManager {
         }
         SpectateData data = spectators.get(player.getName());
         if (data.isFollowing()) {
-            player.getInventory().setItem(0, new CWItem(Material.INK_SACK, 1, (byte)10).setName("&4&lStop Following")
+            player.getInventory().setItem(0, new CWItem(Material.INK_SACK, 1, (short)10).setName("&4&lStop Following")
                     .addLore("&7Stop following this player.").addLore("&7You will be able to move around freely again."));
         } else {
-            player.getInventory().setItem(0, new CWItem(Material.INK_SACK, 1, (byte)9).setName("&4&lStart Following")
+            player.getInventory().setItem(0, new CWItem(Material.INK_SACK, 1, (short)9).setName("&4&lStart Following")
                     .addLore("&7Click to start following a player.").addLore("&7You will follow the player in your 5th slot."));
         }
         int ID = -1;
@@ -317,7 +320,8 @@ public class EventManager {
         for (String p : players.keySet()) {
             ID = players.get(p);
             if (data.getPlayerIndex() == ID) {
-                player.getInventory().setItem(4, new CWItem(Material.SKULL_ITEM).setName("&6&l" + p)
+                player.sendMessage("Setting skull to " + ID + " - " + p);
+                player.getInventory().setItem(4, new CWItem(Material.SKULL_ITEM, 1, (short)3).setName("&6&l" + p)
                         .addLore("&7This indicates the player you're following or can follow.")
                         .addLore("&2Left click&8: &aTeleport to this player.").addLore("&9Right click&8: &3Switch to another player.").setSkullOwner(p));
                 set = true;
@@ -325,9 +329,10 @@ public class EventManager {
             }
         }
         if (!set) {
-            player.getInventory().setItem(4, new CWItem(Material.SKULL_ITEM).setSkullOwner("steve").setName("&4&lNo players")
+            player.sendMessage("Setting skull to steve.");
+            player.getInventory().setItem(4, new CWItem(Material.SKULL_ITEM).setName("&4&lNo players")
                     .addLore("&7There are no players in the game who you can spectate.")
-                    .addLore("&9Right click&8: &3Try switch to another player."));
+                    .addLore("&9Right click&8: &3Try switch to another player.").setSkullOwner("steve"));
             set = true;
         }
         player.getInventory().setItem(8, new CWItem(Material.REDSTONE_BLOCK).setName("&4&lStop Spectating")

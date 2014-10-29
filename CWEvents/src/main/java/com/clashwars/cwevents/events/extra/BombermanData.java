@@ -9,6 +9,7 @@ public class BombermanData {
     private int speed;
     private int bombs;
     private int pierceBombs;
+    private int bombsToRemove;
 
     public BombermanData(String playerName) {
         this.setPlayerName(playerName);
@@ -18,6 +19,7 @@ public class BombermanData {
         speed = 0;
         bombs = 1;
         pierceBombs = 0;
+        bombsToRemove = 0;
     }
 
 
@@ -81,6 +83,15 @@ public class BombermanData {
 
     public void setPierceBombs(int pierceBombs) {
         this.pierceBombs = pierceBombs;
+    }
+
+
+    public int getBombsToRemove() {
+        return bombsToRemove;
+    }
+
+    public void setBombsToRemove(int bombsToRemove) {
+        this.bombsToRemove = bombsToRemove;
     }
 
 }

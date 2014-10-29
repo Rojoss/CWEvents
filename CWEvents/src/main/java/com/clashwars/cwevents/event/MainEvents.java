@@ -96,7 +96,6 @@ public class MainEvents implements Listener {
         }
 
 
-
         //Item interaction
         ItemStack item = event.getItem();
         if (event.getItem() == null) {

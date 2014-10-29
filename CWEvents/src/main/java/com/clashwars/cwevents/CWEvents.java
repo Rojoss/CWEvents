@@ -19,6 +19,7 @@ import com.gmail.filoghost.holograms.HolographicDisplays;
 import com.gmail.filoghost.holograms.api.Hologram;
 import com.gmail.filoghost.holograms.api.HolographicDisplaysAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -158,7 +159,9 @@ public class CWEvents extends JavaPlugin {
         //Reset all players.
         for (Player p : getServer().getOnlinePlayers()) {
             em.resetPlayer(p);
-            p.teleport(p.getWorld().getSpawnLocation());
+            if (p.getGameMode() != GameMode.CREATIVE) {
+                p.teleport(p.getWorld().getSpawnLocation());
+            }
         }
         em.updateEventItem();
 

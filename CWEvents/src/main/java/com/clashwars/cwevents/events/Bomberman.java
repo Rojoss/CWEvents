@@ -18,6 +18,8 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -51,7 +53,6 @@ public class Bomberman extends BaseEvent {
     private HashMap<String, ItemStack> allPowerups = new HashMap<String, ItemStack>();
 
     private ItemStack bombItem;
-    private int bombsToRemove = 0;
 
     public Bomberman() {
         bombItem = new CWItem(Material.TNT, 1, (short) 0, "&4&lBomb", new String[]
@@ -101,6 +102,14 @@ public class Bomberman extends BaseEvent {
 
     public void Reset() {
         super.Reset();
+        //Clear drops
+        List<Entity> entities = world.getEntities();
+        for(Entity entity : entities) {
+            if (entity instanceof Item) {
+                entity.remove();
+            }
+        }
+        //Reset arena
         try {
             try {
                 File schemFile = CWWorldGuard.getSchematicFile(cwe.getEM().getRegionName("arena"));
@@ -124,9 +133,6 @@ public class Bomberman extends BaseEvent {
     public void Open() {
         Reset();
         super.Open();
-        for (String p : em.getPlayers().keySet()) {
-            cwe.getStats().getLocalStats(p).incBombermanGamesPlayed(1);
-        }
     }
 
     public void Start() {
@@ -156,13 +162,14 @@ public class Bomberman extends BaseEvent {
     }
 
     public void bombExplode(Player player, Location loc) {
+        BombermanData bd = bombData.get(player.getName());
         //Don't give bomb back if player picked up -1 bomb and had no bombs in inv.
-        if (bombsToRemove > 0) {
-            bombsToRemove--;
+        if (bd.getBombsToRemove() > 0) {
+            bd.setBombsToRemove(bd.getBombsToRemove() - 1);
         } else {
             player.getInventory().addItem(bombItem);
         }
-        BombermanData bd = bombData.get(player.getName());
+
         BombermanData obd = null;
         Block block = loc.getBlock();
         block.setType(Material.AIR);
@@ -388,11 +395,11 @@ public class Bomberman extends BaseEvent {
                     } else if (key.equals("bombDown")) {
                         if (bd.getBombs() > 1) {
                             bd.setBombs(bd.getBombs() - 1);
-                            bombsToRemove++;
+                            bd.setBombsToRemove(bd.getBombsToRemove() + 1);
                         }
 
                     } else if (key.equals("fuseTimeDown")) {
-                        if (bd.getFuseTime() > 10) {
+                        if (bd.getFuseTime() > 20) {
                             bd.setFuseTime(bd.getFuseTime() - 10);
                         }
                     } else if (key.equals("fuseTimeUp")) {

@@ -81,6 +81,11 @@ public class Race extends BaseEvent {
     }
 
     public void onPlayerJoin(Player player) {
+        equip(player);
+    }
+
+    private void equip(Player player) {
+        player.getInventory().clear();
         player.getInventory().addItem(new CWItem(Material.LEASH, 1, (short) 0, "&6&lLasso", new String[]{"&7Use this on other players.", "&7It will pull them towards you!"}));
         player.getInventory().addItem(new CWItem(Material.POTION, 3, (short)1897).setName("&6&lHealing potion").addLore("&7Get &c3 hearts &7back.").addLore("&7Also stops &6fire&7!"));
 
@@ -146,10 +151,15 @@ public class Race extends BaseEvent {
             return;
         }
         player.setFireTicks(0);
-        player.setHealth(Math.max(player.getHealth() + 6, 20));
+        player.setHealth(Math.min(player.getHealth() + 6, 20));
         player.playSound(player.getLocation(), Sound.DRINK, 0.5f, 1.5f);
-        ParticleEffect.HEART.display(player.getLocation().add(0,0.5f,0), 0.5f, 1.0f, 0.5f, 0.01f, 10);
-        player.getInventory().remove(new ItemStack(item.getType(), 1));
+        ParticleEffect.HEART.display(player.getLocation().add(0,0.5f,0), 0.5f, 1.0f, 0.5f, 0.01f, 1);
+        if (item.getAmount() == 1) {
+            player.setItemInHand(new ItemStack(Material.AIR));
+        } else {
+            player.getItemInHand().setAmount(item.getAmount() - 1);
+        }
+        player.updateInventory();
         event.setCancelled(true);
     }
 
@@ -168,6 +178,7 @@ public class Race extends BaseEvent {
             public void run() {
                 em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getDisplayName() + " &3died and has to start over again!"));
                 em.teleportToArena(event.getPlayer(), false);
+                equip(event.getPlayer());
                 cwe.getStats().getLocalStats(event.getPlayer()).incRaceDeaths(1);
             }
         }, 20L);

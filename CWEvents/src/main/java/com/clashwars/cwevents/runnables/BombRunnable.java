@@ -41,8 +41,10 @@ public class BombRunnable extends BukkitRunnable {
         }
 
         if (ticks <= 0) {
-            bom.bombExplode(player, loc);
-            this.cancel();
+            if (bom != null && player != null) {
+                bom.bombExplode(player, loc);
+                this.cancel();
+            }
         }
         ticks--;
     }

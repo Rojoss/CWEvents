@@ -467,8 +467,6 @@ public class Commands {
                         return true;
                     }
                     activeEvent.getEventClass().Open();
-                    cwe.getEM().setStatus(EventStatus.OPEN);
-                    cwe.getEM().updateEventItem();
                     sender.sendMessage(Util.formatMsg("&6Opened &5" + activeEvent.getName() + " &6arena &5" + activeArena + "&6 for joining."));
                     return true;
                 }

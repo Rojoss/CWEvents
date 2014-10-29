@@ -149,7 +149,7 @@ public class Spleef extends BaseEvent {
             return;
         }
         if (em.getStatus() == EventStatus.STARTED) {
-            if (event.getCause() == DamageCause.LAVA || (event.getCause() == DamageCause.FALL && event.getDamage() >= 2)) {
+            if (event.getCause() == DamageCause.LAVA || (event.getCause() == DamageCause.FALL && event.getDamage() >= 1)) {
                 em.broadcast(Util.formatMsg("&b&l" + player.getName() + " &3fell and is out!"));
                 em.spectateEvent(player);
             }

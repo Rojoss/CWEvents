@@ -20,17 +20,22 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import java.lang.IllegalStateException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class KOH extends BaseEvent {
 
     private List<String> capturingPlayers = new ArrayList<String>();
     private KohRunnable kohRunnable;
     private BukkitTask task;
+    private Map<String, Integer> lives = new HashMap<String, Integer>();
 
     public boolean checkSetup(EventType event, String arena, CommandSender sender) {
         String name = em.getRegionName(event, arena, "hill");
@@ -44,6 +49,7 @@ public class KOH extends BaseEvent {
 
     public void Reset() {
         super.Reset();
+        lives.clear();
         kohRunnable = null;
         capturingPlayers.clear();
         CWWorldGuard.setFlag(world, "koh_area", DefaultFlag.PVP, "deny");
@@ -67,6 +73,8 @@ public class KOH extends BaseEvent {
             cwe.getStats().getLocalStats(p).incKohGamesPlayed(1);
         }
 
+
+
         cwe.getServer().getScheduler().scheduleSyncDelayedTask(cwe, new Runnable() {
             public void run() {
                 em.broadcast(Util.formatMsg("&6You can now &4&lPvP&6!"));
@@ -87,10 +95,27 @@ public class KOH extends BaseEvent {
     }
 
     public void onPlayerLeft(Player player) {
-
+        if (lives.containsKey(player.getName())) {
+            lives.remove(player.getName());
+        }
     }
 
     public void onPlayerJoin(Player player) {
+        equip(player);
+        lives.put(player.getName(), 3);
+    }
+
+    public void capture(Player capturer) {
+        em.broadcast(Util.formatMsg("&a&l" + capturer.getName() + " &6&lis the king of the hill!"));
+        cwe.getStats().getLocalStats(capturer).incKohWins(1);
+        em.stopGame(capturer);
+    }
+
+    private void equip(Player player) {
+        for (PotionEffect effect : player.getActivePotionEffects()) {
+            player.removePotionEffect(effect.getType());
+        }
+        player.getInventory().clear();
         ItemStack item = new ItemStack(Material.DIAMOND_HELMET);
         item.addUnsafeEnchantment(Enchantment.DURABILITY, 5);
         item.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 2);
@@ -129,12 +154,6 @@ public class KOH extends BaseEvent {
         player.updateInventory();
     }
 
-    public void capture(Player capturer) {
-        em.broadcast(Util.formatMsg("&a&l" + capturer.getName() + " &6&lis the king of the hill!"));
-        cwe.getStats().getLocalStats(capturer).incKohWins(1);
-        em.stopGame(capturer);
-    }
-
     @EventHandler
     public void respawn(final PlayerRespawnEvent event) {
         if (em.getEvent() != EventType.KOH) {
@@ -146,25 +165,73 @@ public class KOH extends BaseEvent {
         if (!em.getPlayers().containsKey(event.getPlayer().getName())) {
             return;
         }
-        cwe.getServer().getScheduler().scheduleSyncDelayedTask(cwe, new Runnable() {
-            public void run() {
-                em.broadcast(Util.formatMsg("&b&l" + event.getPlayer().getName() + " &3died and has to start over again!"));
-                em.teleportToArena(event.getPlayer(), false);
-                cwe.getStats().getLocalStats(event.getPlayer()).incKohDeaths(1);
+        final Player player = event.getPlayer();
+        cwe.getStats().getLocalStats(player).incKohDeaths(1);
+        lives.put(player.getName(), lives.get(player.getName()) - 1);
+        if (lives.get(player.getName()) <= 0) {
+            //No more lives remove player.
+            em.broadcast(Util.formatMsg("&b&l" + player.getName() + " &3died and is out of the game!"));
+            player.sendMessage(Util.formatMsg("&cYou have no more lives!"));
+            em.spectateEvent(player);
+
+            //If one player remaining end the game.
+            if (em.getPlayers().size() == 1) {
+                final Player winner = cwe.getServer().getPlayer(em.getPlayers().keySet().iterator().next());
+                cwe.getStats().getLocalStats(winner).incKohWins(1);
+                em.broadcast(Util.formatMsg("&a&l" + winner.getName() + " &6is the last player alive and wins!"));
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        em.stopGame(winner);
+                    }
+                }.runTaskLater(cwe, 30L);
             }
-        }, 20L);
+        } else {
+            if (lives.get(player.getName()) == 1) {
+                em.broadcast(Util.formatMsg("&b&l" + player.getName() + " &3died! &8[&4❤&8]"));
+                player.sendMessage(Util.formatMsg("&cThis is your last life!!! &4Be careful!"));
+            } else {
+                String hearts = "";
+                for (int i = 0; i < lives.get(player.getName()); i++) {
+                    hearts += "❤";
+                }
+                em.broadcast(Util.formatMsg("&b&l" + player.getName() + " &3died! &8[&4" + hearts + "&8]"));
+                player.sendMessage(Util.formatMsg("&cYou have &4" + lives.get(player.getName()) + " &clives remaining."));
+            }
+            cwe.getServer().getScheduler().scheduleSyncDelayedTask(cwe, new Runnable() {
+                public void run() {
+                    em.teleportToArena(player, false);
+                    equip(player);
+                }
+            }, 20L);
+        }
     }
 
     @EventHandler
     public void kill(PlayerDeathEvent event) {
-        if (event.getEntity() == null || event.getEntity().getKiller() == null) {
+        if (event.getEntity() == null) {
             return;
         }
-        Player killer = event.getEntity().getKiller();
-        if (!em.getPlayers().containsKey(killer.getName())) {
-            return;
+        Player player = event.getEntity();
+        //Kill stat
+        if (event.getEntity().getKiller() != null) {
+            Player killer = event.getEntity().getKiller();
+            if (!em.getPlayers().containsKey(killer.getName())) {
+                return;
+            }
+            cwe.getStats().getLocalStats(killer).incKohKills(1);
         }
-        cwe.getStats().getLocalStats(killer).incKohKills(1);
+        //Remove player from hill if died on hill.
+        if (capturingPlayers.contains(player.getName())) {
+            capturingPlayers.remove(player.getName());
+            if (capturingPlayers.size() == 1) {
+                //Only 1 player remaining on the hill.
+                kohRunnable.startCapture(cwe.getServer().getPlayer(capturingPlayers.get(0)));
+            } else if (capturingPlayers.size() == 0) {
+                //Nobody left on the hill.
+                kohRunnable.stopCapture();
+            }
+        }
     }
 
     @EventHandler
